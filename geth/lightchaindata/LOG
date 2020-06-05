@@ -1,8 +1,0 @@
-=============== Jun 6, 2020 (CEST) ===============
-02:15:56.717392 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-02:15:56.723221 db@open opening
-02:15:56.723712 version@stat F·[] S·0B[] Sc·[]
-02:15:56.727072 db@janitor F·2 G·0
-02:15:56.727082 db@open done T·3.853883ms
-02:15:56.730816 db@close closing
-02:15:56.730849 db@close done T·30.393µs
