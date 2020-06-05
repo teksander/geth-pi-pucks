@@ -1,0 +1,20 @@
+#!/bin/bash  
+# Short script to send a file/folder to all robots
+# Assumptions:
+# - The Pi-puck IDs are listed in pi-pucks.txt
+# - Arg1 is the file to send; Arg2 is the folder in /home/pi/
+
+IDS_FILE="pi-pucks.txt"
+PREFIX="pi@172.27.1."
+
+if [ $# -eq 2 ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+	IP="${PREFIX}${ID}"
+	scp -r "$1" "$IP:/home/pi/$2"  &
+	done
+	wait
+else
+	echo "Arg1 is the file to send; Arg2 is the destination folder"
+fi
+
+

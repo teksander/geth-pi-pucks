@@ -1,0 +1,28 @@
+#!/bin/bash  
+# Short script to distribute pre-generated cryptographic keys to Pi-Pucks
+# Assumptions:
+# - The Pi-puck IDs (initial sealers) are listed in pi-pucks.txt
+# - The key files titled "key-i", i = {1, 2 ... n} are in folder keystore-all/
+
+IDS_FILE="pi-pucks.txt"
+PREFIX="pi@172.27.1."
+INDEX=1
+> key-mapping.txt 
+
+# Remove Previous Key Files
+./ssh-all "rm -rf /home/pi/mygethnode/keystore/*"
+
+wait
+# Distribute new key files
+for ID in $(cat "$IDS_FILE"); do
+	wait
+	KEY_FILE=$"key-$INDEX"
+	IP="${PREFIX}${ID}"
+	
+	scp keystore-all/"$KEY_FILE" "$IP":/home/pi/mygethnode/keystore/
+
+	# Return key to Pi-puck ID mapping
+	KEY=$(cat "keystore-all/$KEY_FILE")
+	echo "$ID $KEY_FILE 0x${KEY:12:40}" >> key-mapping.txt &
+	let "INDEX+=1" 
+done

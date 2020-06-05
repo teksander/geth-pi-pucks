@@ -1,0 +1,59 @@
+#!/bin/bash
+#  Initalize GETH on a Raspberry Pi zero W (ArmV6 processor)
+
+# Geth Configurations
+DATA_DIR="mygethnode"
+GEN_BLOCK="pipucks.json"
+CURRENT_USER=$(logname)
+
+# # Check GETH installation
+# if [ ! -f "/usr/local/bin/geth" ] 
+# then
+# echo "GETH was not found. Version 1.9.11 will be installed"
+# wget https://gethstore.blob.core.windows.net/builds/geth-linux-arm6-1.9.11-6a62fe39.tar.gz
+# tar zxvf geth-linux-arm6-1.9.11-6a62fe39.tar.gz
+# cd geth-linux-arm6-1.9.11-6a62fe39
+# sudo cp geth /usr/local/bin/
+# geth version
+# fi
+
+# # If data directory is not found
+# if [ ! -d "/home/${CURRENT_USER}/${DATA_DIR}" ] 
+# then
+# 	mkdir /home/${CURRENT_USER}/${DATA_DIR}
+#     echo "Created new data directory: /home/${CURRENT_USER}/${DATA_DIR}"
+# fi
+
+# cd  /home/${CURRENT_USER}/${DATA_DIR}
+
+# If the GETH process has not been initialized in the data directory
+if [ ! -d "/home/${CURRENT_USER}/${DATA_DIR}/geth" ] 
+then
+    geth init /home/${CURRENT_USER}/${DATA_DIR}/genesis/${GEN_BLOCK} \
+    --datadir /home/${CURRENT_USER}/${DATA_DIR}
+    echo "Initialized GETH with genesis block: /home/${CURRENT_USER}/${DATA_DIR}/genesis/${GEN_BLOCK}"
+fi
+
+# If is a Pi-Puck
+if [ $CURRENT_USER == "pi" ]
+then
+	FILE="/boot/pi-puck_id"
+	ID=$(cat "$FILE")
+else
+	ID="100"
+fi
+
+echo ${ID}
+geth --datadir /home/"$CURRENT_USER"/mygethnode/ \
+--syncmode "full" \
+--port 30311 \
+--rpc --rpcaddr "localhost" \
+--rpcport 8501 \
+--rpcapi "personal,eth,net,web3,txpool,miner" \
+--networkid 1515 \
+--gasprice "1" \
+--allow-insecure-unlock \
+--nodiscover \
+--verbosity 3 \
+--miner.gaslimit "0x9000000000000" \
+--nat=extip:"172.27.1."${ID}""

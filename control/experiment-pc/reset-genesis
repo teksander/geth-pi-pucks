@@ -1,0 +1,52 @@
+#!/bin/bash  
+# Short script to generate and upload a new genesis block
+# Assumptions:
+# - The Pi-puck IDs (initial sealers) are listed in pi-pucks.txt
+# - puppeth is installed
+
+IDS_FILE=$"pi-pucks.txt"
+NUM_NODES=$(cat "$IDS_FILE" | grep -v ^$ | wc -l)
+> genesis.conf 
+
+########## Genesis Configurations ############
+
+echo "2" >> genesis.conf  # Manage existing genesis
+echo "3" >> genesis.conf  # Remove existing genesis
+echo "2" >> genesis.conf  # Configure new genesis
+echo "1" >> genesis.conf  # Create new genesis from scratch
+echo "2" >> genesis.conf  # Clique - proof-of-authority
+echo "15" >> genesis.conf # 15 seconds block time
+
+# List of sealers
+for INDEX in $(seq 1 $NUM_NODES);
+do
+	KEY_FILE=$"key-$INDEX"
+    KEY=$(cat "keystore-all/$KEY_FILE")
+    echo ${KEY:12:40} >> genesis.conf 
+done
+
+ # Pre-funded account
+echo "" >> genesis.conf 
+KEY=$(cat "keystore-all/key-0")
+echo ${KEY:12:40} >> genesis.conf
+echo "" >> genesis.conf
+
+
+echo "yes" >> genesis.conf  # Pre-compile addresses
+echo "1515" >> genesis.conf # Netid
+echo "2" >> genesis.conf    # Manage existing genesis 
+echo "2" >> genesis.conf    # Export genesis configurations
+
+ # Export Path
+echo "/home/$USER/mygethnode/genesis" >> genesis.conf 
+
+########## Generate Genesis Block ############
+echo "Generating Genesis Block..."
+cat "genesis.conf" | nohup puppeth --network=pipucks >/dev/null 2>&1
+rm /home/"$USER"/mygethnode/genesis/pipucks-harmony.json
+rm genesis.conf
+
+########## Upload Genesis File ############
+echo "Uploading Genesis Block..."
+./scp-all /home/"$USER"/mygethnode/genesis/pipucks.json mygethnode/genesis
+wait

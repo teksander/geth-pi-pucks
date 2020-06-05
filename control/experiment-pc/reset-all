@@ -1,0 +1,31 @@
+#!/bin/bash  
+# Short script to reset blockchain to a clean start with the number of nodes
+
+# Update Responding Pi-Pucks
+./ping-all
+wait
+echo "----//----"
+
+# Reset GETH 
+./reset-geth
+wait
+echo "----//----"
+
+# Reset the Genesis File
+echo "Resetting Genesis Block"
+./reset-genesis
+wait
+echo "----//----"
+
+# Distribute Keys
+echo "Reseting Pi-Puck Keys..."
+./reset-keys
+wait
+echo "----//----"
+# # Restart GETH processes
+# echo "Rebooting GETH"
+# ./ssh-all "sudo systemctl enable geth.service"
+# ./ssh-all "sudo systemctl start geth.service"
+# wait
+
+

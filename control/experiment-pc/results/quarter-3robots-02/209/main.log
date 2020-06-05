@@ -1,0 +1,102 @@
+ID TIME BLK DETAIL
+209 3 0 SETUP: Synced Time
+209 4 0 SETUP: Peered to PC
+209 160 2 SETUP: Smart Contract Received at Block 2
+209 558 2 STARTED EXPERIMENT
+209 56 2 Added 222
+209 79 2 Killed 222 @ age 2.04
+209 238 3 Added 222
+209 271 4 Killed 222 @ age 2.54
+209 355 4 Added 224
+209 388 5 Killed 224 @ age 2.38
+209 540 6 Voted: 0.23006134969325154
+209 542 6 Failed Vote. Balance: 0.01
+209 548 6 Added 222
+209 571 6 Killed 222 @ age 2.09
+209 604 6 Added 224
+209 704 7 Killed 224 @ age 2.16
+209 741 7 Added 222
+209 774 7 Killed 222 @ age 2.40
+209 811 7 Added 222
+209 821 7 Added 224
+209 855 8 Killed 224 @ age 2.09
+209 877 8 Killed 222 @ age 2.16
+209 916 8 Failed Vote. Balance: 20.01
+209 1001 8 Added 222
+209 1054 9 Killed 222 @ age 2.22
+209 1127 9 Added 224
+209 1137 9 Added 222
+209 1170 9 Killed 224 @ age 2.23
+209 1173 9 Added 224
+209 1175 9 Killed 222 @ age 2.77
+209 1245 10 Killed 224 @ age 2.25
+209 1282 10 Added 222
+209 1305 10 Killed 222 @ age 2.08
+209 1365 10 Failed Vote. Balance: 20.01
+209 1381 10 Added 224
+209 1434 10 Killed 224 @ age 2.53
+209 1554 10 Added 224
+209 1577 10 Killed 224 @ age 2.03
+209 1637 10 Added 224
+209 1660 10 Killed 224 @ age 2.09
+209 1667 10 Added 224
+209 1719 10 Killed 224 @ age 2.56
+209 1807 10 Failed Vote. Balance: 20.01
+209 2087 10 Added 224
+209 2120 10 Killed 224 @ age 2.08
+209 2163 10 Added 222
+209 2196 10 Killed 222 @ age 2.11
+209 2213 10 Added 222
+209 2236 10 Killed 222 @ age 2.06
+209 2240 10 Added 222
+209 2264 10 Failed Vote. Balance: 20.01
+209 2336 10 Killed 222 @ age 2.48
+209 2538 10 Added 222
+209 2561 10 Killed 222 @ age 2.04
+209 2707 10 Failed Vote. Balance: 20.01
+209 2800 10 Added 224
+209 2843 19 Killed 224 @ age 2.47
+209 3045 20 Added 222
+209 3078 20 Killed 222 @ age 2.16
+209 3215 21 Added 222
+209 3278 21 Killed 222 @ age 2.86
+209 3286 22 Voted: 0.250253807106599
+209 3289 22 Failed Vote. Balance: 60.01
+209 3302 22 Added 222
+209 3335 22 Killed 222 @ age 2.53
+209 3407 22 Added 222
+209 3441 22 Killed 222 @ age 2.07
+209 3464 22 Added 224
+209 3520 23 Killed 224 @ age 2.07
+209 3621 23 Added 224
+209 3654 23 Killed 224 @ age 2.13
+209 3755 23 Added 224
+209 3797 23 Killed 224 @ age 2.45
+209 3901 25 Added 222
+209 3935 25 Killed 222 @ age 2.46
+209 4055 25 Added 224
+209 4088 25 Killed 224 @ age 2.42
+209 4138 25 Added 222
+209 4180 25 Killed 222 @ age 2.79
+209 4258 25 Added 224
+209 4295 25 Added 222
+209 4301 25 Killed 224 @ age 2.43
+209 4336 27 Voted: 0.24633770239013106
+209 4339 27 Failed Vote. Balance: 60.01
+209 4372 27 Killed 222 @ age 2.93
+209 4382 27 Added 222
+209 4435 27 Killed 222 @ age 2.96
+209 4487 28 Voted: 0.2470193740685544
+209 4490 28 Failed Vote. Balance: 20.01
+209 4499 28 Added 224
+209 4532 28 Killed 224 @ age 2.90
+209 4576 28 Added 224
+209 4609 28 Killed 224 @ age 2.43
+209 4820 29 Added 224
+209 4833 29 Added 222
+209 4853 29 Killed 224 @ age 2.13
+209 4910 29 Killed 222 @ age 2.11
+209 4920 29 Added 222
+209 4937 31 Voted: 0.24001354096140826
+209 4940 31 Failed Vote. Balance: 20.01
+209 4955 31 STOPPED EXPERIMENT

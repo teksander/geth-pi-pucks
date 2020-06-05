@@ -1,0 +1,15 @@
+#!/bin/bash  
+# Short script to reset the geth data directory and stop running processes
+
+# Stop GETH Processes 
+echo "Stopping GETH"
+killall geth
+./ssh-all "killall geth"
+wait
+
+# Reset GETH folders
+echo "Reseting Pi-Puck Chaindata..."
+rm -r /home/"$USER"/mygethnode/geth
+./ssh-all "rm -r /home/pi/mygethnode/geth"
+wait
+
