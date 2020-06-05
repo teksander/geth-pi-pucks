@@ -1,0 +1,33 @@
+# Install batctl and alfred
+# sudo apt install libnl-3-dev libnl-genl-3-dev
+# git clone https://git.open-mesh.org/batctl.git
+# cd batctl
+# sudo make install
+# sudo apt-get install alfred
+
+sudo systemctl stop wpa_supplicant.service
+
+# Setup ad hoc connection; run as sudo
+ip link set wlx801f029ba623
+iw wlx801f029ba623 set type ibss
+ifconfig wlx801f029ba623 mtu 1499
+iwconfig wlx801f029ba623 channel 3
+ip link set wlx801f029ba623 up
+iw wlx801f029ba623 ibss join AdHocPi 2432
+
+# Configure batman-adv; run as sudo
+modprobe batman-adv
+batctl if add wlx801f029ba623
+ip link set up dev wlx801f029ba623
+ip link set up dev bat0
+
+ifconfig bat0 172.27.1.100/16
+
+
+
+
+
+
+
+
+

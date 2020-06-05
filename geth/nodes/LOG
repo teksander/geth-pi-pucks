@@ -4,3 +4,15 @@
 02:15:56.826015 version@stat F·[] S·0B[] Sc·[]
 02:15:56.829083 db@janitor F·2 G·0
 02:15:56.829094 db@open done T·3.826789ms
+=============== Jun 6, 2020 (CEST) ===============
+01:04:39.172900 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+=============== Jun 6, 2020 (CEST) ===============
+01:04:39.173061 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+01:04:39.178978 version@stat F·[] S·0B[] Sc·[]
+01:04:39.182538 db@open opening
+01:04:39.182647 journal@recovery F·1
+01:04:39.184397 journal@recovery recovering @1
+01:04:39.187836 memdb@flush created L0@2 N·2 S·176B "loc..seq,v2":"version,v1"
+01:04:39.188566 version@stat F·[1] S·176B[176B] Sc·[0.25]
+01:04:39.192108 db@janitor F·3 G·0
+01:04:39.192125 db@open done T·9.56514ms

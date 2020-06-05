@@ -16,3 +16,19 @@
 02:15:56.792374 version@stat F·[1] S·50KiB[50KiB] Sc·[0.25]
 02:15:56.801955 db@janitor F·3 G·0
 02:15:56.801977 db@open done T·46.311825ms
+=============== Jun 6, 2020 (CEST) ===============
+01:04:39.133277 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+=============== Jun 6, 2020 (CEST) ===============
+01:04:39.133394 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+01:04:39.133443 table@recovery F·1
+01:04:39.133447 table@recovery recovering @2
+01:04:39.133614 table@recovery recovered @2 Gk·622 Ck·0 Cb·0 S·51752 Q·622
+01:04:39.133621 table@recovery recovered F·1 N·622 Gk·622 Ck·0 Q·622
+01:04:39.140445 version@stat F·[1] S·50KiB[50KiB] Sc·[0.25]
+01:04:39.143440 db@open opening
+01:04:39.143504 journal@recovery F·1
+01:04:39.144970 journal@recovery recovering @3
+01:04:39.148683 memdb@flush created L0@4 N·39 S·7KiB "Dat..ion,v624":"r\x00\x00..\xacU\xd5,v662"
+01:04:39.149022 version@stat F·[2] S·58KiB[58KiB] Sc·[0.50]
+01:04:39.152301 db@janitor F·5 G·0
+01:04:39.152325 db@open done T·8.868605ms
