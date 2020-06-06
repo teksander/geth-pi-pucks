@@ -1,3 +1,6 @@
+#!/bin/bash
+#  Initalize ADHOC network on either the computer or the pi-pucks
+
 # Install batctl and alfred
 # sudo apt install libnl-3-dev libnl-genl-3-dev
 # git clone https://git.open-mesh.org/batctl.git
@@ -5,23 +8,40 @@
 # sudo make install
 # sudo apt-get install alfred
 
-sudo systemctl stop wpa_supplicant.service
+
+# If is a Pi-Puck
+if [ $LOGNAME == "pi" ]; then
+	ID=$(cat /boot/pi-puck_id)
+	IF=wlan0
+else
+	ID="100"
+	IF=wlx801f029ba623
+fi
+
+# If a specific interface/identity are passed
+if [ "$#" -eq 1 ]; then
+	IF=$1
+elif [ "$#" -eq 2 ]; then
+	ID=$2
+fi
 
 # Setup ad hoc connection; run as sudo
-ip link set wlx801f029ba623
-iw wlx801f029ba623 set type ibss
-ifconfig wlx801f029ba623 mtu 1499
-iwconfig wlx801f029ba623 channel 3
-ip link set wlx801f029ba623 up
-iw wlx801f029ba623 ibss join AdHocPi 2432
+ip link set $IF
+iw $IF set type ibss
+ifconfig $IF mtu 1499
+iwconfig $IF channel 3
+ip link set $IF up
+iw $IF ibss join AdHocPi 2432
 
 # Configure batman-adv; run as sudo
 modprobe batman-adv
-batctl if add wlx801f029ba623
-ip link set up dev wlx801f029ba623
+batctl if add $IF
+ip link set up dev $IF
 ip link set up dev bat0
 
-ifconfig bat0 172.27.1.100/16
+systemctl stop wpa_supplicant.service
+
+ifconfig bat0 172.27.1.$ID/16
 
 
 
