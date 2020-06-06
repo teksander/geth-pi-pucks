@@ -8,7 +8,7 @@ _“A Framework for Swarm Robotics Experimentation with Pi-puck Robots and an Et
 Publication date: February 2020 Last revision: February 2020. 
 http://iridia.ulb.ac.be/IridiaTrSeries/link/IridiaTr2020-001.pdf
 
-### Final publication:
+### Final Publication:
 
 _“A Blockchain-Controlled Physical Robot Swarm Communicating via an Ad-Hoc Network“_, A. Pacheco, V. Strobel, M. Dorigo. ANTS2020 
 
