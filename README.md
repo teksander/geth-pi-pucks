@@ -10,5 +10,6 @@ http://iridia.ulb.ac.be/IridiaTrSeries/link/IridiaTr2020-001.pdf
 
 ### Final Publication:
 
-_“A Blockchain-Controlled Physical Robot Swarm Communicating via an Ad-Hoc Network“_, A. Pacheco, V. Strobel, M. Dorigo. ANTS2020 
+_“A Blockchain-Controlled Physical Robot Swarm Communicating via an Ad-Hoc Network“_, A. Pacheco, V. Strobel, M. Dorigo. Submitted to ANTS 2020 -- Twelth International Conference on Swarm Intelligence.
+Preprint available at http://iridia.ulb.ac.be/IridiaTrSeries/link/IridiaTr2020-007.pdf
 
