@@ -4,6 +4,9 @@
 source("myplothelpers.R")
 library(stringr)
 
+#' TODO!: Currently, the mean is taken from the robot that received
+#' the consensus signal at last; instead: randomly sample one robots.
+
 # General Settings ------------------------------------------------------
 actual.frequency <- 32 ## Actual frequency of white tiles
 base.dir <- "../"
@@ -13,26 +16,6 @@ data.dir <- file.path(base.dir, "data")
 plot.dir <- file.path(base.dir, "plots")
 
 # Function Declarations -------------------------------------------------
-
-#' Read event.csv file from a randomly selected robot
-sample_event_log <- function(run.path) {
-    robots <- list.dirs(run.path, recursive = FALSE)
-    sampled.robot <- sample(robots, 1)
-    event.file <- file.path(sampled.robot, "event.log")    
-    event.df <- read.csv(event.file, sep=' ')
-}
-
-#' Read event.csv file from a randomly selected robot
-all_event_logs <- function(run.path) {
-    robots <- list.dirs(run.path, recursive = FALSE)
-    all.event.logs <- file.path(robots, "event.log")
-
-    for (robot in all.event.logs) {
-        event.file <- file.path(robot, "event.log")
-        event.df <- read.csv(event.file, sep=' ')
-    }
-}
-
 
 #' Get the mean where a consensus has been reached from an event.csv
 #' file
@@ -60,7 +43,6 @@ find.consensus <- function(sc.df, num.robots, tau) {
     # Return position and time of positions
     return(c(pos, sc.df$TIME[pos]))
 }
-
 
 postprocess <- function(run.path, tau) {
 
@@ -188,7 +170,34 @@ create.df <- function(experiment.path, tau) {
     df$selected.absError <- abs(df$final.mean - actual.frequency)
 
     return(df)
+}
+
+#' Iterate over all files and extract the blockchain size based on the
+#' time of the experiment
+create.bcsize.by.time <- function(df.runs) {
+
+df <- data.frame(TIME=numeric(),
+                 CHAINDATASIZE=numeric(), 
+                 stringsAsFactors=FALSE) 
+
+    i <- 1
+    for (run.path in df.runs$full.path) {
+        robots <- list.dirs(run.path, recursive = FALSE)
+        all.event.logs <- file.path(robots, "extra.csv")
+
+        for (event.file in all.event.logs) {    
+            event.df <- read.csv(event.file, sep=' ')
+            event.df <- event.df[,c("TIME", "CHAINDATASIZE")]            
+            event.df$num.robots <- df.runs$num.robots[i]
+            
+            df <- rbind(df, event.df)    
+        }
+        i <- i + 1        
     }
+    df$CHAINDATASIZE <- as.numeric(as.character(df$CHAINDATASIZE))
+    
+    return(df)
+}
 
 
 # Experiment 1  ------------------------------------------------------------
@@ -216,3 +225,103 @@ plot.x.by.y(df.1,
             report.dir=plot.dir,
             custom.base.breaks.x=c(0,1,2,3,4),
             custom.base.breaks.y=c(0,1000,2000))
+
+
+
+
+# Neighbors analysis per X seconds ---------------------------------------------
+
+create.neighbors.by.num.robots <- function(df.runs, X=15) {
+
+    df <- data.frame(neighbors.per.Xsec=numeric(),
+                     num.robots=numeric(),
+                     avg.block.time=numeric(),
+                     stringsAsFactors=FALSE) 
+
+    i <- 1
+    for (run.path in df.runs$full.path) {
+        robots <- list.dirs(run.path, recursive = FALSE)
+        all.buffer.logs <- file.path(robots, "buffer.csv")
+
+        for (buffer.file in all.buffer.logs) {
+            print(buffer.file)
+
+            buffer.df <- read.csv(buffer.file,
+                                  sep=' ',
+                                  header=F,
+                                  skip=1,
+                                  col.names = paste0("V",seq_len(14)),
+                                  fill = TRUE)
+
+            buffer.df <- buffer.df[,c("V2", "V3", "V4", "V5")]
+            colnames(buffer.df) <- c("TIME", "BLOCK", "BLK", "PEERS")
+
+            
+            sum.neighbors <- sum(buffer.df$PEERS)
+            neighbors.per.Xsec <- X * (sum.neighbors / max(buffer.df$TIME))
+            
+            buffer.df$num.robots <- df.runs$num.robots[i]
+            buffer.df$neighbors.per.Xsec <- neighbors.per.Xsec
+            blocks <- buffer.df$BLOCK
+            avg.block.time <- max(buffer.df$TIME) / (blocks[length(blocks)] - blocks[1])
+
+            small.df <- data.frame(neighbors.per.Xsec=neighbors.per.Xsec,
+                                   num.robots=df.runs$num.robots[i],
+                                   avg.block.time=avg.block.time)
+
+            print(small.df)
+            
+            df <- rbind(df, small.df)    
+        }
+        i <- i + 1        
+    }
+    
+    return(df)
+}
+
+
+neighbors.df <- create.neighbors.by.num.robots(df.1)
+
+## Plots neighbor per X (e.g., 15) seconds
+plot.x.by.y(neighbors.df,
+            x="num.robots",
+            y="neighbors.per.Xsec",
+            xlab="Number of robots",
+            ylab="Encounters(15).",
+            out.name="encounters_plot.pdf",
+            report.dir="../plots/",
+            custom.base.breaks.x=c(5, 7, 8, 10),
+            custom.base.breaks.y=c(0.00, 0.5, 1.0, 1.5, 2.0, 2.5))
+
+
+# Block time analysis -----------------------------------------------------
+
+## Plots average block time
+plot.x.by.y(neighbors.df,
+            x="num.robots",
+            y="avg.block.time",
+            xlab="Number of robots",
+            ylab="Average block time",
+            out.name="blocktime.pdf",
+            report.dir="../plots/",
+            custom.base.breaks.x=c(5,7,8,10),
+            custom.base.breaks.y=c(0.00, 20, 40, 60, 80))
+
+
+
+# Blockchain growth analysis -----------------------------------------------------
+
+
+df.robots <- create.bcsize.by.time(df.1)
+
+plot.bc.size(df.robots,
+             "TIME",
+             "CHAINDATASIZE",
+             "Time in seconds",
+             "Blockchain size in MB",
+             "blockchain_growth.pdf",
+             "../plots",
+             stop.x.at=900,
+             custom.base.breaks.x=c(0, 300, 600, 900),
+             custom.base.breaks.y=c(0, 0.1, 0.2, 0.3, 0.4)
+             )
