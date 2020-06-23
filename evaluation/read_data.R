@@ -12,7 +12,7 @@ actual.frequency <- 32 ## Actual frequency of white tiles
 base.dir <- "../"
 multiplier <- 10000000
 tau <- 0.02
-data.dir <- file.path(base.dir, "results")
+data.dir <- file.path(base.dir, "results", "tau")
 plot.dir <- file.path(base.dir, "evaluation", "plots")
 
 # Function Declarations -------------------------------------------------

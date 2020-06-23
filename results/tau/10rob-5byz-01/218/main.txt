@@ -1,0 +1,102 @@
+ID TIME BLK EVENT DESCRIPTION
+218 1592913425.176 0 SETUP: Synced Time
+218 1592913425.295 0 SETUP: Peered to PC
+218 1592913442.254 2 SETUP: Smart Contract Received at Block 2
+218 6.245 2 STARTED EXPERIMENT
+218 12.378 2 Killed 217 @ age 2.19
+218 18.0 3 Killed 217 @ age 2.13
+218 20.985 3 Killed 222 @ age 2.27
+218 32.678 4 Killed 222 @ age 2.50
+218 37.466 4 Killed 214 @ age 2.01
+218 38.109 4 Killed 210 @ age 2.54
+218 45.924 4 Killed 211 @ age 2.39
+218 46.438 4 Killed 209 @ age 2.77
+218 58.858 5 Killed 224 @ age 2.12
+218 69.02 6 Voted: 0; Status: 1
+218 91.913 7 Killed 222 @ age 2.13
+218 95.487 7 Killed 226 @ age 2.30
+218 97.618 7 Killed 210 @ age 2.17
+218 99.336 8 Failed Vote (No Balance). Balance: 20.01
+218 101.162 8 Killed 210 @ age 2.08
+218 104.877 8 Killed 217 @ age 2.18
+218 108.174 8 Killed 214 @ age 2.44
+218 111.762 8 Killed 226 @ age 2.44
+218 114.877 9 Killed 214 @ age 2.43
+218 126.608 9 Killed 214 @ age 2.28
+218 130.459 10 Killed 224 @ age 2.47
+218 138.075 10 Killed 224 @ age 2.24
+218 148.159 11 Failed Vote (No Balance). Balance: 20.01
+218 159.497 11 Killed 209 @ age 2.02
+218 174.642 13 Killed 214 @ age 2.03
+218 177.747 13 Killed 214 @ age 2.14
+218 178.394 13 Killed 209 @ age 2.10
+218 180.589 13 Killed 224 @ age 2.11
+218 183.71 13 Killed 224 @ age 2.04
+218 192.611 14 Killed 213 @ age 3.79
+218 198.7 14 Killed 224 @ age 2.41
+218 205.408 15 Voted: 0; Status: 1
+218 207.837 15 Killed 210 @ age 2.81
+218 220.079 16 Killed 213 @ age 2.39
+218 223.747 16 Killed 210 @ age 2.67
+218 228.807 16 Killed 214 @ age 2.41
+218 250.448 18 Voted: 0; Status: 1
+218 265.697 18 Killed 210 @ age 2.11
+218 277.709 19 Failed Vote (No Balance). Balance: 0.01
+218 288.516 20 Killed 224 @ age 2.25
+218 289.04 20 Killed 217 @ age 2.14
+218 293.347 20 Killed 211 @ age 2.05
+218 303.905 21 Killed 213 @ age 2.03
+218 313.522 21 Killed 210 @ age 2.05
+218 314.576 21 Killed 217 @ age 2.15
+218 319.963 22 Killed 210 @ age 2.07
+218 323.994 23 Killed 213 @ age 2.29
+218 325.583 23 Failed Vote (No Balance). Balance: 20.01
+218 348.497 24 Killed 217 @ age 2.07
+218 368.734 24 Failed Vote (Unexpected). Trying again. Balance: 20.01
+218 370.439 24 Failed Vote (No Balance). Balance: 20.01
+218 374.682 25 Killed 210 @ age 2.22
+218 376.572 25 Killed 226 @ age 2.32
+218 378.168 25 Killed 209 @ age 3.13
+218 390.264 26 Killed 217 @ age 2.74
+218 404.722 27 Killed 213 @ age 2.68
+218 415.568 27 Failed Vote (No Balance). Balance: 20.01
+218 429.827 28 Killed 213 @ age 2.07
+218 454.461 28 Killed 222 @ age 2.11
+218 459.454 30 Failed Vote (No Balance). Balance: 20.01
+218 461.278 30 Killed 210 @ age 2.06
+218 481.565 30 Killed 210 @ age 2.13
+218 489.584 30 Killed 214 @ age 2.05
+218 502.696 30 Killed 210 @ age 2.10
+218 504.475 30 Failed Vote (No Balance). Balance: 20.01
+218 505.199 30 Killed 226 @ age 2.43
+218 505.704 30 Killed 210 @ age 2.06
+218 516.844 33 Killed 213 @ age 2.04
+218 520.583 34 Killed 211 @ age 2.43
+218 526.35 34 Killed 213 @ age 2.27
+218 548.452 35 Failed Vote (No Balance). Balance: 20.01
+218 553.614 36 Killed 214 @ age 2.11
+218 556.895 36 Killed 214 @ age 2.12
+218 560.036 36 Killed 217 @ age 2.31
+218 560.602 36 Killed 214 @ age 2.18
+218 588.087 38 Killed 209 @ age 2.10
+218 591.611 38 Killed 210 @ age 2.10
+218 594.954 38 Killed 210 @ age 2.22
+218 598.159 39 Killed 210 @ age 2.07
+218 601.574 39 Killed 210 @ age 2.05
+218 605.968 39 Killed 210 @ age 2.15
+218 608.825 39 Killed 210 @ age 2.20
+218 624.194 39 Killed 210 @ age 2.22
+218 636.28 39 Killed 213 @ age 2.01
+218 639.233 40 Voted: 0; Status: 1
+218 643.452 42 Failed Vote (No Balance). Balance: 0.01
+218 678.526 43 Killed 226 @ age 2.05
+218 687.243 43 Failed Vote (No Balance). Balance: 0.01
+218 689.562 43 Killed 222 @ age 2.04
+218 694.613 43 Killed 222 @ age 2.21
+218 697.245 43 Killed 224 @ age 2.20
+218 701.619 46 Killed 214 @ age 2.11
+218 704.797 46 Killed 224 @ age 2.77
+218 707.875 46 Killed 217 @ age 2.66
+218 708.574 46 Killed 210 @ age 2.08
+218 710.726 46 Killed 214 @ age 2.29
+218 716.359 47 STOPPED EXPERIMENT
