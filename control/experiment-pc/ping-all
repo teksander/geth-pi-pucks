@@ -15,6 +15,7 @@ done
 wait
 
 wait
+wc -l temp.txt | awk '{ print "Robot Count: " $1 }'
 sort -n temp.txt >> pi-pucks.txt
 rm temp.txt
 cp pi-pucks.txt /home/"$USER"/mygethnode/control/experiment/

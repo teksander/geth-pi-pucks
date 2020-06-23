@@ -6,6 +6,6 @@ FILE="/boot/pi-puck_id"
 ID=$(cat "$FILE")
 
 touch logs/readme.txt
-ssh esmi@172.27.1.100 mkdir mygethnode/control/experiment-pc/results/$1
+ssh esmi@172.27.1.100 mkdir mygethnode/results/$1
 wait
-scp -r logs esmi@172.27.1.100:~/mygethnode/control/experiment-pc/results/$1/$ID
+scp -r logs esmi@172.27.1.100:~/mygethnode/results/$1/$ID

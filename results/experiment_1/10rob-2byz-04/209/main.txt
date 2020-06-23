@@ -1,0 +1,53 @@
+ID TIME BLK EVENT DESCRIPTION
+209 1592497591.16 0 SETUP: Synced Time
+209 1592497591.272 0 SETUP: Peered to PC
+209 1592497606.035 2 SETUP: Smart Contract Received at Block 2
+209 5.986 2 STARTED EXPERIMENT
+209 12.999 2 Killed 218 @ age 2.14
+209 18.83 3 Killed 214 @ age 2.48
+209 19.395 3 Killed 218 @ age 2.04
+209 26.494 3 Killed 226 @ age 2.14
+209 29.064 3 Killed 218 @ age 2.03
+209 29.906 3 Killed 214 @ age 2.07
+209 56.717 5 Killed 217 @ age 2.07
+209 62.595 6 Voted: 0; Status: 1
+209 64.395 6 Killed 210 @ age 2.08
+209 69.4 6 Killed 214 @ age 2.22
+209 80.379 7 Killed 213 @ age 2.17
+209 96.408 8 Killed 214 @ age 2.07
+209 97.878 8 Failed Vote (No Balance). Balance: 20.01
+209 100.516 8 Killed 214 @ age 2.08
+209 103.526 8 Killed 214 @ age 2.12
+209 109.592 8 Killed 214 @ age 2.10
+209 111.074 9 Killed 217 @ age 2.18
+209 113.604 9 Killed 214 @ age 2.12
+209 118.415 9 Killed 217 @ age 2.07
+209 125.81 10 Killed 217 @ age 2.19
+209 126.69 10 Killed 214 @ age 2.35
+209 129.304 10 Killed 218 @ age 2.51
+209 132.849 10 Killed 210 @ age 2.02
+209 139.21 10 Killed 214 @ age 2.25
+209 156.882 12 Voted: 0; Status: 1
+209 160.015 12 Killed 226 @ age 2.92
+209 171.775 12 Killed 214 @ age 2.20
+209 190.07 14 Killed 217 @ age 2.06
+209 193.095 14 Killed 217 @ age 2.03
+209 198.198 14 Killed 224 @ age 2.12
+209 207.88 15 Voted: 0; Status: 1
+209 227.977 16 Killed 222 @ age 2.15
+209 228.827 16 Killed 210 @ age 2.25
+209 231.957 17 Killed 211 @ age 2.33
+209 232.787 17 Killed 222 @ age 2.46
+209 236.487 17 Failed Vote (No Balance). Balance: 0.01
+209 244.434 18 Killed 222 @ age 2.19
+209 247.174 18 Killed 224 @ age 2.01
+209 250.787 18 Killed 226 @ age 2.82
+209 256.813 18 Killed 224 @ age 2.02
+209 262.222 19 Killed 224 @ age 2.01
+209 265.753 19 Killed 222 @ age 2.85
+209 273.851 19 Killed 222 @ age 2.03
+209 280.514 20 Killed 226 @ age 2.04
+209 282.17 20 Failed Vote (No Balance). Balance: 20.01
+209 286.061 20 Killed 226 @ age 2.50
+209 291.543 21 Killed 211 @ age 2.35
+209 313.361 22 STOPPED EXPERIMENT

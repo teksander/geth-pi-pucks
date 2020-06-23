@@ -1,0 +1,51 @@
+ID TIME BLK EVENT DESCRIPTION
+214 1592420304.147 0 SETUP: Synced Time
+214 1592420304.356 0 SETUP: Peered to PC
+214 1592420320.171 2 SETUP: Smart Contract Received at Block 2
+214 6.108 2 STARTED EXPERIMENT
+214 17.184 3 Killed 210 @ age 2.08
+214 25.857 3 Killed 210 @ age 2.08
+214 28.099 3 Killed 217 @ age 2.14
+214 29.435 3 Killed 222 @ age 2.16
+214 45.087 4 Killed 209 @ age 2.46
+214 58.564 5 Killed 209 @ age 3.25
+214 63.637 6 Voted: 0.32792207792207795; Status: 1
+214 81.48 7 Killed 209 @ age 2.61
+214 84.011 7 Killed 222 @ age 2.06
+214 92.211 8 Killed 210 @ age 2.05
+214 100.067 8 Failed Vote (No Balance). Balance: 0.01
+214 109.156 9 Killed 218 @ age 2.34
+214 123.524 10 Killed 209 @ age 2.31
+214 127.564 10 Killed 210 @ age 2.53
+214 129.617 10 Killed 213 @ age 2.38
+214 130.241 10 Killed 209 @ age 2.68
+214 132.099 10 Killed 217 @ age 2.05
+214 138.682 11 Killed 209 @ age 2.97
+214 140.689 11 Killed 213 @ age 2.15
+214 146.832 11 Killed 209 @ age 2.76
+214 151.44 12 Voted: 0.2701711491442543; Status: 1
+214 168.085 13 Killed 213 @ age 2.14
+214 172.639 13 Killed 211 @ age 2.10
+214 176.287 13 Killed 226 @ age 2.41
+214 183.017 14 Killed 210 @ age 2.35
+214 196.523 15 Voted: 0.24861367837338263; Status: 1
+214 213.758 16 Killed 217 @ age 2.14
+214 237.034 17 Killed 209 @ age 2.13
+214 241.034 18 Voted: 0.2637444279346211; Status: 1
+214 250.14 18 Killed 224 @ age 2.11
+214 253.399 18 Killed 213 @ age 2.06
+214 258.55 19 Killed 213 @ age 2.62
+214 259.746 19 Killed 222 @ age 2.60
+214 263.115 19 Killed 224 @ age 2.40
+214 266.319 19 Killed 222 @ age 2.34
+214 269.956 19 Killed 224 @ age 2.24
+214 283.713 20 Killed 210 @ age 2.96
+214 291.568 21 Voted: 0.3008793969849246; Status: 1
+214 320.877 22 Killed 222 @ age 2.09
+214 323.72 22 Failed Vote (No Balance). Balance: 20.01
+214 324.918 22 Killed 218 @ age 2.02
+214 329.641 22 Killed 218 @ age 2.11
+214 332.629 22 Killed 210 @ age 2.25
+214 337.498 22 Killed 210 @ age 2.13
+214 344.028 22 Killed 211 @ age 2.40
+214 346.639 22 STOPPED EXPERIMENT

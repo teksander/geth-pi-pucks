@@ -1,0 +1,53 @@
+ID TIME BLK EVENT DESCRIPTION
+210 1592486967.148 0 SETUP: Synced Time
+210 1592486967.452 0 SETUP: Peered to PC
+210 1592486983.182 2 SETUP: Smart Contract Received at Block 2
+210 6.65 2 STARTED EXPERIMENT
+210 16.31 3 Killed 217 @ age 2.02
+210 17.539 3 Killed 218 @ age 2.08
+210 43.874 4 Killed 222 @ age 2.01
+210 45.882 4 Killed 209 @ age 2.02
+210 47.864 5 Killed 222 @ age 2.35
+210 52.129 5 Killed 214 @ age 2.53
+210 55.02 5 Killed 222 @ age 2.04
+210 62.107 6 Killed 222 @ age 2.13
+210 62.817 6 Voted: 0.3102409638554217; Status: 1
+210 65.882 6 Killed 226 @ age 2.55
+210 88.009 7 Killed 214 @ age 2.84
+210 91.337 8 Killed 209 @ age 3.45
+210 94.263 8 Killed 224 @ age 2.43
+210 99.624 8 Killed 222 @ age 3.15
+210 103.625 8 Failed Vote (No Balance). Balance: 20.01
+210 104.127 8 Killed 217 @ age 3.59
+210 112.547 9 Killed 218 @ age 2.51
+210 121.074 10 Killed 211 @ age 3.45
+210 126.386 10 Killed 224 @ age 3.52
+210 132.946 10 Killed 224 @ age 2.00
+210 139.807 11 Killed 224 @ age 2.00
+210 149.905 11 Failed Vote (No Balance). Balance: 20.01
+210 153.297 12 Killed 224 @ age 2.51
+210 172.436 13 Killed 211 @ age 2.06
+210 184.647 14 Killed 224 @ age 2.05
+210 190.056 14 Killed 217 @ age 2.31
+210 193.832 14 Killed 217 @ age 2.28
+210 195.757 14 Killed 213 @ age 2.31
+210 197.033 15 Voted: 0.3527724665391969; Status: 1
+210 198.497 15 Killed 217 @ age 2.35
+210 227.717 17 Killed 217 @ age 2.03
+210 231.31 17 Killed 214 @ age 2.18
+210 234.842 17 Killed 214 @ age 2.30
+210 236.537 17 Killed 217 @ age 2.53
+210 239.435 17 Killed 214 @ age 2.14
+210 240.607 18 Voted: 0.3197852760736196; Status: 1
+210 245.94 18 Killed 214 @ age 2.28
+210 260.042 19 Killed 226 @ age 2.61
+210 265.82 19 Killed 224 @ age 2.20
+210 266.756 19 Killed 222 @ age 2.39
+210 281.763 20 Killed 213 @ age 2.03
+210 287.52 21 Voted: 0.2795629820051414; Status: 1
+210 321.023 23 Killed 226 @ age 2.07
+210 324.572 23 Killed 226 @ age 2.14
+210 332.231 24 Voted: 0.2653846153846154; Status: 1
+210 333.277 24 Killed 209 @ age 2.16
+210 348.087 25 Killed 211 @ age 2.05
+210 364.21 25 STOPPED EXPERIMENT

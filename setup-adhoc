@@ -1,13 +1,15 @@
 #!/bin/bash
 #  Initalize ADHOC network on either the computer or the pi-pucks
 
+# Run as SUDO
+[ "$UID" -eq 0 ] || exec sudo bash "$0" "$@"
+
 # Install batctl and alfred
-# sudo apt install libnl-3-dev libnl-genl-3-dev
+# apt install libnl-3-dev libnl-genl-3-dev
 # git clone https://git.open-mesh.org/batctl.git
 # cd batctl
-# sudo make install
-# sudo apt-get install alfred
-
+# make install
+# apt-get install alfred
 
 # If is a Pi-Puck
 if [ $LOGNAME == "pi" ]; then
@@ -20,9 +22,10 @@ fi
 
 # If a specific interface/identity are passed
 if [ "$#" -eq 1 ]; then
-	IF=$1
+	ID=$1
 elif [ "$#" -eq 2 ]; then
-	ID=$2
+	ID=$1
+	IF=$2
 fi
 
 # Setup ad hoc connection; run as sudo

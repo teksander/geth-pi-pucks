@@ -1,0 +1,15 @@
+ID TIME BLK EVENT DESCRIPTION
+209 1592337587.143 0 SETUP: Synced Time
+209 1592337587.306 0 SETUP: Peered to PC
+209 1592337604.312 2 SETUP: Smart Contract Received at Block 2
+209 10.83 2 STARTED EXPERIMENT
+209 78.02 7 Voted: 0.20860927152317882; Status: 1
+209 108.936 9 Failed Vote (No Balance). Balance: 0.01
+209 166.94 13 Voted: 0.32808022922636104; Status: 1
+209 198.514 15 Failed Vote (No Balance). Balance: 0.01
+209 255.8 19 Voted: 0.3023897058823529; Status: 1
+209 288.028 21 Failed Vote (No Balance). Balance: 0.01
+209 334.494 24 Failed Vote (No Balance). Balance: 0.01
+209 379.586 27 Failed Vote (No Balance). Balance: 0.01
+209 423.132 30 Failed Vote (No Balance). Balance: 0.01
+209 433.563 30 STOPPED EXPERIMENT

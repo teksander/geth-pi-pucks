@@ -1,0 +1,54 @@
+ID TIME BLK EVENT DESCRIPTION
+226 1592834744.145 0 SETUP: Synced Time
+226 1592834744.27 0 SETUP: Peered to PC
+226 1592834760.712 2 SETUP: Smart Contract Received at Block 2
+226 6.535 2 STARTED EXPERIMENT
+226 18.533 3 Killed 209 @ age 2.15
+226 35.756 4 Killed 214 @ age 2.01
+226 46.388 4 Killed 213 @ age 2.25
+226 54.941 5 Killed 213 @ age 2.18
+226 55.445 5 Killed 214 @ age 2.06
+226 59.168 5 Killed 213 @ age 2.36
+226 61.886 6 Voted: 0; Status: 1
+226 63.478 6 Killed 214 @ age 2.03
+226 81.191 7 Killed 222 @ age 2.06
+226 97.816 8 Failed Vote (No Balance). Balance: 20.01
+226 101.265 8 Killed 210 @ age 2.07
+226 105.312 8 Killed 213 @ age 2.01
+226 139.653 11 Killed 211 @ age 2.23
+226 144.559 11 Killed 217 @ age 2.86
+226 146.177 11 Killed 214 @ age 2.25
+226 152.437 12 Voted: 0; Status: 1
+226 159.689 12 Killed 213 @ age 2.04
+226 162.135 12 Killed 209 @ age 2.06
+226 163.076 12 Killed 210 @ age 2.66
+226 169.754 13 Killed 213 @ age 2.55
+226 174.174 13 Killed 213 @ age 2.16
+226 179.821 13 Killed 213 @ age 2.52
+226 189.916 14 Killed 218 @ age 2.11
+226 193.893 14 Killed 213 @ age 2.69
+226 198.475 15 Voted: 0; Status: 1
+226 208.818 15 Killed 213 @ age 2.16
+226 216.655 16 Killed 213 @ age 2.07
+226 225.495 16 Killed 218 @ age 2.18
+226 226.724 16 Killed 222 @ age 2.14
+226 230.966 17 Killed 209 @ age 2.54
+226 236.161 17 Failed Vote (No Balance). Balance: 0.01
+226 236.859 17 Killed 209 @ age 2.24
+226 254.465 18 Killed 211 @ age 2.16
+226 255.987 18 Killed 209 @ age 2.15
+226 273.491 20 Killed 218 @ age 2.16
+226 295.953 21 Killed 224 @ age 2.23
+226 298.519 21 Killed 211 @ age 2.25
+226 299.509 21 Killed 213 @ age 2.36
+226 302.354 22 Voted: 0; Status: 1
+226 305.531 22 Killed 222 @ age 2.73
+226 318.6 23 Killed 214 @ age 2.42
+226 324.831 23 Failed Vote (No Balance). Balance: 20.01
+226 337.889 24 Killed 217 @ age 2.00
+226 343.483 24 Killed 210 @ age 2.14
+226 352.128 25 Killed 210 @ age 2.16
+226 354.144 25 Killed 217 @ age 2.08
+226 363.701 26 Killed 211 @ age 2.02
+226 377.375 27 Voted: 0; Status: 1
+226 390.598 27 STOPPED EXPERIMENT

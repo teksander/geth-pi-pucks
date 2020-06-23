@@ -8,13 +8,14 @@ import subprocess
 class TicToc(object):
     """ Pendulum Class to Synchronize Output Times
     """
-    def __init__(self, delay):
+    def __init__(self, delay, name = None):
         """ Constructor
         :type delay: float
         :param delay: Time to wait
         """         
         self.delay = delay      
         self.stime = time.time()  
+        self.name = name
 
     def tic(self):
         self.stime = time.time()    
@@ -24,6 +25,7 @@ class TicToc(object):
         if dtime < self.delay:
             time.sleep(self.delay - dtime)
         else:
+            # print('{} Pendulum too Slow. Elapsed: {}'.format(self.name,dtime))
             pass
 
 class TCP_server(object):
@@ -32,7 +34,7 @@ class TCP_server(object):
     until the application exits.
     """
 
-    def __init__(self, data, ip, port):
+    def __init__(self, data, ip, port, unlocked = False):
         """ Constructor
         :type data: str
         :param data: Data to be sent back upon request
@@ -42,12 +44,13 @@ class TCP_server(object):
         :param port: TCP listening port for enodes
         """
         self.__stop = 1
-
+        
         self.data = data
         self.ip = ip
         self.port = port                              
         self.newIds = set()
-        self.__isping = 0
+        self.allowed = set()
+        self.unlocked = unlocked
 
     def __hosting(self):
         """ This method runs in the background until program is closed """ 
@@ -65,13 +68,17 @@ class TCP_server(object):
         while True:
             try:
                 # set the timeout
-                __socket.settimeout(1)
+                __socket.settimeout(2)
                 # queue one request
                 __socket.listen(1)    
                 # establish a connection
                 __clientsocket,addr = __socket.accept()   
                 # print("TCP request from %s" % str(addr))
-                __clientsocket.send(self.data.encode('ascii'))
+
+                if (addr[0][-3:] in self.allowed) or self.unlocked:
+                    __clientsocket.send(self.data.encode('ascii'))
+                    self.unallow(addr[0][-3:])
+
                 __clientsocket.close()
 
                 # make of set of connection IDs
@@ -94,10 +101,28 @@ class TCP_server(object):
         # connect to hostname on the port
         __socket.connect((server_ip, port))                               
         # Receive no more than 1024 bytes
-        msg = __socket.recv(1024)   
-        __socket.close()   
+        msg = __socket.recv(1024)  
+        msg = msg.decode('ascii') 
 
-        return msg.decode('ascii')
+        if msg == '':
+            raise ValueError('Connection Refused')
+
+        __socket.close()   
+        return msg
+
+        return 
+
+
+    def lock(self):
+        self.unlocked = False
+    def unlock(self):
+        self.unlocked = True
+
+    def allow(self, client_id):
+        self.allowed.add(client_id)
+
+    def unallow(self, client_id):
+        self.allowed.discard(client_id)
 
     def getNew(self):
         if self.__stop:
@@ -136,7 +161,6 @@ class Peer(object):
         :type id__: str
         :param id__: id of the peer
         """
-        self.__stop = 0
         # Add the known peer details
         self.id = id__
         self.ip = '172.27.1.' + id__
@@ -146,6 +170,7 @@ class Peer(object):
         self.ageLimit = ageLimit
         self.w3 = w3
         self.isdead = 0
+        self.age = 0
         
 
         # Initialize background daemon thread
@@ -169,10 +194,10 @@ class Peer(object):
                 if (self.ageLimit != 0) & (self.age > self.ageLimit):
                     self.kill()
 
-            if self.__stop:
+            if self.isdead:
                 break 
             else:
-                time.sleep(1);   
+                time.sleep(0.1);   
 
     def reset_age(self):
         """ This method resets the timestamp of the robot meeting """ 
@@ -181,7 +206,6 @@ class Peer(object):
 
     def kill(self):
         """ This method kills the peer and ends the thread """
-        self.__stop = 1
         self.isdead = 1
         cmd = "admin.removePeer(\"{}\")".format(self.enode)
         subprocess.call(["geth","--exec",cmd,"attach","/home/pi/mygethnode/geth.ipc"], stdout=subprocess.DEVNULL)   

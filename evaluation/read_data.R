@@ -12,8 +12,8 @@ actual.frequency <- 32 ## Actual frequency of white tiles
 base.dir <- "../"
 multiplier <- 10000000
 tau <- 0.02
-data.dir <- file.path(base.dir, "data")
-plot.dir <- file.path(base.dir, "plots")
+data.dir <- file.path(base.dir, "results")
+plot.dir <- file.path(base.dir, "evaluation", "plots")
 
 # Function Declarations -------------------------------------------------
 
@@ -48,7 +48,7 @@ postprocess <- function(run.path, tau) {
 
     # Find number of robots again (TODO: use as argument)
     num.robots <- strtoi(str_match(run.path,
-                            "(\\d+)robots-(\\d)byz-(\\d+)$")[2])
+                            "(\\d+)rob-(\\d)byz-(\\d+)$")[2])
 
 
     robots <- list.dirs(run.path, recursive = FALSE)
@@ -126,15 +126,17 @@ postprocess <- function(run.path, tau) {
 create.df <- function(experiment.path, tau) {
     experiments <- list.dirs(experiment.path, recursive=FALSE,
                              full.names = FALSE)
+    print(experiments)
     experiments.with.path <- list.dirs(experiment.path,
                                        recursive=FALSE)
     
     # Extract information about that run using a regex:
     # - Number of robots
-    # - Number of Byzantines
+    # - Number of Byzantines 
+    ##### WARNING (TODO): Compare byzantines in filename to robots with estimate == 0
     # - Repetition number
     all.experiments.matrix <- str_match(experiments,
-                                        "^(\\d+)robots-(\\d)byz-(\\d+)$")
+                                        "^(\\d+)rob-(\\d)byz-(\\d+)$")
 
     # Create a data frame with all information from all runs
     df <- as.data.frame(all.experiments.matrix)
@@ -149,6 +151,9 @@ create.df <- function(experiment.path, tau) {
     # - position of consensus
     # - the final mean
     # - consensus time
+
+
+    print(df)
 
     postprocessed <- lapply(df$full.path, postprocess, tau)
     postprocessed.df <- data.frame(matrix(unlist(postprocessed),
@@ -187,7 +192,8 @@ df <- data.frame(TIME=numeric(),
 
         for (event.file in all.event.logs) {    
             event.df <- read.csv(event.file, sep=' ')
-            event.df <- event.df[,c("TIME", "CHAINDATASIZE")]            
+            event.df <- event.df[,c("TIME", "CHAINDATASIZE")]      
+            event.df$CHAINDATASIZE <- event.df$CHAINDATASIZE / 1000000      
             event.df$num.robots <- df.runs$num.robots[i]
             
             df <- rbind(df, event.df)    
@@ -254,15 +260,20 @@ create.neighbors.by.num.robots <- function(df.runs, X=15) {
                                   fill = TRUE)
 
             buffer.df <- buffer.df[,c("V2", "V3", "V4", "V5")]
-            colnames(buffer.df) <- c("TIME", "BLOCK", "BLK", "PEERS")
+            colnames(buffer.df) <- c("TIME", "BLOCK", "BUFFER", "GETH")
 
             
-            sum.neighbors <- sum(buffer.df$PEERS)
-            neighbors.per.Xsec <- X * (sum.neighbors / max(buffer.df$TIME))
+            # WARNING: Replace this plot with average of the column TELAPSED in block.log. x axis: number of robots; y axis: block travel time
+
+
+            logging.frequency <- 1/2  # 1 log per 2 seconds
+            sum.neighbors <- sum(buffer.df$GETH)
+            neighbors.per.Xsec <- (X * (sum.neighbors / max(buffer.df$TIME))) / logging.frequency
             
             buffer.df$num.robots <- df.runs$num.robots[i]
             buffer.df$neighbors.per.Xsec <- neighbors.per.Xsec
             blocks <- buffer.df$BLOCK
+            # WARNING: THIS CAN BE IMPROVED; todo: instead of reading from buffer.log read from block.log last entry
             avg.block.time <- max(buffer.df$TIME) / (blocks[length(blocks)] - blocks[1])
 
             small.df <- data.frame(neighbors.per.Xsec=neighbors.per.Xsec,
@@ -289,7 +300,7 @@ plot.x.by.y(neighbors.df,
             xlab="Number of robots",
             ylab="Encounters(15).",
             out.name="encounters_plot.pdf",
-            report.dir="../plots/",
+            report.dir=plot.dir,
             custom.base.breaks.x=c(5, 7, 8, 10),
             custom.base.breaks.y=c(0.00, 0.5, 1.0, 1.5, 2.0, 2.5))
 
@@ -303,7 +314,7 @@ plot.x.by.y(neighbors.df,
             xlab="Number of robots",
             ylab="Average block time",
             out.name="blocktime.pdf",
-            report.dir="../plots/",
+            report.dir=plot.dir,
             custom.base.breaks.x=c(5,7,8,10),
             custom.base.breaks.y=c(0.00, 20, 40, 60, 80))
 
@@ -320,7 +331,7 @@ plot.bc.size(df.robots,
              "Time in seconds",
              "Blockchain size in MB",
              "blockchain_growth.pdf",
-             "../plots",
+             plot.dir,
              stop.x.at=900,
              custom.base.breaks.x=c(0, 300, 600, 900),
              custom.base.breaks.y=c(0, 0.1, 0.2, 0.3, 0.4)

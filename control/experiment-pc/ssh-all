@@ -23,3 +23,5 @@ for ID in $(cat "$IDS_FILE"); do
 done
 cssh $ALL_IPS
 fi
+
+wait
