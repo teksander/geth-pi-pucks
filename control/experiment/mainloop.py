@@ -162,8 +162,10 @@ def Estimate(rate = estimateRate):
 			for value in newValues:
 				if value > 700:
 					totalWhite += 1
+					# rw.setLEDs(0b11111111)
 				else:
 					totalBlack += 1
+					# rw.setLEDs(0b00000000)
 			if isbyz:
 				estimate = 0
 			else:
@@ -234,7 +236,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 				try:
 					peer.enode = tcp.request(peer.ip, tcp.port)
 					rw.setLEDs(0b11111111)  
-					# mainlog.log(['Received {} enode'.format(peer.id)]) 	   		 
+					mainlog.log(['Received {} enode'.format(peer.id)]) 	   		 
 				except ValueError:
 					pass
 					# print('Peer Refused Connection')
@@ -431,6 +433,9 @@ def signal_handler(sig, frame):
 				log.close()
 			except:
 				print('Error Closing Logfile')
+				
+		if isbyz:
+			print('This Robot Is BYZANTINE')
 
 	if not startFlag:
 		START()

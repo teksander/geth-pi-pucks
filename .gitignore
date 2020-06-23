@@ -1,5 +1,8 @@
 batctl/
 geth/
+evaluation/plots/
+results/plots/
+
 *.ipc
 
 # Byte-compiled / optimized / DLL files
