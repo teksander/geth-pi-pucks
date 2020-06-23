@@ -1,0 +1,64 @@
+ID TIME BLK EVENT DESCRIPTION
+217 1592421445.135 0 SETUP: Synced Time
+217 1592421445.357 0 SETUP: Peered to PC
+217 1592421462.052 2 SETUP: Smart Contract Received at Block 2
+217 6.401 2 STARTED EXPERIMENT
+217 11.894 2 Killed 218 @ age 2.00
+217 20.946 3 Killed 218 @ age 2.14
+217 46.221 5 Killed 213 @ age 2.02
+217 52.174 5 Killed 211 @ age 2.13
+217 55.169 5 Killed 222 @ age 2.01
+217 64.917 6 Killed 213 @ age 2.56
+217 66.447 6 Voted: 0.2949438202247191; Status: 1
+217 68.177 6 Killed 209 @ age 2.70
+217 70.408 6 Killed 210 @ age 2.94
+217 79.064 7 Killed 210 @ age 2.43
+217 86.503 7 Killed 211 @ age 2.53
+217 90.703 7 Killed 218 @ age 2.01
+217 93.618 8 Killed 210 @ age 2.63
+217 97.371 8 Killed 214 @ age 2.49
+217 102.383 8 Failed Vote (No Balance). Balance: 0.01
+217 105.027 8 Killed 213 @ age 2.43
+217 119.487 9 Killed 214 @ age 3.56
+217 127.341 10 Killed 214 @ age 2.60
+217 136.632 10 Killed 218 @ age 2.05
+217 139.622 11 Killed 214 @ age 2.28
+217 147.233 11 Killed 210 @ age 3.12
+217 150.357 11 Killed 214 @ age 2.78
+217 152.756 11 Killed 209 @ age 2.41
+217 156.303 12 Voted: 0.3149882903981265; Status: 1
+217 164.143 12 Killed 209 @ age 2.68
+217 189.521 14 Killed 211 @ age 2.45
+217 190.926 14 Killed 210 @ age 2.02
+217 197.352 14 Killed 210 @ age 2.56
+217 204.353 15 Killed 213 @ age 2.10
+217 211.029 15 Killed 226 @ age 2.53
+217 236.734 17 Killed 211 @ age 2.15
+217 245.383 17 Killed 213 @ age 2.16
+217 247.156 17 Killed 218 @ age 2.26
+217 255.403 18 Killed 224 @ age 2.04
+217 258.717 18 Killed 218 @ age 2.75
+217 259.662 18 Killed 226 @ age 2.17
+217 273.738 19 Killed 213 @ age 3.16
+217 280.07 20 Killed 214 @ age 3.97
+217 286.536 20 Killed 222 @ age 3.14
+217 289.492 20 Killed 214 @ age 3.06
+217 309.6 22 Failed Vote (Unexpected). Trying again. Balance: 100.01
+217 322.813 22 Killed 214 @ age 2.22
+217 324.095 23 Voted: 0.3863892013498313; Status: 1
+217 327.199 23 Killed 214 @ age 2.03
+217 338.893 24 Voted: 0.3859743040685225; Status: 1
+217 352.518 24 Killed 224 @ age 2.07
+217 359.152 24 Killed 222 @ age 2.10
+217 360.273 25 Killed 224 @ age 2.59
+217 364.671 25 Killed 210 @ age 2.07
+217 382.409 27 Voted: 0.37017873941674506; Status: 1
+217 414.935 27 Killed 214 @ age 2.02
+217 447.646 29 Killed 222 @ age 2.04
+217 449.022 31 Voted: 0.37073750991276766; Status: 1
+217 451.321 31 Killed 211 @ age 2.24
+217 452.251 31 Killed 222 @ age 2.13
+217 459.82 32 Killed 213 @ age 2.41
+217 464.611 32 Failed Vote (No Balance). Balance: 20.01
+217 474.471 33 Killed 210 @ age 2.36
+217 475.608 33 STOPPED EXPERIMENT

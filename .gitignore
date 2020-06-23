@@ -1,6 +1,5 @@
 batctl/
 geth/
-results/
 
 *.ipc
 

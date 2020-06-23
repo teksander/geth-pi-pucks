@@ -1,0 +1,52 @@
+ID TIME BLK EVENT DESCRIPTION
+210 1592580020.159 0 SETUP: Synced Time
+210 1592580020.273 0 SETUP: Peered to PC
+210 1592580066.809 4 SETUP: Smart Contract Received at Block 4
+210 6.069 4 STARTED EXPERIMENT
+210 13.162 4 Killed 209 @ age 2.10
+210 16.559 4 Killed 224 @ age 2.44
+210 19.782 5 Killed 217 @ age 2.09
+210 20.411 5 Killed 226 @ age 2.12
+210 22.969 5 Killed 209 @ age 2.31
+210 25.496 5 Killed 226 @ age 2.44
+210 32.198 6 Killed 226 @ age 2.49
+210 35.199 6 Killed 218 @ age 2.76
+210 52.273 7 Killed 217 @ age 2.44
+210 66.111 8 Voted: 0.22185430463576158; Status: 1
+210 76.869 8 Killed 217 @ age 2.00
+210 97.252 9 Failed Vote (No Balance). Balance: 0.01
+210 102.021 10 Killed 209 @ age 2.20
+210 113.302 11 Killed 222 @ age 2.09
+210 122.422 12 Killed 211 @ age 2.19
+210 136.208 12 Killed 217 @ age 2.27
+210 141.734 13 Killed 224 @ age 2.02
+210 145.956 13 Killed 217 @ age 2.97
+210 148.395 13 Killed 218 @ age 2.43
+210 152.723 14 Voted: 0.25875; Status: 1
+210 176.125 15 Killed 209 @ age 2.02
+210 186.198 16 Killed 213 @ age 2.12
+210 189.382 16 Killed 217 @ age 2.07
+210 196.143 17 Voted: 0.2448015122873346; Status: 1
+210 214.756 18 Killed 211 @ age 2.26
+210 218.47 18 Killed 224 @ age 2.12
+210 222.358 18 Killed 214 @ age 2.14
+210 224.974 18 Killed 222 @ age 2.02
+210 228.095 19 Killed 226 @ age 2.44
+210 228.784 19 Killed 214 @ age 3.19
+210 231.784 19 Killed 211 @ age 2.17
+210 232.644 19 Killed 222 @ age 2.81
+210 238.27 19 Failed Vote (No Balance). Balance: 0.01
+210 244.119 20 Killed 222 @ age 2.58
+210 251.465 20 Killed 214 @ age 2.15
+210 256.05 21 Killed 222 @ age 2.19
+210 261.993 21 Killed 226 @ age 2.84
+210 263.725 21 Killed 218 @ age 2.11
+210 268.724 21 Killed 214 @ age 2.12
+210 274.832 22 Killed 226 @ age 2.11
+210 286.97 23 Killed 222 @ age 3.55
+210 289.045 23 Killed 224 @ age 2.37
+210 293.563 23 Killed 226 @ age 3.41
+210 298.99 23 Killed 224 @ age 2.26
+210 303.099 24 Voted: 0.26952624839948786; Status: 1
+210 331.043 25 STOPPED EXPERIMENT
+210 331.818 26 Voted: 0.2543655413271246; Status: 1

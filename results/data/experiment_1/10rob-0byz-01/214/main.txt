@@ -1,0 +1,53 @@
+ID TIME BLK EVENT DESCRIPTION
+214 1592861441.154 0 SETUP: Synced Time
+214 1592861441.338 0 SETUP: Peered to PC
+214 1592861457.42 2 SETUP: Smart Contract Received at Block 2
+214 5.755 2 STARTED EXPERIMENT
+214 16.244 2 Killed 222 @ age 2.08
+214 25.28 2 Killed 222 @ age 2.18
+214 31.659 4 Killed 217 @ age 2.00
+214 32.258 4 Killed 222 @ age 2.47
+214 34.668 4 Killed 218 @ age 2.15
+214 36.538 4 Killed 217 @ age 2.07
+214 47.869 5 Killed 226 @ age 2.01
+214 63.035 6 Killed 224 @ age 2.05
+214 73.253 6 Killed 217 @ age 2.18
+214 77.469 6 Killed 210 @ age 2.05
+214 78.377 7 Voted: 0.2511520737327189; Status: 1
+214 96.787 8 Failed Vote (No Balance). Balance: 20.01
+214 110.588 9 Killed 218 @ age 2.20
+214 117.633 9 Killed 222 @ age 2.08
+214 122.163 9 Killed 222 @ age 2.04
+214 129.744 10 Killed 211 @ age 2.03
+214 136.308 10 Killed 217 @ age 2.04
+214 146.378 10 Killed 226 @ age 2.22
+214 154.529 12 Voted: 0.29524886877828055; Status: 1
+214 165.214 12 Killed 210 @ age 2.07
+214 169.171 13 Killed 210 @ age 2.21
+214 169.827 13 Killed 209 @ age 2.43
+214 177.827 13 Killed 226 @ age 2.09
+214 184.888 14 Killed 209 @ age 2.00
+214 185.549 14 Killed 226 @ age 2.24
+214 190.841 14 Killed 226 @ age 2.60
+214 196.262 14 Killed 224 @ age 2.37
+214 198.833 15 Voted: 0.3423817863397548; Status: 1
+214 200.074 15 Killed 210 @ age 2.96
+214 204.22 15 Killed 226 @ age 2.75
+214 210.379 15 Killed 224 @ age 2.34
+214 214.173 16 Killed 209 @ age 2.60
+214 220.499 16 Killed 226 @ age 2.16
+214 224.578 16 Killed 211 @ age 3.04
+214 227.882 16 Killed 209 @ age 3.52
+214 232.057 17 Killed 217 @ age 2.77
+214 239.696 17 Failed Vote (No Balance). Balance: 0.01
+214 242.593 17 Killed 217 @ age 2.72
+214 255.613 18 Killed 211 @ age 2.19
+214 262.399 19 Killed 211 @ age 2.47
+214 267.882 19 Killed 211 @ age 2.41
+214 270.835 19 Killed 226 @ age 2.41
+214 274.231 19 Killed 218 @ age 2.92
+214 279.265 20 Killed 210 @ age 2.49
+214 281.189 20 Killed 224 @ age 2.04
+214 285.869 20 Killed 226 @ age 2.11
+214 289.053 21 Voted: 0.3537200504413619; Status: 1
+214 309.434 22 STOPPED EXPERIMENT

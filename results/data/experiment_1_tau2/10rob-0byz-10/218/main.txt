@@ -1,0 +1,52 @@
+ID TIME BLK EVENT DESCRIPTION
+218 1592486966.156 0 SETUP: Synced Time
+218 1592486966.335 0 SETUP: Peered to PC
+218 1592486982.869 2 SETUP: Smart Contract Received at Block 2
+218 6.372 2 STARTED EXPERIMENT
+218 10.852 2 Killed 210 @ age 2.03
+218 14.798 2 Killed 209 @ age 2.35
+218 17.338 3 Killed 217 @ age 2.29
+218 18.075 3 Killed 210 @ age 2.26
+218 28.91 3 Killed 222 @ age 2.94
+218 31.974 3 Killed 213 @ age 2.46
+218 45.703 5 Killed 226 @ age 2.17
+218 56.278 5 Killed 213 @ age 2.64
+218 59.408 5 Killed 211 @ age 2.33
+218 63.281 6 Voted: 0.3463855421686747; Status: 1
+218 64.37 6 Killed 213 @ age 2.45
+218 72.54 6 Killed 226 @ age 2.34
+218 76.303 6 Killed 226 @ age 2.33
+218 78.992 7 Killed 222 @ age 2.40
+218 88.426 7 Killed 210 @ age 2.22
+218 91.998 8 Killed 209 @ age 2.71
+218 94.854 8 Killed 211 @ age 2.12
+218 101.896 8 Failed Vote (No Balance). Balance: 20.01
+218 109.102 9 Killed 210 @ age 2.41
+218 111.687 9 Killed 226 @ age 2.09
+218 117.934 9 Killed 211 @ age 2.58
+218 124.841 10 Killed 210 @ age 2.61
+218 129.106 10 Killed 226 @ age 2.06
+218 130.061 10 Killed 214 @ age 3.60
+218 132.245 10 Killed 224 @ age 2.21
+218 149.463 11 Failed Vote (No Balance). Balance: 20.01
+218 153.499 12 Killed 209 @ age 2.36
+218 163.468 12 Killed 214 @ age 2.48
+218 190.987 14 Killed 209 @ age 2.02
+218 198.582 15 Killed 211 @ age 2.24
+218 214.026 15 Killed 213 @ age 2.15
+218 232.634 15 Killed 211 @ age 2.15
+218 243.713 15 Killed 222 @ age 2.09
+218 246.02 15 Killed 213 @ age 2.33
+218 246.757 15 Killed 222 @ age 2.02
+218 252.612 18 Voted: 0.3607142857142857; Status: 1
+218 256.912 19 Killed 222 @ age 2.07
+218 261.054 19 Killed 211 @ age 2.49
+218 267.855 19 Killed 224 @ age 2.46
+218 270.838 20 Voted: 0.3643048128342246; Status: 1
+218 284.592 20 Killed 214 @ age 2.39
+218 303.575 21 Failed Vote (No Balance). Balance: 20.01
+218 353.913 25 Killed 217 @ age 2.03
+218 357.002 25 Killed 214 @ age 2.17
+218 357.519 25 Killed 217 @ age 2.30
+218 361.567 26 Voted: 0.36296660117878193; Status: 1
+218 363.637 26 STOPPED EXPERIMENT
