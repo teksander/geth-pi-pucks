@@ -1,5 +1,7 @@
 batctl/
 geth/
+results/
+
 *.ipc
 
 # Byte-compiled / optimized / DLL files
