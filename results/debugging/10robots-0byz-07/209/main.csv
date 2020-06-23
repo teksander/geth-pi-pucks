@@ -1,0 +1,104 @@
+ID TIME BLK DETAIL
+209 1591911565.153 0 SETUP: Synced Time
+209 1591911566.908 0 SETUP: Peered to PC
+209 1591911581.657 2 SETUP: Smart Contract Received at Block 2
+209 33.698 3 STARTED EXPERIMENT
+209 51.52 3 Added 224 from ERANDB
+209 53.51 3 Added 217 from ERANDB
+209 54.172 3 Killed 224 @ age 2.12
+209 56.142 3 Killed 217 @ age 2.20
+209 56.831 3 Added 224 from ERANDB
+209 61.441 3 Killed 224 @ age 2.07
+209 69.392 3 Added 217 from ERANDB
+209 71.375 3 Added 210 from ERANDB
+209 72.031 3 Killed 217 @ age 2.14
+209 74.007 3 Killed 210 @ age 2.17
+209 77.35 3 Added 210 from ERANDB
+209 79.159 3 Failed Vote (No Balance). Balance: 0.01
+209 79.974 3 Killed 210 @ age 2.25
+209 103.828 3 Added 214 from ERANDB
+209 104.476 3 Added 217 from ERANDB
+209 105.806 3 Added 224 from ERANDB
+209 106.461 3 Killed 214 @ age 2.13
+209 107.953 3 Killed 217 @ age 2.21
+209 110.631 4 Killed 224 @ age 3.12
+209 118.237 4 Added 217 from ERANDB
+209 122.06 4 Killed 217 @ age 2.78
+209 124.604 4 Failed Vote (No Balance). Balance: 0.01
+209 150.283 4 Added 214 from ERANDB
+209 153.594 4 Killed 214 @ age 2.49
+209 178.841 7 Added 211 from ERANDB
+209 181.44 7 Killed 211 @ age 2.12
+209 183.468 7 Added 210 from ERANDB
+209 188.097 7 Killed 210 @ age 2.57
+209 213.316 7 Added 214 from ERANDB
+209 219.952 8 Killed 214 @ age 2.15
+209 235.972 8 Added 222 from ERANDB
+209 236.602 8 Added 224 from ERANDB
+209 238.638 8 Killed 222 @ age 2.20
+209 239.582 10 Voted: 0.2297077922077922; Status: 1
+209 242.289 10 Failed Vote (No Balance). Balance: 0.01
+209 242.869 10 Killed 224 @ age 2.54
+209 253.305 11 Added 213 from ERANDB
+209 255.974 11 Killed 213 @ age 2.45
+209 262.005 12 Added 214 from ERANDB
+209 264.634 12 Killed 214 @ age 2.28
+209 286.959 12 Failed Vote (No Balance). Balance: 0.01
+209 332.035 12 Failed Vote (No Balance). Balance: 0.01
+209 354.616 12 Added 213 from ERANDB
+209 358.593 12 Killed 213 @ age 2.47
+209 377.055 17 Failed Vote (No Balance). Balance: 20.01
+209 385.898 17 Added 213 from ERANDB
+209 389.878 17 Added 210 from ERANDB
+209 390.09 17 Killed 213 @ age 2.36
+209 394.656 17 Killed 210 @ age 2.12
+209 395.465 17 Added 218 from ERANDB
+209 400.146 19 Killed 218 @ age 2.01
+209 420.94 20 Added 214 from ERANDB
+209 422.083 20 Failed Vote (No Balance). Balance: 20.01
+209 424.909 20 Killed 214 @ age 2.49
+209 442.142 20 Added 214 from ERANDB
+209 442.803 20 Added 217 from ERANDB
+209 446.097 20 Killed 217 @ age 2.02
+209 446.787 20 Added 217 from ERANDB
+209 446.967 20 Killed 214 @ age 2.53
+209 448.129 20 Added 214 from ERANDB
+209 450.934 21 Killed 217 @ age 2.45
+209 452.268 21 Killed 214 @ age 2.68
+209 474.544 24 Added 214 from ERANDB
+209 479.165 24 Killed 214 @ age 2.34
+209 480.544 24 Added 218 from ERANDB
+209 483.165 24 Killed 218 @ age 2.43
+209 491.292 25 Added 226 from ERANDB
+209 495.206 25 Killed 226 @ age 2.57
+209 501.124 26 Voted: 0.29109834888729363; Status: 1
+209 509.163 26 Added 222 from ERANDB
+209 513.787 26 Killed 222 @ age 2.67
+209 516.464 27 Voted: 0.30006954102920724; Status: 1
+209 517.229 27 Added 222 from ERANDB
+209 526.454 27 Killed 222 @ age 2.36
+209 537.049 27 Added 224 from ERANDB
+209 539.696 28 Killed 224 @ age 2.09
+209 557.213 29 Failed Vote (No Balance). Balance: 0.01
+209 570.218 30 Added 222 from ERANDB
+209 572.824 30 Killed 222 @ age 2.18
+209 586.719 30 Added 211 from ERANDB
+209 589.356 30 Killed 211 @ age 2.08
+209 602.274 30 Failed Vote (No Balance). Balance: 0.01
+209 602.616 30 Added 222 from ERANDB
+209 605.909 30 Killed 222 @ age 2.47
+209 647.283 30 Failed Vote (No Balance). Balance: 0.01
+209 663.498 30 Added 210 from ERANDB
+209 668.202 30 Added 213 from ERANDB
+209 668.295 30 Killed 210 @ age 2.22
+209 670.768 30 Killed 213 @ age 2.23
+209 679.38 30 Added 224 from ERANDB
+209 679.536 31 Added 217 from ERANDB
+209 682.197 33 Killed 217 @ age 2.31
+209 683.275 33 Killed 224 @ age 2.22
+209 692.623 33 Failed Vote (No Balance). Balance: 0.01
+209 702.95 34 Added 217 from ERANDB
+209 706.227 34 Killed 217 @ age 2.26
+209 738.074 35 Added 214 from ERANDB
+209 744.717 35 Killed 214 @ age 2.48
+209 745.158 35 STOPPED EXPERIMENT

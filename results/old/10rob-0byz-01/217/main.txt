@@ -1,0 +1,50 @@
+ID TIME BLK EVENT DESCRIPTION
+217 1592406792.141 0 SETUP: Synced Time
+217 1592406792.249 0 SETUP: Peered to PC
+217 1592406840.394 4 SETUP: Smart Contract Received at Block 4
+217 6.308 4 STARTED EXPERIMENT
+217 49.026 7 Killed 224 @ age 2.02
+217 63.044 8 Voted: 0.2238372093023256; Status: 1
+217 83.034 9 Killed 218 @ age 2.02
+217 93.311 10 Killed 226 @ age 2.18
+217 95.755 10 Killed 211 @ age 2.45
+217 98.991 10 Failed Vote (No Balance). Balance: 20.01
+217 114.994 11 Killed 214 @ age 2.01
+217 144.649 13 Killed 224 @ age 2.32
+217 146.119 13 Killed 214 @ age 2.41
+217 150.727 14 Voted: 0.2921478060046189; Status: 1
+217 157.309 14 Killed 226 @ age 2.64
+217 179.691 15 Killed 213 @ age 2.10
+217 187.939 16 Killed 214 @ age 2.05
+217 194.25 16 Killed 214 @ age 2.20
+217 195.401 17 Voted: 0.24822064056939502; Status: 1
+217 199.247 17 Killed 214 @ age 2.62
+217 202.024 17 Killed 224 @ age 2.12
+217 228.536 19 Killed 213 @ age 2.02
+217 233.684 19 Killed 210 @ age 2.04
+217 234.416 19 Failed Vote (No Balance). Balance: 0.01
+217 241.922 19 Killed 213 @ age 2.16
+217 252.013 20 Killed 224 @ age 2.03
+217 257.565 21 Killed 213 @ age 2.35
+217 260.28 21 Killed 209 @ age 2.39
+217 262.481 21 Killed 211 @ age 2.93
+217 267.205 21 Killed 210 @ age 2.58
+217 273.571 22 Killed 224 @ age 3.03
+217 287.137 23 Voted: 0.2575392038600724; Status: 1
+217 294.842 23 Killed 222 @ age 2.38
+217 305.831 24 Killed 226 @ age 2.04
+217 306.939 24 Killed 209 @ age 2.20
+217 333.143 26 Voted: 0.27486910994764396; Status: 1
+217 346.375 27 Killed 210 @ age 2.28
+217 350.441 27 Killed 226 @ age 2.26
+217 354.492 27 Killed 222 @ age 2.29
+217 376.702 29 Voted: 0.28551660516605165; Status: 1
+217 381.175 29 Killed 218 @ age 2.12
+217 384.818 29 Killed 213 @ age 2.17
+217 388.119 29 Killed 222 @ age 2.51
+217 390.468 29 Killed 210 @ age 2.58
+217 394.509 30 Killed 224 @ age 2.14
+217 401.395 30 Killed 224 @ age 2.34
+217 408.372 31 Killed 209 @ age 2.29
+217 415.056 31 STOPPED EXPERIMENT
+217 415.611 31 Failed Vote (No Balance). Balance: 20.01

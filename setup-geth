@@ -1,5 +1,5 @@
 #!/bin/bash
-#  Initalize GETH on a Raspberry Pi zero W (ArmV6 processor)
+#  Initalize GETH on either the computer or the pi-pucks
 
 # Geth Configurations
 DATA_DIR="mygethnode"
@@ -35,7 +35,7 @@ then
 fi
 
 # If is a Pi-Puck
-if [ $CURRENT_USER == "pi" ]
+if [ $LOGNAME == "pi" ]
 then
 	FILE="/boot/pi-puck_id"
 	ID=$(cat "$FILE")

@@ -1,0 +1,48 @@
+ID TIME BLK EVENT DESCRIPTION
+218 1591967112.16 0 SETUP: Synced Time
+218 1591967112.271 0 SETUP: Peered to PC
+218 1591967143.587 3 SETUP: Smart Contract Received at Block 3
+218 17.451 4 STARTED EXPERIMENT
+218 51.075 4 Killed 224 @ age 2.11
+218 53.633 4 Killed 210 @ age 2.13
+218 63.317 4 Failed Vote (No Balance). Balance: 0.01
+218 108.379 4 Failed Vote (No Balance). Balance: 0.01
+218 129.305 4 Killed 209 @ age 2.00
+218 151.353 4 Killed 211 @ age 2.09
+218 154.125 4 Failed Vote (No Balance). Balance: 0.01
+218 199.412 8 Failed Vote (No Balance). Balance: 0.01
+218 200.016 8 Killed 226 @ age 2.04
+218 217.242 9 Killed 222 @ age 2.16
+218 270.656 12 Killed 211 @ age 2.15
+218 277.765 12 Killed 226 @ age 2.01
+218 285.657 13 Voted: 0.16956521739130434; Status: 1
+218 340.771 13 Killed 210 @ age 2.06
+218 347.983 13 Killed 226 @ age 2.03
+218 351.794 17 Voted: 0.1775; Status: 1
+218 354.611 17 Killed 214 @ age 2.10
+218 358.418 17 Failed Vote (No Balance). Balance: 0.01
+218 381.666 18 Killed 210 @ age 2.08
+218 382.165 18 Killed 213 @ age 2.12
+218 400.899 19 Failed Vote (No Balance). Balance: 0.01
+218 421.552 19 Killed 224 @ age 2.07
+218 445.984 20 Failed Vote (No Balance). Balance: 20.01
+218 459.255 22 Killed 211 @ age 2.03
+218 491.262 22 Failed Vote (No Balance). Balance: 20.01
+218 494.414 22 Killed 217 @ age 2.14
+218 524.756 25 Killed 209 @ age 2.07
+218 566.093 25 Killed 213 @ age 2.06
+218 572.768 28 Voted: 0.24548192771084337; Status: 1
+218 580.253 28 Killed 211 @ age 2.02
+218 626.683 28 Killed 214 @ age 2.11
+218 628.548 30 Voted: 0.23714442013129103; Status: 1
+218 631.48 31 Failed Vote (No Balance). Balance: 20.01
+218 650.192 32 Killed 226 @ age 2.01
+218 668.753 32 Killed 217 @ age 2.03
+218 675.273 32 Failed Vote (No Balance). Balance: 20.01
+218 690.858 32 Killed 222 @ age 2.06
+218 720.346 32 Failed Vote (No Balance). Balance: 20.01
+218 725.061 32 Killed 210 @ age 2.04
+218 740.126 32 Killed 222 @ age 2.05
+218 750.667 32 Killed 209 @ age 2.04
+218 756.23 32 Killed 224 @ age 2.04
+218 759.002 32 STOPPED EXPERIMENT

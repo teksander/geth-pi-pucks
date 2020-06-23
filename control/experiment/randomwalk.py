@@ -79,6 +79,7 @@ class RandomWalk(object):
 				self.ir[i] = self.bus.read_word_data(EPUCK_I2C_ADDR, IR0_REFLECTED + i)
 				if self.ir[i]>50000:
 					self.ir[i] = 0
+					
 			# Find Wheel Speed for Obstacle Avoidance
 			for i, reading in enumerate(self.ir):
 				if(reading > 400):

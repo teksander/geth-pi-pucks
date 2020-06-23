@@ -22,7 +22,7 @@ class RGBLEDs(object):
 		self.blue = 0x04
 		self.off = 0x00
 		self.white = 0x07
-		self.freeze = False
+		self.frozen = False
 
 		try:
 			self.bus = smbus.SMBus(self.I2C_CHANNEL)
@@ -32,34 +32,43 @@ class RGBLEDs(object):
 
 	def setLED(self, LED, RGB):
 		# try:
-		if not self.freeze:
+		if not self.frozen:
 			for i in range(len(LED)):
 				self.bus.write_byte_data(self.FT903_I2C_ADDR, LED[i], RGB[i])
 		# except:
 		# 	pass
 
 	def flashRed(self, delay=1):
-		self.setLED(self.all, 3*[self.red])
-		time.sleep(delay)
-		self.setLED(self.all, 3*[self.off])
+		if not self.frozen:
+			self.setLED(self.all, 3*[self.red])
+			time.sleep(delay)
+			self.setLED(self.all, 3*[self.off])
 
 	def flashGreen(self, delay=1):
-		self.setLED(self.all, 3*[self.green])
-		time.sleep(delay)
-		self.setLED(self.all, 3*[self.off])
+		if not self.frozen:
+			self.setLED(self.all, 3*[self.green])
+			time.sleep(delay)
+			self.setLED(self.all, 3*[self.off])
 
 	def flashBlue(self, delay=1):
-		self.setLED(self.all, 3*[self.blue])
-		time.sleep(delay)
-		self.setLED(self.all, 3*[self.off])
+		if not self.frozen:
+			self.setLED(self.all, 3*[self.blue])
+			time.sleep(delay)
+			self.setLED(self.all, 3*[self.off])
 
 	def flashWhite(self, delay=1):
-		self.setLED(self.all, 3*[self.white])
-		time.sleep(delay)
-		self.setLED(self.all, 3*[self.off])
+		if not self.frozen:
+			self.setLED(self.all, 3*[self.white])
+			time.sleep(delay)
+			self.setLED(self.all, 3*[self.off])
 
 	def freeze(self):
-		self.freeze = True
+		self.frozen = True
 
 	def unfreeze(self):
-		self.freeze = False
+		self.frozen = False
+
+	def stop(self):
+		self.unfreeze()
+		self.setLED([0x00,0x01,0x02], [0x00,0x00,0x00])
+		self.bus.close()

@@ -1,0 +1,109 @@
+ID TIME BLK DETAIL
+214 1.386 0 SETUP: Synced Time
+214 1.522 0 SETUP: Peered to PC
+214 33.37 3 SETUP: Smart Contract Received at Block 3
+214 49.938 3 STARTED EXPERIMENT
+214 22.895 3 Added 226
+214 26.836 3 Added 217
+214 28.807 4 Killed 226 @ age 2.24
+214 30.81 4 Killed 217 @ age 2.15
+214 135.413 4 Added 217
+214 138.39 6 Killed 217 @ age 2.33
+214 138.892 8 Added 222
+214 143.528 9 Killed 222 @ age 2.31
+214 161.548 9 Added 209
+214 163.852 9 Killed 209 @ age 2.15
+214 164.215 9 Added 222
+214 167.25 9 Killed 222 @ age 2.25
+214 168.922 9 Added 226
+214 169.894 10 Voted: 0.42841409691629956; Status: 1
+214 170.214 10 Failed Vote (Unexpected). Balance: 60.01
+214 170.681 10 Added 218
+214 174.609 10 Killed 218 @ age 2.14
+214 176.192 10 Added 213
+214 176.88 10 Killed 226 @ age 2.40
+214 182.727 10 Killed 213 @ age 2.14
+214 213.67 11 Added 222
+214 217.62 11 Killed 222 @ age 2.31
+214 219.653 12 Added 209
+214 221.892 12 Added 226
+214 224.271 12 Killed 209 @ age 2.79
+214 225.06 12 Added 209
+214 226.657 12 Killed 226 @ age 2.49
+214 230.15 13 Added 226
+214 232.018 13 Killed 209 @ age 2.38
+214 238.579 13 Killed 226 @ age 2.59
+214 296.501 13 Added 210
+214 301.535 13 Killed 210 @ age 2.20
+214 329.407 17 Added 222
+214 332.701 17 Killed 222 @ age 2.12
+214 352.998 17 Added 210
+214 355.645 17 Killed 210 @ age 2.26
+214 355.886 17 Failed Vote (Unexpected). Balance: 40.01
+214 363.71 17 Added 217
+214 366.717 17 Killed 217 @ age 2.53
+214 405.536 17 Added 218
+214 408.544 19 Killed 218 @ age 2.13
+214 412.803 20 Added 209
+214 415.477 20 Killed 209 @ age 2.07
+214 415.832 20 Added 210
+214 416.58 20 Added 217
+214 420.248 21 Voted: 0.34096586178184846; Status: 1
+214 420.39 21 Killed 217 @ age 2.16
+214 421.397 21 Failed Vote (Unexpected). Balance: 40.01
+214 422.029 21 Killed 210 @ age 2.82
+214 426.43 21 Added 224
+214 429.852 21 Added 217
+214 430.374 21 Killed 224 @ age 2.15
+214 435.907 22 Killed 217 @ age 2.75
+214 437.856 22 Voted: 0.34147317854283427; Status: 1
+214 438.846 22 Added 218
+214 438.822 22 Failed Vote (Unexpected). Balance: 40.01
+214 446.838 22 Killed 218 @ age 3.47
+214 453.674 23 Added 222
+214 461.533 23 Killed 222 @ age 2.10
+214 463.49 23 Added 222
+214 467.439 23 Added 210
+214 475.482 23 Killed 222 @ age 2.28
+214 476.335 23 Killed 210 @ age 2.32
+214 477.362 23 Added 224
+214 480.72 23 Killed 224 @ age 2.36
+214 493.87 24 Added 211
+214 498.147 24 Killed 211 @ age 2.20
+214 514.067 24 Added 218
+214 516.363 24 Killed 218 @ age 2.11
+214 527.682 25 Added 222
+214 532.632 25 Killed 222 @ age 2.51
+214 537.317 25 Added 226
+214 550.857 25 Killed 226 @ age 2.03
+214 555.851 25 Added 210
+214 558.792 26 Killed 210 @ age 2.48
+214 564.193 27 Added 213
+214 565.05 27 Added 218
+214 568.06 27 Killed 218 @ age 2.61
+214 572.838 27 Added 210
+214 573.022 27 Killed 213 @ age 2.24
+214 575.657 28 Voted: 0.33222691611345806; Status: 1
+214 575.778 28 Failed Vote (Unexpected). Balance: 100.01
+214 583.182 28 Killed 210 @ age 2.20
+214 592.517 28 Added 226
+214 596.153 28 Killed 226 @ age 2.39
+214 612.115 28 Added 211
+214 615.443 28 Killed 211 @ age 2.49
+214 624.132 28 Added 218
+214 628.121 29 Killed 218 @ age 2.40
+214 629.109 30 Voted: 0.3416850220264317; Status: 1
+214 629.391 30 Failed Vote (Unexpected). Balance: 60.01
+214 629.96 30 Added 213
+214 634.996 31 Killed 213 @ age 2.18
+214 665.997 31 Added 218
+214 669.67 33 Killed 218 @ age 2.36
+214 706.571 35 Voted: 0.344162188568637; Status: 1
+214 706.639 35 Failed Vote (Unexpected). Balance: 100.01
+214 725.524 35 Added 217
+214 728.813 35 Killed 217 @ age 2.18
+214 730.671 36 Voted: 0.3485134497404436; Status: 1
+214 730.797 36 Failed Vote (Unexpected). Balance: 60.01
+214 741.244 36 Added 211
+214 745.264 36 Killed 211 @ age 2.53
+214 771.812 36 STOPPED EXPERIMENT

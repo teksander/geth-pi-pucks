@@ -13,8 +13,31 @@ if [ $# -eq 2 ]; then
 	scp -r "$1" "$IP:/home/pi/$2"  &
 	done
 	wait
-else
-	echo "Arg1 is the file to send; Arg2 is the destination folder"
 fi
 
+# Custom often uploaded folders/files
 
+if [ $1 == "scs" ]; then 
+	solc -o ~/mygethnode/control/experiment/scs/build/ --bin --abi --overwrite ~/mygethnode/control/experiment/scs/experiment.sol
+	for ID in $(cat "$IDS_FILE"); do
+	IP="${PREFIX}${ID}"
+	scp -r ~/mygethnode/control/experiment/scs "$IP:/home/pi/mygethnode/control/experiment/"  &
+	done
+	wait
+fi
+
+if [ $1 == "mainloop" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+	IP="${PREFIX}${ID}"
+	scp -r ~/mygethnode/control/experiment/mainloop.py "$IP:/home/pi/mygethnode/control/experiment/"  &
+	done
+	wait
+fi
+
+if [ $1 == "all" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+	IP="${PREFIX}${ID}"
+	scp -r ~/mygethnode/control/experiment "$IP:/home/pi/mygethnode/control/"  &
+	done
+	wait
+fi

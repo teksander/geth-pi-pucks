@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import sys
+sys.path.insert(1, '/home/esmi/mygethnode/control/experiment')
 from console import *
 from aux import TCP_server
 import json
@@ -7,15 +9,20 @@ import threading
 import time
 import socket
 
-
 # /* FUNCTIONS */ 
 #######################################################################
 
 def getEnodes():
     return [peer.enode for peer in w3.geth.admin.peers()]
 
-def getIds():
+def getIds(database = 'geth'):
+    if database == 'geth':
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
+
+    elif database == 'file':
+        keyMap = open('/home/esmi/mygethnode/control/experiment-pc/key-mapping.txt')
+        return [line.split()[0] for line in keyMap]
+
 
 def getBalances():
     keyMap = open('/home/esmi/mygethnode/control/experiment-pc/key-mapping.txt')
@@ -68,9 +75,10 @@ myTIME = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 myENODE = w3.geth.admin.nodeInfo().enode
 myKEY = w3.eth.coinbase
 
-tcpTIME  = TCP_server(myTIME, myIP, 40123)
-tcpENODE = TCP_server(myENODE, myIP, 40421)
-tcpKEY = TCP_server(myKEY, myIP, 40422)
+tcpTIME  = TCP_server(myTIME, myIP, 40123, True)
+tcpENODE = TCP_server(myENODE, myIP, 40421, True)
+tcpKEY = TCP_server(myKEY, myIP, 40422, True)
+
 
 def clock():
     while True:

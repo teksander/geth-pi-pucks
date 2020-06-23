@@ -1,0 +1,56 @@
+ID TIME BLK EVENT DESCRIPTION
+209 1592580020.124 0 SETUP: Synced Time
+209 1592580020.311 0 SETUP: Peered to PC
+209 1592580066.898 4 SETUP: Smart Contract Received at Block 4
+209 6.042 4 STARTED EXPERIMENT
+209 10.495 4 Killed 210 @ age 2.02
+209 10.998 4 Killed 224 @ age 2.24
+209 18.524 5 Killed 224 @ age 2.45
+209 25.18 5 Killed 226 @ age 2.48
+209 26.37 5 Killed 210 @ age 2.03
+209 30.92 5 Killed 222 @ age 2.18
+209 32.763 6 Killed 210 @ age 2.46
+209 39.096 6 Killed 218 @ age 2.05
+209 45.578 7 Killed 210 @ age 2.23
+209 49.285 7 Killed 217 @ age 2.73
+209 57.198 7 Killed 217 @ age 2.93
+209 61.499 7 Killed 211 @ age 2.26
+209 64.496 8 Voted: 0; Status: 1
+209 72.071 8 Killed 214 @ age 2.52
+209 92.482 10 Killed 211 @ age 2.33
+209 93.475 10 Killed 226 @ age 2.42
+209 94.026 10 Killed 213 @ age 2.02
+209 100.67 10 Failed Vote (No Balance). Balance: 0.01
+209 101.711 10 Killed 210 @ age 2.75
+209 107.522 11 Killed 214 @ age 2.82
+209 113.554 11 Killed 222 @ age 2.09
+209 136.217 12 Killed 214 @ age 2.03
+209 137.479 13 Killed 211 @ age 2.19
+209 140.452 13 Killed 226 @ age 2.34
+209 143.76 13 Killed 214 @ age 2.31
+209 150.758 14 Voted: 0; Status: 1
+209 169.328 15 Killed 214 @ age 2.12
+209 171.34 15 Killed 211 @ age 2.56
+209 175.95 15 Killed 210 @ age 2.18
+209 193.298 16 Killed 222 @ age 2.32
+209 195.656 16 Killed 218 @ age 2.09
+209 198.296 17 Voted: 0; Status: 1
+209 199.452 17 Killed 213 @ age 2.16
+209 244.17 19 Killed 224 @ age 2.12
+209 264.282 19 Killed 222 @ age 2.10
+209 269.376 19 Killed 222 @ age 2.16
+209 271.268 21 Killed 217 @ age 2.21
+209 272.025 22 Voted: 0; Status: 1
+209 279.319 22 Killed 213 @ age 2.01
+209 288.799 23 Voted: 0; Status: 1
+209 296.961 23 Killed 218 @ age 2.02
+209 299.172 23 Killed 222 @ age 2.19
+209 306.95 24 Killed 226 @ age 2.13
+209 313.303 24 Killed 226 @ age 2.14
+209 317.567 25 Killed 226 @ age 2.12
+209 323.563 25 Killed 226 @ age 2.56
+209 326.488 25 Killed 211 @ age 2.67
+209 327.415 25 Killed 214 @ age 2.38
+209 331.39 26 STOPPED EXPERIMENT
+209 331.394 26 Killed 222 @ age 2.49
+209 331.984 26 Voted: 0; Status: 1

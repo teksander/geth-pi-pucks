@@ -38,7 +38,7 @@ contract Estimation {
       mean = 5000000;
       threshold = 2000000;
       ticketPrice = 40;
-      tau = 200000;
+      tau = 100000;
       consensusReached = false;
       startBlock = block.number;
       valueUBI = 20;
@@ -103,6 +103,9 @@ contract Estimation {
   }
   
   function askForUBI() public returns (uint) {
+    if (!robot[msg.sender].isRegistered) {
+       return 0;
+    }
 
     // Update the UBI due
     uint payoutUBI = 0;
@@ -123,6 +126,9 @@ contract Estimation {
   }
   
   function askForPayout() public returns (uint) {
+    if (!robot[msg.sender].isRegistered) {
+       return 0;
+    }
 
     // Update the payout due
     uint payout = robot[msg.sender].payout;
@@ -149,7 +155,7 @@ contract Estimation {
   }
     
   function updateMean() public {  
-    if (lastUpdate >= roundCount) {
+    if (!robot[msg.sender].isRegistered || lastUpdate >= roundCount) {
        revert();
     }
 

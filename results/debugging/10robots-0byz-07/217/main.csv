@@ -1,0 +1,109 @@
+ID TIME BLK DETAIL
+217 1591911565.132 0 SETUP: Synced Time
+217 1591911565.341 0 SETUP: Peered to PC
+217 1591911582.359 2 SETUP: Smart Contract Received at Block 2
+217 33.849 3 STARTED EXPERIMENT
+217 51.859 3 Added 218 from ERANDB
+217 53.707 3 Added 209 from ERANDB
+217 54.353 3 Killed 218 @ age 2.08
+217 56.324 3 Killed 209 @ age 2.19
+217 60.312 3 Added 210 from ERANDB
+217 63.603 3 Killed 210 @ age 2.04
+217 65.007 3 Added 210 from ERANDB
+217 68.238 3 Killed 210 @ age 2.10
+217 69.587 3 Added 209 from ERANDB
+217 72.21 3 Killed 209 @ age 2.20
+217 79.388 3 Failed Vote (No Balance). Balance: 0.01
+217 80.258 3 Added 214 from ERANDB
+217 85.435 3 Killed 214 @ age 2.06
+217 105.437 3 Added 209 from ERANDB
+217 107.924 3 Killed 209 @ age 2.15
+217 117.952 4 Added 209 from ERANDB
+217 121.276 4 Killed 209 @ age 2.53
+217 124.465 4 Failed Vote (No Balance). Balance: 0.01
+217 132.552 5 Added 211 from ERANDB
+217 138.529 5 Added 214 from ERANDB
+217 138.679 5 Killed 211 @ age 2.53
+217 142.218 4 Killed 214 @ age 2.53
+217 165.473 5 Added 211 from ERANDB
+217 166.768 5 Added 222 from ERANDB
+217 168.075 5 Killed 211 @ age 2.12
+217 169.428 7 Killed 222 @ age 2.15
+217 169.741 7 Failed Vote (No Balance). Balance: 20.01
+217 179.083 8 Added 211 from ERANDB
+217 182.705 8 Killed 211 @ age 2.42
+217 209.218 8 Added 224 from ERANDB
+217 214.515 8 Killed 224 @ age 2.28
+217 275.616 8 Added 213 from ERANDB
+217 279.632 12 Killed 213 @ age 2.46
+217 287.667 12 Added 210 from ERANDB
+217 290.36 12 Killed 210 @ age 2.36
+217 293.146 12 Added 214 from ERANDB
+217 295.951 12 Killed 214 @ age 2.08
+217 299.766 13 Voted: 0.23680904522613067; Status: 1
+217 302.723 14 Failed Vote (No Balance). Balance: 20.01
+217 335.481 14 Added 211 from ERANDB
+217 338.111 14 Killed 211 @ age 2.12
+217 338.808 14 Added 211 from ERANDB
+217 341.505 16 Killed 211 @ age 2.48
+217 344.316 16 Added 222 from ERANDB
+217 347.51 16 Killed 222 @ age 2.27
+217 347.83 16 Failed Vote (No Balance). Balance: 20.01
+217 363.325 17 Added 210 from ERANDB
+217 365.985 17 Killed 210 @ age 2.11
+217 392.526 18 Failed Vote (No Balance). Balance: 20.01
+217 395.846 18 Added 214 from ERANDB
+217 398.467 18 Killed 214 @ age 2.09
+217 411.534 19 Added 218 from ERANDB
+217 414.452 19 Killed 218 @ age 2.49
+217 431.016 19 Added 218 from ERANDB
+217 433.646 19 Killed 218 @ age 2.12
+217 438.308 19 Added 224 from ERANDB
+217 440.934 19 Killed 224 @ age 2.15
+217 443.659 19 Added 209 from ERANDB
+217 449.688 22 Killed 209 @ age 2.06
+217 453.537 23 Voted: 0.24581673306772908; Status: 1
+217 481.848 23 Added 224 from ERANDB
+217 482.791 23 Failed Vote (No Balance). Balance: 0.01
+217 483.228 23 Added 210 from ERANDB
+217 485.131 23 Killed 224 @ age 2.08
+217 488.442 23 Killed 210 @ age 2.08
+217 491.112 23 Added 218 from ERANDB
+217 493.74 23 Killed 218 @ age 2.46
+217 495.789 23 Added 214 from ERANDB
+217 499.247 24 Killed 214 @ age 2.53
+217 509.325 25 Added 213 from ERANDB
+217 513.307 26 Killed 213 @ age 2.43
+217 520.625 26 Added 226 from ERANDB
+217 524.59 26 Killed 226 @ age 2.35
+217 527.728 26 Failed Vote (No Balance). Balance: 0.01
+217 527.989 26 Added 210 from ERANDB
+217 530.578 26 Killed 210 @ age 2.25
+217 535.323 28 Added 214 from ERANDB
+217 538.679 28 Killed 214 @ age 2.31
+217 566.127 29 Added 222 from ERANDB
+217 570.074 29 Killed 222 @ age 2.42
+217 593.328 29 Added 226 from ERANDB
+217 595.945 29 Killed 226 @ age 2.12
+217 604.616 29 Added 224 from ERANDB
+217 609.893 31 Voted: 0.3008720930232558; Status: 1
+217 609.938 31 Killed 224 @ age 2.19
+217 618.825 31 Added 213 from ERANDB
+217 623.014 31 Killed 213 @ age 2.51
+217 630.387 31 Added 218 from ERANDB
+217 633.011 31 Killed 218 @ age 2.12
+217 666.966 32 Added 224 from ERANDB
+217 669.57 32 Killed 224 @ age 2.30
+217 675.609 32 Added 224 from ERANDB
+217 679.57 32 Killed 224 @ age 2.48
+217 685.027 33 Voted: 0.2912596401028278; Status: 1
+217 687.41 33 Failed Vote (No Balance). Balance: 0.01
+217 694.886 33 Added 224 from ERANDB
+217 698.842 33 Killed 224 @ age 2.48
+217 702.857 33 Added 209 from ERANDB
+217 706.142 33 Killed 209 @ age 2.50
+217 732.378 36 Failed Vote (No Balance). Balance: 20.01
+217 739.94 36 Added 213 from ERANDB
+217 742.561 36 Killed 213 @ age 2.08
+217 744.572 36 Added 211 from ERANDB
+217 745.369 36 STOPPED EXPERIMENT
