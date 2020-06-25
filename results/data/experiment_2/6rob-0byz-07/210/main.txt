@@ -1,0 +1,53 @@
+ID TIME BLK EVENT DESCRIPTION
+210 1593020972.159 0 SETUP: Synced Time
+210 1593020972.27 0 SETUP: Peered to PC
+210 1593020987.97 2 SETUP: Smart Contract Received at Block 2
+210 4.845 2 STARTED EXPERIMENT
+210 10.326 2 Received 213 enode
+210 19.379 3 Killed 213 @ age 2.18
+210 32.438 3 Received 224 enode
+210 36.947 3 Killed 224 @ age 2.12
+210 43.476 3 Received 213 enode
+210 47.978 3 Killed 213 @ age 2.09
+210 51.118 3 Failed Vote (No Balance). Balance: 0.01
+210 70.103 3 Received 209 enode
+210 77.044 3 Killed 209 @ age 2.14
+210 79.104 5 Received 226 enode
+210 85.245 6 Killed 226 @ age 2.11
+210 123.484 7 Received 226 enode
+210 125.018 7 Received 218 enode
+210 129.215 8 Killed 226 @ age 2.04
+210 132.776 8 Killed 218 @ age 2.18
+210 168.594 8 Received 226 enode
+210 176.11 8 Killed 226 @ age 2.10
+210 214.806 8 Received 218 enode
+210 215.809 8 Failed Vote (Unexpected). Trying again. Balance: 60.01
+210 217.831 8 Received 209 enode
+210 220.161 11 Killed 218 @ age 2.23
+210 220.787 12 Voted: 0.2765793528505393; Status: 1
+210 224.857 12 Failed Vote (No Balance). Balance: 0.01
+210 227.239 12 Received 213 enode
+210 232.422 13 Killed 209 @ age 2.03
+210 235.522 13 Killed 213 @ age 2.02
+210 243.91 13 Received 224 enode
+210 251.412 14 Killed 224 @ age 2.16
+210 278.517 14 Received 224 enode
+210 286.563 14 Received 218 enode
+210 291.076 16 Voted: 0.27511682242990654; Status: 1
+210 293.66 16 Killed 224 @ age 2.06
+210 299.889 16 Killed 218 @ age 2.07
+210 302.439 16 Received 213 enode
+210 308.464 16 Killed 213 @ age 2.08
+210 314.551 18 Failed Vote (No Balance). Balance: 0.01
+210 326.364 18 Received 226 enode
+210 326.585 18 Received 224 enode
+210 333.497 18 Killed 224 @ age 2.15
+210 346.308 19 Received 213 enode
+210 350.894 19 Killed 226 @ age 2.11
+210 352.887 19 Killed 213 @ age 2.16
+210 355.449 19 Received 224 enode
+210 360.522 20 Voted: 0.23565380997177798; Status: 1
+210 363.532 20 Killed 224 @ age 2.01
+210 380.608 20 Received 213 enode
+210 388.634 21 Killed 213 @ age 2.11
+210 388.938 21 STOPPED EXPERIMENT

@@ -162,10 +162,10 @@ def Estimate(rate = estimateRate):
 			for value in newValues:
 				if value > 700:
 					totalWhite += 1
-					# rw.setLEDs(0b11111111)
+					rw.setLEDs(0b11111111)
 				else:
 					totalBlack += 1
-					# rw.setLEDs(0b00000000)
+					rw.setLEDs(0b00000000)
 			if isbyz:
 				estimate = 0
 			else:
@@ -235,7 +235,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 			elif peer.enode == None:
 				try:
 					peer.enode = tcp.request(peer.ip, tcp.port)
-					rw.setLEDs(0b11111111)  
+					# rw.setLEDs(0b11111111)  
 					mainlog.log(['Received {} enode'.format(peer.id)]) 	   		 
 				except ValueError:
 					pass
@@ -244,8 +244,8 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 					pass
 					# print('Peering Failed')
 
-		if not peerBuffer:
-			rw.setLEDs(0b00000000)	
+		# if not peerBuffer:
+		# 	rw.setLEDs(0b00000000)	
 
 		if bufferlog.isReady():
 			gethIds = getIds('geth')

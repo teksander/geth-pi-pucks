@@ -1,0 +1,53 @@
+ID TIME BLK EVENT DESCRIPTION
+211 1593089217.13 0 SETUP: Synced Time
+211 1593089217.238 0 SETUP: Peered to PC
+211 1593089247.804 3 SETUP: Smart Contract Received at Block 3
+211 4.834 3 STARTED EXPERIMENT
+211 5.851 3 Received 213 enode
+211 9.838 3 Killed 213 @ age 2.12
+211 40.456 3 Received 218 enode
+211 44.053 3 Killed 218 @ age 2.09
+211 51.404 5 Failed Vote (No Balance). Balance: 0.01
+211 66.123 5 Received 209 enode
+211 71.122 5 Killed 209 @ age 2.13
+211 86.732 8 Received 224 enode
+211 88.256 8 Received 218 enode
+211 88.768 8 Received 210 enode
+211 89.825 8 Killed 224 @ age 2.22
+211 92.362 8 Killed 218 @ age 2.21
+211 97.636 9 Killed 210 @ age 2.78
+211 105.964 9 Received 209 enode
+211 111.381 9 Killed 209 @ age 2.01
+211 127.498 9 Received 210 enode
+211 128.474 9 Killed 210 @ age 2.11
+211 130.521 9 Received 210 enode
+211 133.537 9 Killed 210 @ age 2.06
+211 134.953 11 Voted: 0.16240409207161124; Status: 1
+211 141.267 12 Failed Vote (No Balance). Balance: 20.01
+211 155.349 12 Received 213 enode
+211 160.352 12 Received 210 enode
+211 165.992 13 Killed 210 @ age 2.13
+211 170.157 13 Killed 213 @ age 2.57
+211 179.839 13 Received 224 enode
+211 189.414 14 Killed 224 @ age 2.10
+211 194.959 14 Received 209 enode
+211 200.471 14 Killed 209 @ age 2.09
+211 206.062 14 Received 218 enode
+211 206.553 14 Received 213 enode
+211 209.549 14 Killed 218 @ age 2.04
+211 210.575 14 Received 226 enode
+211 213.696 14 Killed 213 @ age 2.03
+211 215.066 14 Killed 226 @ age 2.04
+211 230.763 15 Received 226 enode
+211 233.261 15 Received 224 enode
+211 235.275 15 Killed 226 @ age 2.06
+211 240.376 16 Voted: 0.22261735419630158; Status: 1
+211 243.87 16 Killed 224 @ age 2.16
+211 259.206 17 Voted: 0.23355263157894737; Status: 1
+211 263.521 17 Received 210 enode
+211 271.037 17 Killed 210 @ age 2.09
+211 272.061 17 Received 209 enode
+211 280.349 18 Killed 209 @ age 2.08
+211 287.588 18 Failed Vote (No Balance). Balance: 0.01
+211 342.861 22 Voted: 0.24925668979187315; Status: 1
+211 350.185 22 STOPPED EXPERIMENT
