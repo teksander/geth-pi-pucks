@@ -1,5 +1,7 @@
 batctl/
 geth/
+evaluation/plots/
+results/plots/
 
 *.ipc
 

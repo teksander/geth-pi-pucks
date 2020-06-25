@@ -177,6 +177,40 @@ create.df <- function(experiment.path, tau) {
     return(df)
 }
 
+
+#' Extract the block travel time (TELAPSED) as a function of the
+#' number of robots
+
+get.block.travel.time <- function(df.runs) {
+
+    df <- data.frame(num.robots=numeric(),
+                     TIMESTAMP=numeric(),
+                     TELAPSED=numeric()) 
+
+    i <- 1
+    for (run.path in df.runs$full.path) {
+        robots <- list.dirs(run.path, recursive = FALSE)
+        all.block.logs <- file.path(robots, "block.csv")
+
+        for (block.file in all.block.logs) {    
+            block.df <- read.csv(block.file, sep=' ')
+            block.df <- block.df[,c("TIMESTAMP", "TELAPSED")]
+            block.df$num.robots <- df.runs$num.robots[i]
+
+            print(block.df)
+            
+            df <- rbind(df, block.df)    
+        }
+        i <- i + 1        
+    }
+    df$TIMESTAMP <- as.numeric(as.character(df$TIMESTAMP))
+    df$TELAPSED <- as.numeric(as.character(df$TELAPSED))
+    
+    return(df)
+
+    
+    }
+
 #' Iterate over all files and extract the blockchain size based on the
 #' time of the experiment
 create.bcsize.by.time <- function(df.runs) {
@@ -204,6 +238,7 @@ df <- data.frame(TIME=numeric(),
     
     return(df)
 }
+
 
 
 # Experiment 1  ------------------------------------------------------------
@@ -263,9 +298,9 @@ create.neighbors.by.num.robots <- function(df.runs, X=15) {
             colnames(buffer.df) <- c("TIME", "BLOCK", "BUFFER", "GETH")
 
             
-            # WARNING: Replace this plot with average of the column TELAPSED in block.log. x axis: number of robots; y axis: block travel time
-
-
+            # WARNING: Replace this plot with average of the column
+            # TELAPSED in block.log. x axis: number of robots; y axis:
+            # block travel time
             logging.frequency <- 1/2  # 1 log per 2 seconds
             sum.neighbors <- sum(buffer.df$GETH)
             neighbors.per.Xsec <- (X * (sum.neighbors / max(buffer.df$TIME))) / logging.frequency
@@ -273,7 +308,9 @@ create.neighbors.by.num.robots <- function(df.runs, X=15) {
             buffer.df$num.robots <- df.runs$num.robots[i]
             buffer.df$neighbors.per.Xsec <- neighbors.per.Xsec
             blocks <- buffer.df$BLOCK
-            # WARNING: THIS CAN BE IMPROVED; todo: instead of reading from buffer.log read from block.log last entry
+            # WARNING: THIS CAN BE IMPROVED; TODO: instead of reading
+            # from buffer.csv read from block.csv last entry
+
             avg.block.time <- max(buffer.df$TIME) / (blocks[length(blocks)] - blocks[1])
 
             small.df <- data.frame(neighbors.per.Xsec=neighbors.per.Xsec,
@@ -318,6 +355,22 @@ plot.x.by.y(neighbors.df,
             custom.base.breaks.x=c(5,7,8,10),
             custom.base.breaks.y=c(0.00, 20, 40, 60, 80))
 
+
+
+## Get block travel time
+travel.time.df <- get.block.travel.time(df.1)
+
+
+## Plots average block time
+plot.x.by.y(travel.time.df,
+            x="num.robots",
+            y="TELAPSED",
+            xlab="Number of robots",
+            ylab="Block travel time",
+            out.name="block_travel_time.pdf",
+            report.dir=plot.dir,
+            custom.base.breaks.x=c(5,7,8,10),
+            custom.base.breaks.y=c(0.00, 40, 80, 120, 160, 200, 240, 280))
 
 
 # Blockchain growth analysis -----------------------------------------------------
