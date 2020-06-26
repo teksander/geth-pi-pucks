@@ -9,11 +9,10 @@ library(stringr)
 
 # General Settings ------------------------------------------------------
 actual.frequency <- 32 ## Actual frequency of white tiles
-base.dir <- "../"
 multiplier <- 10000000
 tau <- 0.01
-data.dir <- file.path(base.dir, "data")
-plot.dir <- file.path(base.dir, "plots")
+data.dir <- file.path("data")
+plot.dir <- file.path("plots")
 
 # Function Declarations -------------------------------------------------
 
@@ -328,33 +327,6 @@ create.neighbors.by.num.robots <- function(df.runs, X=15) {
 }
 
 
-neighbors.df <- create.neighbors.by.num.robots(df.1)
-
-## Plots neighbor per X (e.g., 15) seconds
-plot.x.by.y(neighbors.df,
-            x="num.robots",
-            y="neighbors.per.Xsec",
-            xlab="Number of robots",
-            ylab="Encounters(15).",
-            out.name="encounters_plot.pdf",
-            report.dir=plot.dir,
-            custom.base.breaks.x=c(5, 7, 8, 10),
-            custom.base.breaks.y=c(0.00, 0.5, 1.0, 1.5, 2.0, 2.5))
-
-
-# Block time analysis -----------------------------------------------------
-
-## Plots average block time
-plot.x.by.y(neighbors.df,
-            x="num.robots",
-            y="avg.block.time",
-            xlab="Number of robots",
-            ylab="Average block time",
-            out.name="blocktime.pdf",
-            report.dir=plot.dir,
-            custom.base.breaks.x=c(5,7,8,10),
-            custom.base.breaks.y=c(0.00, 20, 40, 60, 80))
-
 
 
 # Blockchain growth analysis -----------------------------------------------------
@@ -415,6 +387,31 @@ plot.x.by.y(travel.time.df,
             report.dir=plot.dir,
             custom.base.breaks.x=c(5,6,7,8,9,10),
             custom.base.breaks.y=c(0.00, 40, 80, 120, 160, 200, 240, 280))
+
+
+neighbors.df <- create.neighbors.by.num.robots(df.2)
+
+# ## Plots neighbor per X (e.g., 15) seconds
+# plot.x.by.y(neighbors.df,
+#             x="num.robots",
+#             y="neighbors.per.Xsec",
+#             xlab="Number of robots",
+#             ylab="Encounters(15).",
+#             out.name="encounters_plot.pdf",
+#             report.dir=plot.dir,
+#             custom.base.breaks.x=c(5, 6, 7, 8, 9, 10),
+#             custom.base.breaks.y=c(0.00, 0.5, 1.0, 1.5, 2.0, 2.5))
+
+## Plots average block time
+plot.x.by.y(neighbors.df,
+            x="num.robots",
+            y="avg.block.time",
+            xlab="Number of robots",
+            ylab="Average block time",
+            out.name="blocktime.pdf",
+            report.dir=plot.dir,
+            custom.base.breaks.x=c(5,7,8,10),
+            custom.base.breaks.y=c(0.00, 20, 40, 60, 80))
 
 t5.mask <- travel.time.df$num.robots == 5
 t5 <- travel.time.df[t5.mask,]
