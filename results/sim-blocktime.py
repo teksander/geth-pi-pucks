@@ -163,11 +163,12 @@ def animate(i):
 
 	return [robot.artist_body for robot in robotList]+[robot.artist_rb for robot in robotList]+[robot.artist_front for robot in robotList]
 
-N = 20
+
 arenaSizeX = 0.5
 arenaSizeY = 0.5
-robotSpeed = 0.14
-erbDist = 0.065
+N = 10
+robotSpeed = 0.18
+erbDist = 0.1
 logfile = open('sim-blocktime.csv', 'w+')
 timeStep = 0.1
 reps = 500

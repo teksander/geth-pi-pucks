@@ -32,7 +32,7 @@ estimateRate = 1
 voteRate = 45
 bufferRate = 0.5
 eventRate = 1
-globalPeers = 0
+globalPeers = 1
 ageLimit = 2
 
 # /* Initialize Sub-modules */
@@ -192,8 +192,11 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 				peerBuffer.append(newPeer)
 
 		for peer in peerBuffer: 
-
-					newPeer.enode = tcp.request(newPeer.ip, tcp.port)
+			if not getIds('geth'):
+				try:
+					peer.enode = tcp.request(newPeer.ip, tcp.port)
+				except:
+					pass
 
 		peerFile.close()
 

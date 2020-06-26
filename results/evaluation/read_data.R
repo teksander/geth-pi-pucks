@@ -265,7 +265,7 @@ plot.x.by.y(df.1,
             out.name=sprintf("exp1_time.pdf"),
             report.dir=plot.dir,
             custom.base.breaks.x=c(0,1,2,3,4),
-            custom.base.breaks.y=c(0,1000,2000))
+            custom.base.breaks.y=c(0,500,1000))
 
 
 
@@ -357,22 +357,6 @@ plot.x.by.y(neighbors.df,
 
 
 
-## Get block travel time
-travel.time.df <- get.block.travel.time(df.1)
-
-
-## Plots average block time
-plot.x.by.y(travel.time.df,
-            x="num.robots",
-            y="TELAPSED",
-            xlab="Number of robots",
-            ylab="Block travel time",
-            out.name="block_travel_time.pdf",
-            report.dir=plot.dir,
-            custom.base.breaks.x=c(5,7,8,10),
-            custom.base.breaks.y=c(0.00, 40, 80, 120, 160, 200, 240, 280))
-
-
 # Blockchain growth analysis -----------------------------------------------------
 
 
@@ -389,3 +373,69 @@ plot.bc.size(df.robots,
              custom.base.breaks.x=c(0, 300, 600, 900),
              custom.base.breaks.y=c(0, 0.1, 0.2, 0.3, 0.4)
              )
+
+
+# ------------------ Experiment 2
+
+experiment.2.path <- file.path(data.dir, "experiment_2")
+df.2 <- create.df(experiment.2.path, tau)
+
+# Plot selected absolute error
+plot.x.by.y(df.2,
+            x="num.robots",
+            y="selected.absError",
+            xlab=expression("Number of robots"),
+            ylab=expression("Absolute error (in %)"),
+            out.name=sprintf("exp2_error.pdf"),
+            report.dir=plot.dir,
+            custom.base.breaks.x=c(5,6,7,8,9,10))
+
+# Plot consensus time
+plot.x.by.y(df.2,
+            x="num.robots",
+            y="final.time",
+            xlab=expression("Number of robots"),
+            ylab=expression("Consensus time (s)"),
+            out.name=sprintf("exp2_time.pdf"),
+            report.dir=plot.dir,
+            custom.base.breaks.x=c(5,6,7,8,9,10),
+            custom.base.breaks.y=c(0,500,1000))
+
+## Get block travel time
+travel.time.df <- get.block.travel.time(df.2)
+
+
+## Plots average block time
+plot.x.by.y(travel.time.df,
+            x="num.robots",
+            y="TELAPSED",
+            xlab="Number of robots",
+            ylab="Block travel time",
+            out.name="block_travel_time.pdf",
+            report.dir=plot.dir,
+            custom.base.breaks.x=c(5,6,7,8,9,10),
+            custom.base.breaks.y=c(0.00, 40, 80, 120, 160, 200, 240, 280))
+
+t5.mask <- travel.time.df$num.robots == 5
+t5 <- travel.time.df[t5.mask,]
+print(mean(t5$TELAPSED))
+
+t5.mask <- travel.time.df$num.robots == 6
+t5 <- travel.time.df[t5.mask,]
+print(mean(t5$TELAPSED))
+
+t5.mask <- travel.time.df$num.robots == 7
+t5 <- travel.time.df[t5.mask,]
+print(mean(t5$TELAPSED))
+
+t5.mask <- travel.time.df$num.robots == 8
+t5 <- travel.time.df[t5.mask,]
+print(mean(t5$TELAPSED))
+
+t5.mask <- travel.time.df$num.robots == 9
+t5 <- travel.time.df[t5.mask,]
+print(mean(t5$TELAPSED))
+
+t5.mask <- travel.time.df$num.robots == 10
+t5 <- travel.time.df[t5.mask,]
+print(mean(t5$TELAPSED))
