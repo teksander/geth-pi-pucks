@@ -1,0 +1,54 @@
+ID TIME BLK EVENT DESCRIPTION
+210 1593455962.128 0 SETUP: Synced Time
+210 1593455962.256 0 SETUP: Peered to PC
+210 1593455978.567 2 SETUP: Smart Contract Received at Block 2
+210 5.237 2 STARTED EXPERIMENT
+210 7.263 2 Received 222 enode
+210 25.361 3 Killed 222 @ age 2.05
+210 51.127 3 Failed Vote (No Balance). Balance: 0.01
+210 56.437 3 Received 222 enode
+210 57.955 3 Received 224 enode
+210 66.006 3 Killed 224 @ age 2.05
+210 70.626 5 Killed 222 @ age 2.10
+210 99.838 6 Received 222 enode
+210 124.446 6 Killed 222 @ age 2.07
+210 128.524 6 Received 224 enode
+210 129.682 7 Voted: 0.27479892761394104; Status: 1
+210 136.139 7 Killed 224 @ age 2.03
+210 142.281 9 Received 213 enode
+210 149.853 9 Killed 213 @ age 2.10
+210 160.921 9 Received 226 enode
+210 185.088 10 Received 224 enode
+210 186.649 10 Killed 224 @ age 2.01
+210 187.743 10 Received 224 enode
+210 189.349 13 Voted: 0.2757685352622061; Status: 1
+210 193.975 13 Failed Vote (No Balance). Balance: 0.01
+210 194.938 13 Killed 224 @ age 2.16
+210 212.792 14 Killed 226 @ age 2.13
+210 249.911 15 Received 226 enode
+210 250.413 15 Received 213 enode
+210 254.42 15 Killed 226 @ age 2.05
+210 262.202 17 Killed 213 @ age 2.02
+210 263.625 17 Received 213 enode
+210 274.02 18 Voted: 0.2813664596273292; Status: 1
+210 279.931 18 Killed 213 @ age 2.07
+210 300.054 18 Received 222 enode
+210 307.609 18 Killed 222 @ age 2.16
+210 316.658 18 Received 226 enode
+210 323.749 20 Voted: 0.2778361344537815; Status: 1
+210 328.037 20 Failed Vote (No Balance). Balance: 20.01
+210 334.925 20 Received 213 enode
+210 339.884 20 Received 222 enode
+210 345.59 21 Killed 213 @ age 2.23
+210 346.615 21 Killed 226 @ age 2.27
+210 346.835 21 Received 213 enode
+210 350.785 21 Killed 222 @ age 2.36
+210 351.373 21 Killed 213 @ age 2.12
+210 352.391 21 Received 213 enode
+210 370.332 23 Received 226 enode
+210 376.886 23 Killed 213 @ age 2.07
+210 378.424 23 Killed 226 @ age 2.21
+210 384.05 24 Voted: 0.29814487632508835; Status: 1
+210 415.084 24 Received 222 enode
+210 430.663 26 Killed 222 @ age 2.04
+210 445.153 26 STOPPED EXPERIMENT

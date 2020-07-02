@@ -159,6 +159,14 @@ def init():
 
 def animate(i):
 	global robotList, timeStep
+
+	contaminated = [robot.iscontaminated for robot in robotList]
+
+	if sum(contaminated) == N:
+		for robot in robotList:
+			robot.iscontaminated = False
+		random.choice(robotList).iscontaminated = True
+
 	stepAll(timeStep,robotList)
 
 	return [robot.artist_body for robot in robotList]+[robot.artist_rb for robot in robotList]+[robot.artist_front for robot in robotList]
@@ -167,8 +175,8 @@ def animate(i):
 arenaSizeX = 0.5
 arenaSizeY = 0.5
 N = 10
-robotSpeed = 0.18
-erbDist = 0.1
+robotSpeed = 0.11
+erbDist = 0.07
 logfile = open('sim-blocktime.csv', 'w+')
 timeStep = 0.1
 reps = 500
@@ -198,6 +206,7 @@ if sys.argv[1] == '--sim':
 			stepAll(timeStep, robotList)
 			timeNow = timeNow+timeStep
 			contaminatedCount = sum([robot.iscontaminated for robot in robotList])
+
 			if contaminatedCount == N:
 				row = [round(robot.timeToContamination,2) for robot in robotList]
 				logfile.write('{} {:.2f} {:.2f}\n'.format(' '.join([str(x) for x in row]), sum(row)/len(row),max(row)))

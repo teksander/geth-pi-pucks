@@ -1,0 +1,52 @@
+ID TIME BLK EVENT DESCRIPTION
+222 1593453305.122 0 SETUP: Synced Time
+222 1593453305.227 0 SETUP: Peered to PC
+222 1593453320.729 2 SETUP: Smart Contract Received at Block 2
+222 4.59 2 STARTED EXPERIMENT
+222 6.058 2 Received 224 enode
+222 13.637 2 Received 213 enode
+222 14.099 2 Killed 224 @ age 2.02
+222 23.771 3 Killed 213 @ age 2.09
+222 44.84 3 Received 224 enode
+222 50.555 3 Failed Vote (No Balance). Balance: 0.01
+222 64.012 5 Received 210 enode
+222 67.452 5 Killed 224 @ age 2.18
+222 67.95 5 Killed 210 @ age 2.00
+222 98.045 5 Received 226 enode
+222 107.101 5 Killed 226 @ age 2.08
+222 113.646 5 Received 210 enode
+222 120.071 8 Voted: 0.4340974212034384; Status: 1
+222 122.182 9 Killed 210 @ age 2.06
+222 217.086 10 Received 224 enode
+222 217.596 10 Received 213 enode
+222 221.786 15 Killed 224 @ age 2.61
+222 222.371 15 Received 210 enode
+222 224.77 15 Killed 213 @ age 2.27
+222 231.488 15 Killed 210 @ age 2.18
+222 234.1 16 Voted: 0.36700581395348836; Status: 1
+222 238.364 16 Failed Vote (No Balance). Balance: 0.01
+222 251.754 17 Received 224 enode
+222 260.826 17 Received 213 enode
+222 263.308 17 Killed 224 @ age 2.14
+222 265.334 17 Killed 213 @ age 2.05
+222 288.932 17 Received 226 enode
+222 296.973 17 Killed 226 @ age 2.08
+222 331.169 21 Voted: 0.3559754851889683; Status: 1
+222 332.165 21 Received 210 enode
+222 339.797 21 Killed 210 @ age 2.03
+222 344.218 22 Voted: 0.368860510805501; Status: 1
+222 384.994 24 Received 213 enode
+222 390.316 25 Voted: 0.36461937716262977; Status: 1
+222 393.046 25 Killed 213 @ age 2.12
+222 426.26 27 Received 210 enode
+222 429.808 27 Received 213 enode
+222 434.811 27 Killed 210 @ age 2.12
+222 439.376 27 Killed 213 @ age 2.14
+222 449.449 27 Received 224 enode
+222 451.96 27 Received 213 enode
+222 457.024 27 Received 226 enode
+222 460.438 29 Voted: 0.3745414526779164; Status: 1
+222 462.488 29 Killed 224 @ age 2.10
+222 466.642 29 Killed 213 @ age 2.04
+222 476.213 30 Voted: 0.3660524450744153; Status: 1
+222 499.785 31 STOPPED EXPERIMENT

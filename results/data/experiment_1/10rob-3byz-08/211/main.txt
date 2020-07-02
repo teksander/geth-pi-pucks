@@ -1,0 +1,204 @@
+ID TIME BLK EVENT DESCRIPTION
+211 1593692813.145 0 SETUP: Synced Time
+211 1593692813.285 0 SETUP: Peered to PC
+211 1593692845.189 3 SETUP: Smart Contract Received at Block 3
+211 6.404 3 STARTED EXPERIMENT
+211 6.917 3 Received 209 enode
+211 7.008 3 Received 224 enode
+211 11.517 3 Killed 224 @ age 2.01
+211 12.011 3 Received 224 enode
+211 30.254 4 Killed 224 @ age 2.00
+211 31.299 4 Received 224 enode
+211 34.856 4 Received 222 enode
+211 39.432 4 Killed 224 @ age 2.04
+211 42.974 4 Killed 222 @ age 2.06
+211 54.223 6 Received 217 enode
+211 55.252 6 Killed 209 @ age 2.25
+211 56.839 6 Received 209 enode
+211 62.22 7 Voted: 0.19822485207100593; Status: 1
+211 62.554 7 Killed 217 @ age 2.45
+211 65.23 7 Received 226 enode
+211 67.196 7 Killed 209 @ age 2.05
+211 76.825 7 Received 222 enode
+211 79.541 8 Killed 226 @ age 2.11
+211 80.083 8 Received 210 enode
+211 82.219 8 Killed 222 @ age 2.28
+211 83.055 8 Received 226 enode
+211 83.738 8 Received 214 enode
+211 85.821 8 Killed 210 @ age 2.36
+211 86.446 8 Killed 214 @ age 3.07
+211 87.066 8 Killed 226 @ age 2.31
+211 89.226 8 Received 213 enode
+211 90.04 8 Received 217 enode
+211 91.094 8 Received 226 enode
+211 96.569 9 Killed 213 @ age 4.65
+211 97.405 9 Killed 226 @ age 2.01
+211 101.701 9 Killed 217 @ age 2.85
+211 104.529 9 Failed Vote (No Balance). Balance: 20.01
+211 107.467 10 Received 209 enode
+211 109.643 10 Received 213 enode
+211 114.613 10 Killed 213 @ age 3.11
+211 118.646 10 Killed 209 @ age 3.82
+211 123.3 11 Received 224 enode
+211 131.614 11 Killed 224 @ age 2.04
+211 132.21 11 Received 222 enode
+211 135.279 11 Killed 222 @ age 2.12
+211 145.87 12 Failed Vote (No Balance). Balance: 20.01
+211 154.034 13 Received 214 enode
+211 155.917 13 Received 224 enode
+211 157.584 13 Received 226 enode
+211 158.873 13 Killed 224 @ age 2.02
+211 159.927 13 Killed 226 @ age 2.33
+211 162.918 13 Killed 214 @ age 2.23
+211 163.446 13 Received 224 enode
+211 165.924 13 Killed 224 @ age 2.25
+211 168.042 13 Received 224 enode
+211 171.212 14 Killed 224 @ age 2.59
+211 184.276 15 Received 213 enode
+211 185.878 15 Received 209 enode
+211 191.246 15 Killed 213 @ age 2.25
+211 192.402 15 Received 213 enode
+211 193.539 15 Killed 209 @ age 2.21
+211 195.076 15 Killed 213 @ age 2.41
+211 196.227 16 Voted: 0.28477443609022557; Status: 1
+211 197.319 16 Received 213 enode
+211 199.828 16 Killed 213 @ age 2.08
+211 213.206 17 Received 213 enode
+211 215.385 17 Received 214 enode
+211 216.238 17 Killed 213 @ age 2.04
+211 217.241 17 Received 209 enode
+211 217.85 17 Killed 214 @ age 2.20
+211 219.556 17 Received 213 enode
+211 222.565 17 Killed 213 @ age 2.19
+211 228.124 18 Received 226 enode
+211 228.769 18 Killed 226 @ age 3.07
+211 232.966 18 Received 226 enode
+211 234.771 18 Killed 209 @ age 2.08
+211 237.647 18 Killed 226 @ age 2.75
+211 238.518 18 Received 209 enode
+211 240.969 19 Voted: 0.3019578313253012; Status: 1
+211 241.767 19 Killed 209 @ age 2.08
+211 243.724 19 Received 209 enode
+211 247.474 19 Killed 209 @ age 2.16
+211 251.721 19 Received 213 enode
+211 255.791 20 Killed 213 @ age 2.89
+211 257.749 20 Received 209 enode
+211 258.523 20 Received 213 enode
+211 262.227 20 Killed 213 @ age 2.53
+211 265.381 20 Killed 209 @ age 2.51
+211 267.415 20 Received 222 enode
+211 268.081 20 Received 209 enode
+211 269.873 20 Killed 209 @ age 2.18
+211 270.897 20 Received 226 enode
+211 272.02 21 Received 209 enode
+211 275.4 21 Killed 222 @ age 2.15
+211 276.087 21 Killed 209 @ age 3.01
+211 279.489 21 Killed 226 @ age 2.46
+211 283.06 21 Failed Vote (No Balance). Balance: 0.01
+211 286.736 22 Received 209 enode
+211 291.019 22 Killed 209 @ age 2.92
+211 294.06 22 Received 209 enode
+211 297.284 22 Killed 209 @ age 2.02
+211 302.784 23 Received 226 enode
+211 306.565 23 Killed 226 @ age 2.93
+211 307.538 23 Received 209 enode
+211 310.541 23 Killed 209 @ age 2.06
+211 311.059 23 Received 222 enode
+211 312.891 23 Received 226 enode
+211 313.882 23 Killed 222 @ age 2.09
+211 316.351 24 Killed 226 @ age 2.22
+211 318.301 24 Received 222 enode
+211 319.499 24 Received 217 enode
+211 321.903 24 Killed 222 @ age 2.12
+211 324.699 24 Killed 217 @ age 2.35
+211 325.965 24 Received 222 enode
+211 327.722 24 Received 218 enode
+211 331.639 25 Killed 222 @ age 3.19
+211 334.716 25 Received 222 enode
+211 339.0 25 Killed 218 @ age 3.28
+211 339.998 25 Killed 222 @ age 3.15
+211 348.422 26 Voted: 0.32090336134453784; Status: 1
+211 365.742 27 Received 210 enode
+211 369.737 27 Received 226 enode
+211 372.214 27 Received 222 enode
+211 374.858 27 Killed 222 @ age 2.10
+211 375.35 27 Killed 210 @ age 2.22
+211 376.73 28 Voted: 0.3643822393822394; Status: 1
+211 380.192 28 Received 224 enode
+211 382.313 28 Received 218 enode
+211 382.887 28 Killed 224 @ age 2.21
+211 383.699 28 Received 224 enode
+211 386.022 28 Received 214 enode
+211 387.608 28 Killed 218 @ age 2.60
+211 391.708 28 Killed 214 @ age 2.90
+211 396.019 29 Received 224 enode
+211 399.657 29 Killed 224 @ age 2.62
+211 402.022 29 Received 224 enode
+211 405.385 30 Killed 224 @ age 2.42
+211 406.801 30 Received 222 enode
+211 415.45 30 Killed 222 @ age 2.18
+211 418.431 30 Failed Vote (No Balance). Balance: 20.01
+211 441.025 32 Received 214 enode
+211 442.581 32 Received 210 enode
+211 445.038 32 Killed 214 @ age 2.15
+211 445.602 32 Killed 210 @ age 2.06
+211 446.383 32 Received 218 enode
+211 446.694 32 Received 210 enode
+211 448.551 32 Killed 218 @ age 2.23
+211 449.38 32 Received 213 enode
+211 450.845 32 Killed 210 @ age 2.21
+211 452.571 33 Received 217 enode
+211 455.455 33 Killed 213 @ age 3.36
+211 458.367 33 Killed 217 @ age 3.58
+211 461.562 33 Received 222 enode
+211 466.645 34 Voted: 0.34198295894655306; Status: 1
+211 468.858 34 Killed 222 @ age 2.73
+211 472.548 34 Received 213 enode
+211 475.546 34 Received 209 enode
+211 478.856 34 Killed 213 @ age 2.74
+211 479.849 34 Killed 209 @ age 2.80
+211 492.27 35 Received 209 enode
+211 494.849 35 Received 214 enode
+211 498.947 36 Received 217 enode
+211 499.76 36 Killed 209 @ age 2.12
+211 502.178 36 Killed 214 @ age 2.09
+211 504.959 36 Received 213 enode
+211 507.625 36 Failed Vote (No Balance). Balance: 20.01
+211 507.812 36 Killed 217 @ age 2.01
+211 510.436 36 Killed 213 @ age 2.84
+211 513.618 37 Received 222 enode
+211 518.414 37 Received 213 enode
+211 523.4 37 Received 226 enode
+211 527.73 38 Killed 222 @ age 3.04
+211 528.925 38 Killed 226 @ age 3.99
+211 531.534 38 Killed 213 @ age 2.59
+211 541.127 38 Received 226 enode
+211 542.822 39 Killed 226 @ age 2.76
+211 543.886 39 Received 226 enode
+211 548.901 39 Killed 226 @ age 2.55
+211 550.912 39 Received 210 enode
+211 553.339 39 Killed 210 @ age 2.19
+211 555.637 40 Received 222 enode
+211 555.809 40 Voted: 0.3691558441558442; Status: 1
+211 558.776 40 Killed 222 @ age 2.66
+211 559.39 40 Received 213 enode
+211 564.698 40 Received 226 enode
+211 567.602 40 Received 224 enode
+211 569.677 40 Killed 226 @ age 2.65
+211 570.417 40 Killed 213 @ age 2.28
+211 576.06 41 Received 210 enode
+211 576.904 41 Killed 224 @ age 2.20
+211 577.743 41 Received 214 enode
+211 581.11 41 Killed 210 @ age 2.72
+211 581.826 41 Killed 214 @ age 2.59
+211 583.701 41 Received 210 enode
+211 593.919 42 Received 209 enode
+211 597.802 42 Killed 210 @ age 2.22
+211 601.772 43 Killed 209 @ age 2.83
+211 612.602 43 Received 224 enode
+211 615.584 44 Voted: 0.35154880187025134; Status: 1
+211 616.962 44 Received 226 enode
+211 620.966 44 Killed 224 @ age 2.17
+211 622.012 44 Killed 226 @ age 2.17
+211 626.204 44 Received 213 enode
+211 626.961 44 STOPPED EXPERIMENT

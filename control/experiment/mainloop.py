@@ -32,7 +32,7 @@ estimateRate = 1
 voteRate = 45
 bufferRate = 0.5
 eventRate = 1
-globalPeers = 1
+globalPeers = 0
 ageLimit = 2
 
 # /* Initialize Sub-modules */
