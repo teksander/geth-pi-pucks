@@ -181,7 +181,7 @@ logfile = open('sim-blocktime.csv', 'w+')
 timeStep = 0.1
 reps = 500
 
-if sys.argv[1] == '--ani':
+if len(sys.argv)== 1 or sys.argv[1] == '--ani':
 	# set up figure and animation
 	fig = plt.figure()
 	ax = fig.add_subplot(111, aspect='equal', autoscale_on=False,
