@@ -413,6 +413,27 @@ plot.x.by.y(neighbors.df,
             custom.base.breaks.x=c(5,7,8,10),
             custom.base.breaks.y=c(0.00, 20, 40, 60, 80))
 
+
+# ------------------ Experiment 3
+
+experiment.3.path <- file.path(data.dir, "experiment_3")
+df.3 <- create.df(experiment.3.path, tau)
+
+## Get block travel time
+travel.time.df <- get.block.travel.time(df.3)
+
+## Plots average block time
+plot.x.by.y(travel.time.df,
+            x="num.robots",
+            y="TELAPSED",
+            xlab="Number of robots",
+            ylab="Block travel time",
+            out.name="exp3_block_travel_time.pdf",
+            report.dir=plot.dir,
+            custom.base.breaks.x=c(5,10),
+            custom.base.breaks.y=c(0.00, 40, 80, 120, 160, 200, 240, 280))
+
+
 t5.mask <- travel.time.df$num.robots == 5
 t5 <- travel.time.df[t5.mask,]
 print(mean(t5$TELAPSED))
