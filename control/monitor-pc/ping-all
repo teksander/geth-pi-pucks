@@ -3,10 +3,10 @@
 # Returns a text file pi-pucks.txt containing the responding Pi-Puck IDs
 # Assumptions:
 # - All known Pi-puck IDs are listed in ~/geth-pi-pucks/swarm-control/pi-pucks-all.txt
+source globalconfig
 
 IDS_FILE="pi-pucks-all.txt"
 SUBNET="172.27.1"
-WORKING_DIR="/home/$USER/geth-pi-pucks"
 
 > pi-pucks.txt
 
