@@ -2,29 +2,29 @@
 #  Initalize GETH on either the computer or the pi-pucks
 
 # Geth Configurations
-DATA_DIR="mygethnode"
+DATA_DIR="geth-pi-pucks"
 GEN_BLOCK="pipucks.json"
 CURRENT_USER=$(logname)
 
 # # Check GETH installation
 # if [ ! -f "/usr/local/bin/geth" ] 
 # then
-# echo "GETH was not found. Version 1.9.11 will be installed"
-# wget https://gethstore.blob.core.windows.net/builds/geth-linux-arm6-1.9.11-6a62fe39.tar.gz
-# tar zxvf geth-linux-arm6-1.9.11-6a62fe39.tar.gz
-# cd geth-linux-arm6-1.9.11-6a62fe39
+# echo "GETH was not found. Version 1.10.2 will be installed"
+# wget https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.10.2-97d11b01.tar.gz
+# tar zxvf geth-linux-amd64-1.10.2-97d11b01.tar.gz
+# cd geth-linux-amd64-1.10.2-97d11b01.tar.gz
 # sudo cp geth /usr/local/bin/
 # geth version
 # fi
 
-# # If data directory is not found
-# if [ ! -d "/home/${CURRENT_USER}/${DATA_DIR}" ] 
-# then
-# 	mkdir /home/${CURRENT_USER}/${DATA_DIR}
-#     echo "Created new data directory: /home/${CURRENT_USER}/${DATA_DIR}"
-# fi
+# If data directory is not found
+if [ ! -d "/home/${CURRENT_USER}/${DATA_DIR}" ] 
+then
+	mkdir /home/${CURRENT_USER}/${DATA_DIR}
+    echo "Created new data directory: /home/${CURRENT_USER}/${DATA_DIR}"
+fi
 
-# cd  /home/${CURRENT_USER}/${DATA_DIR}
+cd  /home/${CURRENT_USER}/${DATA_DIR}
 
 # If the GETH process has not been initialized in the data directory
 if [ ! -d "/home/${CURRENT_USER}/${DATA_DIR}/geth" ] 
@@ -44,7 +44,7 @@ else
 fi
 
 echo ${ID}
-geth --datadir /home/"$CURRENT_USER"/mygethnode/ \
+geth --datadir /home/"$CURRENT_USER"/"$DATA_DIR"/ \
 --syncmode "full" \
 --port 30311 \
 --rpc --rpcaddr "localhost" \
