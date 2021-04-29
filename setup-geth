@@ -1,37 +1,35 @@
 #!/bin/bash
 #  Initalize GETH on either the computer or the pi-pucks
 
-# Geth Configurations
-DATA_DIR="geth-pi-pucks"
+source globalconfig
 GEN_BLOCK="pipucks.json"
-CURRENT_USER=$(logname)
 
-# # Check GETH installation
-# if [ ! -f "/usr/local/bin/geth" ] 
-# then
-# echo "GETH was not found. Version 1.10.2 will be installed"
+# Check GETH installation
+if [ ! -f "/usr/local/bin/geth" ] 
+then
+echo "GETH was not found"
+# echo "Installing GETH Version 1.10.2"
 # wget https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.10.2-97d11b01.tar.gz
 # tar zxvf geth-linux-amd64-1.10.2-97d11b01.tar.gz
 # cd geth-linux-amd64-1.10.2-97d11b01.tar.gz
 # sudo cp geth /usr/local/bin/
-# geth version
-# fi
-
-# If data directory is not found
-if [ ! -d "/home/${CURRENT_USER}/${DATA_DIR}" ] 
-then
-	mkdir /home/${CURRENT_USER}/${DATA_DIR}
-    echo "Created new data directory: /home/${CURRENT_USER}/${DATA_DIR}"
 fi
 
-cd  /home/${CURRENT_USER}/${DATA_DIR}
+# If data directory is not found
+if [ ! -d "$WORKING_DIR" ] 
+then
+	mkdir $WORKING_DIR
+    echo "Created new data directory: $WORKING_DIR"
+fi
+
+cd  $WORKING_DIR
 
 # If the GETH process has not been initialized in the data directory
-if [ ! -d "/home/${CURRENT_USER}/${DATA_DIR}/geth" ] 
+if [ ! -d "$WORKING_DIR/geth" ] 
 then
-    geth init /home/${CURRENT_USER}/${DATA_DIR}/genesis/${GEN_BLOCK} \
-    --datadir /home/${CURRENT_USER}/${DATA_DIR}
-    echo "Initialized GETH with genesis block: /home/${CURRENT_USER}/${DATA_DIR}/genesis/${GEN_BLOCK}"
+    geth init $WORKING_DIR/genesis/${GEN_BLOCK} \
+    --datadir $WORKING_DIR
+    echo "Initialized GETH with genesis block: $WORKING_DIR/genesis/${GEN_BLOCK}"
 fi
 
 # If is a Pi-Puck
@@ -44,14 +42,13 @@ else
 fi
 
 echo ${ID}
-geth --datadir /home/"$CURRENT_USER"/"$DATA_DIR"/ \
+geth --datadir $WORKING_DIR \
 --syncmode "full" \
 --port 30311 \
 --rpc --rpcaddr "localhost" \
 --rpcport 8501 \
 --rpcapi "personal,eth,net,web3,txpool,miner" \
 --networkid 1515 \
---gasprice "1" \
 --allow-insecure-unlock \
 --nodiscover \
 --verbosity 3 \

@@ -6,6 +6,8 @@
 
 IDS_FILE=$"pi-pucks.txt"
 NUM_NODES=$(cat "$IDS_FILE" | grep -v ^$ | wc -l)
+WORKING_DIR="/home/$USER/geth-pi-pucks"
+
 > genesis.conf 
 
 ########## Genesis Configurations ############
@@ -43,7 +45,7 @@ echo "/home/$USER/mygethnode/genesis" >> genesis.conf
 ########## Generate Genesis Block ############
 echo "Generating Genesis Block..."
 cat "genesis.conf" | nohup puppeth --network=pipucks >/dev/null 2>&1
-rm /home/"$USER"/mygethnode/genesis/pipucks-harmony.json
+rm $WORKING_DIR/genesis/pipucks-harmony.json
 rm genesis.conf
 
 ########## Upload Genesis File ############

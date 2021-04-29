@@ -1,0 +1,4 @@
+#!/bin/bash
+# Define the location of the program
+
+WORKING_DIR="/home/$USER/geth-pi-pucks"

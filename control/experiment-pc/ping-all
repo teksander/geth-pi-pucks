@@ -2,10 +2,12 @@
 # Short script to ping the complete list of Pi-Pucks
 # Returns a text file pi-pucks.txt containing the responding Pi-Puck IDs
 # Assumptions:
-# - All known Pi-puck IDs are listed in ~/mygethnode/swarm-control/pi-pucks-all.txt
+# - All known Pi-puck IDs are listed in ~/geth-pi-pucks/swarm-control/pi-pucks-all.txt
 
 IDS_FILE="pi-pucks-all.txt"
 SUBNET="172.27.1"
+WORKING_DIR="/home/$USER/geth-pi-pucks"
+
 > pi-pucks.txt
 
 touch temp.txt
@@ -18,4 +20,4 @@ wait
 wc -l temp.txt | awk '{ print "Robot Count: " $1 }'
 sort -n temp.txt >> pi-pucks.txt
 rm temp.txt
-cp pi-pucks.txt /home/"$USER"/mygethnode/control/experiment/
+cp pi-pucks.txt $WORKING_DIR/control/experiment/
