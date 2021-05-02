@@ -1,58 +1,26 @@
-#!/bin/bash
-#  Initalize ADHOC network on either the computer or the pi-pucks
+#!/bin/bash 
 # Running this script will disable internet connection
-#  Optional Inputs: ID and IF
 
-# Run as SUDO
-[ "$UID" -eq 0 ] || exec sudo bash "$0" "$@"
+# Disable wpa_supplicant and dhcpcd
+systemctl stop wpa_supplicant.service
+systemctl stop dhcpcd.service
 
-## Install batctl and alfred
-# apt install libnl-3-dev libnl-genl-3-dev
-# git clone https://git.open-mesh.org/batctl.git
-# cd batctl
-# make install
-# apt-get install alfred
+# Setup Ad-Hoc Network
+ip link set wlan0
+iw wlan0 set type ibss
+ifconfig wlan0 mtu 1499
+iwconfig wlan0 channel 3
+ip link set wlan0 up
+iw wlan0 ibss join AdHocPi 2432
 
-# If is a Pi-Puck
-if [ $LOGNAME == "pi" ]; then
-	systemctl stop wpa_supplicant.service
-	systemctl stop dhcpcd.service
-	ID_FILE="/boot/pi-puck_id"
-	ID=$(cat $ID_FILE)
-	IF=wlan0
-	echo "Joining Ad-hoc network with Pi-Puck ID $ID"
-else
-	ID="100"
-	IF=wlx801f029ba623
-	echo "Joining Ad-hoc network with ID $ID"
-fi
-
-# If a specific interface/identity are passed
-if [ "$#" -eq 1 ]; then
-	ID=$1
-elif [ "$#" -eq 2 ]; then
-	ID=$1
-	IF=$2
-fi
-
-# Setup ad hoc connection; run as sudo
-ip link set $IF
-iw $IF set type ibss
-ifconfig $IF mtu 1499
-iwconfig $IF channel 3
-ip link set $IF up
-iw $IF ibss join AdHocPi 2432
-
-# Configure batman-adv; run as sudo
+# Configure batman-adv virtual network
 modprobe batman-adv
-batctl if add $IF
-ip link set up dev $IF
+batctl if add wlan0
+ip link set up dev wlan0
 ip link set up dev bat0
 
-systemctl stop wpa_supplicant.service
-
-ifconfig bat0 172.27.1.${ID}/16
-
+IP=$(cat /boot/pi-puck_id) #<---- Set any desired last three digits of IP here
+ifconfig bat0 172.27.1.${IP}/16
 
 
 
