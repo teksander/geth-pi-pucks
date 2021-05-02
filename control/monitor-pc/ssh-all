@@ -5,13 +5,13 @@
 # - The Pi-puck IDs are listed in pi-pucks.txt
 
 IDS_FILE="pi-pucks.txt"
-PREFIX="pi@172.27.1."
+PREFIX="pi@${SUBNET}."
 
 # Send individual command to each robot
 if [ "$#" -eq 1 ]; then
 	for ID in $(cat "$IDS_FILE"); do
-	IP="pi@172.27.1.${ID}"
-	ssh "$IP" "$1" &
+		IP="${PREFIX}${ID}"
+		ssh "$IP" "$1" &
 	done
 fi
 
@@ -19,7 +19,7 @@ fi
 if [ "$#" -eq 0 ]; then
 ALL_IPS=""
 for ID in $(cat "$IDS_FILE"); do
-	ALL_IPS="$ALL_IPS $PREFIX$ID"
+	ALL_IPS="$ALL_IPS ${PREFIX}${ID}"
 done
 cssh $ALL_IPS
 fi

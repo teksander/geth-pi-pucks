@@ -7,12 +7,13 @@ wait
 echo "----//----"
 
 # Reset GETH 
+echo "Reseting Geth..."
 ./reset-geth
 wait
 echo "----//----"
 
 # Reset the Genesis File
-echo "Resetting Genesis Block"
+echo "Reseting Genesis Block..."
 ./reset-genesis
 wait
 echo "----//----"

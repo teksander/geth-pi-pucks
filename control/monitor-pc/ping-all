@@ -3,11 +3,9 @@
 # Returns a text file pi-pucks.txt containing the responding Pi-Puck IDs
 # Assumptions:
 # - All known Pi-puck IDs are listed in ~/geth-pi-pucks/swarm-control/pi-pucks-all.txt
-source globalconfig
+source ../../globalconfig
 
 IDS_FILE="pi-pucks-all.txt"
-SUBNET="172.27.1"
-
 > pi-pucks.txt
 
 touch temp.txt
@@ -20,4 +18,5 @@ wait
 wc -l temp.txt | awk '{ print "Robot Count: " $1 }'
 sort -n temp.txt >> pi-pucks.txt
 rm temp.txt
-cp pi-pucks.txt $WORKING_DIR/control/experiment/
+cp pi-pucks.txt $MAIN_DIR/control/robots/
+

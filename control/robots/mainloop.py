@@ -552,6 +552,20 @@ def waitForSC():
 		else:
 			time.sleep(2)
 
+def registerSC():
+	global sc
+	sc = None
+
+	abiPath = os.environ["MAIN_DIR_ROBOTS"]'/control/experiment/scs/build/Estimation.abi'
+	abi = json.loads(open(abiPath).read())
+
+	sc = w3.eth.contract(abi=abi, address=os.environ["CONTRACT_ADDRESS"])
+	startBlock = 0
+	global startStamp
+	startStamp = 0
+	sc.functions.registerRobot().transact()
+	
+
 def i2cdetect():
 	i2cFlag = True
 	bus = smbus.SMBus(4) # 1 indicates /dev/i2c-1
@@ -568,7 +582,6 @@ def i2cdetect():
 #######################################################################
 
 if len(sys.argv) == 1:
-	# /* Requests to monitor PC (Centralized Bit) */
 	#######################################################################
 	# /* Check for I2C */ 
 	print('Checking I2C Connections...')
@@ -581,16 +594,16 @@ if len(sys.argv) == 1:
 	print('Waiting for Time Sync...')
 	waitForTS()
 
-	# /* Wait for PC Enode */
-	print('Waiting for PC Enode...')
-	waitForPC()
+	# # /* Wait for PC Enode */
+	# print('Waiting for PC Enode...')
+	# waitForPC()
 
-	# /* Wait for Smart Contract */
-	print('Waiting for SC deployment...')
-	waitForSC()
+	# # /* Wait for Smart Contract */
+	# print('Waiting for SC deployment...')
+	# waitForSC()
 
-
-	# /* Actually begin */
+	registerSC()
+	# /* Begin Experiment */
 	#######################################################################
 	START()
 	print('Type Ctrl+C to stop experiment')
@@ -637,13 +650,13 @@ elif len(sys.argv) == 2:
 		print('Waiting for Time Sync...')
 		waitForTS()
 
-		# /* Wait for PC Enode */
-		print('Waiting for PC Enode...')
-		waitForPC()
+		# # /* Wait for PC Enode */
+		# print('Waiting for PC Enode...')
+		# waitForPC()
 
-		# /* Wait for Smart Contract */
-		print('Waiting for SC deployment...')
-		waitForSC()
+		# # /* Wait for Smart Contract */
+		# print('Waiting for SC deployment...')
+		# waitForSC()
 
 		START()
 		print('Type Ctrl+C to stop experiment')

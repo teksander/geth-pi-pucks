@@ -1,4 +1,12 @@
 #!/bin/bash
-# Define the location of the program
+# Define variables used frequently
 
-WORKING_DIR="/home/$USER/geth-pi-pucks"
+export BASE_FOLDER="geth-pi-pucks"
+
+export MAIN_DIR="/home/$USER/$BASE_FOLDER"
+export MAIN_DIR_ROBOTS="/home/pi/$BASE_FOLDER"
+
+export GENESIS_FILE="$MAIN_DIR/genesis/pipucks.json"
+export CONTRACT_FILE="$MAIN_DIR/control/robots/scs/experiment.sol"
+export CONTRACT_ADDRESS=`cat $MAIN_DIR/control/robots/scs/contractAddress.txt`
+export SUBNET="172.27.1"

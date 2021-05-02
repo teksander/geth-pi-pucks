@@ -1,5 +1,6 @@
 #!/bin/bash
 #  Initalize ADHOC network on either the computer or the pi-pucks
+# Running this script will disable internet connection
 #  Optional Inputs: ID and IF
 
 # Run as SUDO
@@ -14,11 +15,16 @@
 
 # If is a Pi-Puck
 if [ $LOGNAME == "pi" ]; then
-	ID=$(cat /boot/pi-puck_id)
+	systemctl stop wpa_supplicant.service
+	systemctl stop dhcpcd.service
+	ID_FILE="/boot/pi-puck_id"
+	ID=$(cat $ID_FILE)
 	IF=wlan0
+	echo "Joining Ad-hoc network with Pi-Puck ID $ID"
 else
 	ID="100"
 	IF=wlx801f029ba623
+	echo "Joining Ad-hoc network with ID $ID"
 fi
 
 # If a specific interface/identity are passed
@@ -45,7 +51,7 @@ ip link set up dev bat0
 
 systemctl stop wpa_supplicant.service
 
-ifconfig bat0 172.27.1.$ID/16
+ifconfig bat0 172.27.1.${ID}/16
 
 
 

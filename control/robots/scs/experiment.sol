@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 contract Estimation {
 
   int  public mean;
@@ -34,7 +34,7 @@ contract Estimation {
   mapping(address => robotInfo) public robot;
   mapping(uint => voteInfo[]) public round;
 
-  constructor() public {
+  constructor() {
       mean = 5000000;
       threshold = 2000000;
       ticketPrice = 40;
@@ -96,7 +96,7 @@ contract Estimation {
 
   function registerRobot() public {
     if (!robot[msg.sender].isRegistered) {
-        robot[msg.sender].robotAddress = msg.sender;
+        robot[msg.sender].robotAddress = payable(msg.sender);
         robot[msg.sender].isRegistered = true;
         robotCount += 1;
     }
@@ -120,7 +120,7 @@ contract Estimation {
 
     // Transfer the UBI due
     if (payoutUBI > 0) {
-      msg.sender.transfer(payoutUBI * 1 ether);
+      payable(msg.sender).transfer(payoutUBI * 1 ether);
     }
     return payoutUBI;
   }
@@ -134,7 +134,7 @@ contract Estimation {
     uint payout = robot[msg.sender].payout;
 
     // Transfer the payout due
-    msg.sender.transfer(payout * 1 ether);
+    payable(msg.sender).transfer(payout * 1 ether);
     robot[msg.sender].payout = 0;
     return payout;
   }    
@@ -146,7 +146,7 @@ contract Estimation {
     
     voteCount += 1;
 
-    round[roundCount].push(voteInfo(msg.sender, estimate));
+    round[roundCount].push(voteInfo(payable(msg.sender), estimate));
     
     if (round[roundCount].length == robotCount) {
       roundCount += 1;

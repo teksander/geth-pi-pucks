@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 contract Estimation {
 
 int  public mean;
@@ -39,7 +39,7 @@ mapping(address => uint) public receivedUBI;
 mapping(address => int) public payoutForAddress;
 mapping(address => int256) public weights;
 
-constructor() public {
+constructor() {
     mean = 5000000;
     count = 0;
     roundthreshold = 2000000;
@@ -109,7 +109,7 @@ function askForUBI() public {
       }
   }
 
-  msg.sender.transfer((expectedUBI - receivedUBI[msg.sender]) * valueUBI * 1 ether);
+  payable(msg.sender).transfer((expectedUBI - receivedUBI[msg.sender]) * valueUBI * 1 ether);
   receivedUBI[msg.sender] = expectedUBI;
 }
 
@@ -172,7 +172,7 @@ function vote(int x_n) public payable {
   }
   int weight = int(msg.sender.balance);
   voteCount += 1;
-  votingInformation memory vi = votingInformation(msg.sender, x_n, block.number, weight, msg.value, 0);
+  votingInformation memory vi = votingInformation(payable(msg.sender), x_n, block.number, weight, msg.value, 0);
   allVotes.push(vi);
   askForPayout();
   }

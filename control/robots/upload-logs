@@ -2,10 +2,17 @@
 # Short script to upload the logs folder to the monitoring PC
 # Assumptions:
 # - Data is containted in logs/ folder and the PC has ID 100
+
+source ../../globalconfig
+
 FILE="/boot/pi-puck_id"
 ID=$(cat "$FILE")
 
 touch logs/readme.txt
-ssh esmi@172.27.1.100 mkdir mygethnode/results/$1
+ssh eksander@${SUBNET}.100 mkdir $MAIN_DIR/results/$1
 wait
-scp -r logs esmi@172.27.1.100:~/mygethnode/results/$1/$ID
+scp -r logs eksander@${SUBNET}.100:$MAIN_DIR/results/$1/$ID
+
+# mv logs $ID
+# wait
+# scp -r $ID eksander@${SUBNET}.100:$MAIN_DIR/results/$1/$ID

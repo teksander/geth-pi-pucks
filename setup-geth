@@ -1,8 +1,7 @@
 #!/bin/bash
 #  Initalize GETH on either the computer or the pi-pucks
-
 source globalconfig
-GEN_BLOCK="pipucks.json"
+
 
 # Check GETH installation
 if [ ! -f "/usr/local/bin/geth" ] 
@@ -16,20 +15,20 @@ echo "GETH was not found"
 fi
 
 # If data directory is not found
-if [ ! -d "$WORKING_DIR" ] 
+if [ ! -d "$MAIN_DIR" ] 
 then
-	mkdir $WORKING_DIR
-    echo "Created new data directory: $WORKING_DIR"
+	mkdir $MAIN_DIR
+    echo "Created new data directory: $MAIN_DIR"
 fi
 
-cd  $WORKING_DIR
+cd  $MAIN_DIR
 
 # If the GETH process has not been initialized in the data directory
-if [ ! -d "$WORKING_DIR/geth" ] 
+if [ ! -d "$MAIN_DIR/geth" ] 
 then
-    geth init $WORKING_DIR/genesis/${GEN_BLOCK} \
-    --datadir $WORKING_DIR
-    echo "Initialized GETH with genesis block: $WORKING_DIR/genesis/${GEN_BLOCK}"
+    geth init $GENESIS_FILE \
+    --datadir $MAIN_DIR
+    echo "Initialized GETH with genesis block: $GENESIS_FILE"
 fi
 
 # If is a Pi-Puck
@@ -42,7 +41,7 @@ else
 fi
 
 echo ${ID}
-geth --datadir $WORKING_DIR \
+geth --datadir $MAIN_DIR \
 --syncmode "full" \
 --port 30311 \
 --rpc --rpcaddr "localhost" \
@@ -53,4 +52,4 @@ geth --datadir $WORKING_DIR \
 --nodiscover \
 --verbosity 3 \
 --miner.gaslimit "0x9000000000000" \
---nat=extip:"172.27.1."${ID}""
+--nat=extip:"${SUBNET}.${ID}"
