@@ -19,5 +19,5 @@ batctl if add wlan0
 ip link set up dev wlan0
 ip link set up dev bat0
 
-IP =$(cat /boot/pi-puck_id)
-ifconfig bat0 172.27.0.${IP}/16
+IP=$(cat /boot/pi-puck_id)
+cmd="bat0 172.27.0.${IP}/16"
