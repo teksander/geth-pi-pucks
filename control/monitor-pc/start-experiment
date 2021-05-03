@@ -1,0 +1,36 @@
+#!/bin/bash  
+# Short script begin the an experiment
+
+# Parameters
+NUM_BYZ=0
+NUM_ROB=2
+
+# Update Responding Pi-Pucks
+./ping-all
+wait
+echo "----//----"
+
+NUM_RESP=$(wc -l < pi-pucks.txt)
+
+if ((NUM_ROB != NUM_RESP)); then
+	printf '%s\n' "Not enough robot are responding" >&2  # write error message to stderr
+	exit 1         
+fi
+
+# Reset the Genesis File
+echo "Reseting Genesis Block..."
+./reset-genesis
+wait
+echo "----//----"
+
+# Distribute Keys
+echo "Reseting Pi-Puck Keys..."
+./reset-keys
+wait
+echo "----//----"
+
+# # Restart GETH processes
+echo "Rebooting GETH"
+./ssh-all "sudo systemctl enable geth.service"
+./ssh-all "sudo systemctl start geth.service"
+wait

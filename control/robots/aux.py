@@ -208,7 +208,7 @@ class Peer(object):
         """ This method kills the peer and ends the thread """
         self.isdead = 1
         cmd = "admin.removePeer(\"{}\")".format(self.enode)
-        subprocess.call(["geth","--exec",cmd,"attach","/home/pi/mygethnode/geth.ipc"], stdout=subprocess.DEVNULL)   
+        subprocess.call(["geth","--exec",cmd,"attach","/home/pi/geth-pi-pucks/geth.ipc"], stdout=subprocess.DEVNULL)   
 
 
     def isPeer(self):

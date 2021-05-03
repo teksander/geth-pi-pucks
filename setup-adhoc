@@ -1,4 +1,5 @@
 #!/bin/bash 
+# Short script for Pi-pucks to join the ad-hoc network
 # Running this script will disable internet connection
 
 # Disable wpa_supplicant and dhcpcd

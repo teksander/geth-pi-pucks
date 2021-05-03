@@ -23,17 +23,17 @@ def init_web3():
     return w3
 
 def registerSC():
+    global sc
     sc = None
 
     abiPath = os.getcwd()+'/scs/build/Estimation.abi'
-    addressPath = os.getcwd()+'/scs/contractAddress.txt'
-
     abi = json.loads(open(abiPath).read())
-    address = '0x'+open(addressPath).read()
-    print(address)
+
+    addressPath = os.getcwd()+'/scs/contractAddress.txt'
+    address = '0x'+open(addressPath).read().rstrip()
+
     sc = w3.eth.contract(abi=abi, address=address)
 
-    return sc
 
 if __name__ == "__main__":
 

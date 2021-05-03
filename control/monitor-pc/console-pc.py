@@ -65,21 +65,44 @@ def deploySC():
     print('Start Block:', contract.functions.startBlock().call())
     return contract
 
+def registerSCPC():
+    sc = None
+
+    abiPath = '/home/eksander/geth-pi-pucks/control/robots/scs/build/Estimation.abi'
+    addressPath = '/home/eksander/geth-pi-pucks/control/robots/scs/contractAddress.txt'
+
+    abi = json.loads(open(abiPath).read())
+    address = '0x'+open(addressPath).read()
+    print(address)
+    sc = w3.eth.contract(abi=abi, address=address)
+
+    return sc
+
+
 # /* BOOT CONSOLE */ 
 #######################################################################
 
-w3 = init_web3()
-
 myIP  = '172.27.1.100'
 
+try:
+    w3 = init_web3()
+
+    myENODE = w3.geth.admin.nodeInfo().enode
+    myKEY = w3.eth.coinbase
+
+    tcpENODE = TCP_server(myENODE, myIP, 40421, True)
+    tcpKEY = TCP_server(myKEY, myIP, 40422, True)
+
+    tcpENODE.start()
+    tcpKEY.start()
+
+except:
+    print('No connection to running Geth process')
+
+
+
 myTIME = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-myENODE = w3.geth.admin.nodeInfo().enode
-myKEY = w3.eth.coinbase
-
 tcpTIME  = TCP_server(myTIME, myIP, 40123, True)
-tcpENODE = TCP_server(myENODE, myIP, 40421, True)
-tcpKEY = TCP_server(myKEY, myIP, 40422, True)
-
 
 def clock():
     while True:
@@ -93,7 +116,6 @@ clockTh.daemon = True
 clockTh.start()
 
 tcpTIME.start()
-tcpENODE.start()
-tcpKEY.start()
+
 
 

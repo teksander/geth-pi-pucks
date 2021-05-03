@@ -35,6 +35,9 @@ eventRate = 1
 globalPeers = 0
 ageLimit = 2
 
+# Global parameters
+# subprocess.call("source ../../globalconfig")
+
 # /* Initialize Sub-modules */
 #######################################################################
 
@@ -99,7 +102,7 @@ class Logger(object):
 		return time.time()-self.tStamp > self.rate
 
 	def start(self):
-		self.tStart = startStamp
+		self.tStart = time.time()
 
 	def close(self):
 		self.file.close()
@@ -128,6 +131,7 @@ synclog = Logger('logs/sync.csv', syncheader)
 extraheader = ['CHAINDATASIZE', '%CPU']
 extralog = Logger('logs/extra.csv', extraheader)
 
+# Edit logmodules list to include the desired logs
 logmodules = [bufferlog, estimatelog, votelog, sclog, mainlog, blocklog, synclog, extralog]
 
 # /* Define Main-modules */
@@ -312,7 +316,7 @@ def Vote(rate = voteRate):
 	
 
 		# Low frequency logging of chaindata size and cpu usage
-		chainSize = getFolderSize('/home/pi/mygethnode/geth')
+		chainSize = getFolderSize('/home/pi/geth-pi-pucks/geth')
 		useCPU = str(round(float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline()),2))
 		extralog.log([chainSize,useCPU])
 
@@ -517,60 +521,53 @@ def waitForPC():
 		except:
 			time.sleep(1)
 
-def waitForSC():
-	global sc
-	sc = None
+# def waitForSC():
+# 	global sc
+# 	sc = None
 
-	w3.geth.miner.start()
-	txFilter = w3.eth.filter('pending')
-	while True:
-		for txHex in txFilter.get_new_entries():
-			tx = w3.eth.getTransaction(txHex)
-			if tx['to'] == None:
-				scReceipt = w3.eth.waitForTransactionReceipt(tx.hash)
-				abiPath = '/scs/build/Estimation.abi'
-				abi = json.loads(open(abiPath).read())
+# 	w3.geth.miner.start()
+# 	txFilter = w3.eth.filter('pending')
+# 	while True:
+# 		for txHex in txFilter.get_new_entries():
+# 			tx = w3.eth.getTransaction(txHex)
+# 			if tx['to'] == None:
+# 				scReceipt = w3.eth.waitForTransactionReceipt(tx.hash)
+# 				abiPath = os.getcwd()+'/scs/build/Estimation.abi'
+# 				abi = json.loads(open(abiPath).read())
 
-				sc = w3.eth.contract(abi=abi, address=scReceipt.contractAddress)
-				startBlock = scReceipt.blockNumber
-				global startStamp
-				startStamp = w3.eth.getBlock(startBlock).timestamp
-				mainlog.log(['SETUP: Smart Contract Received at Block {}'.format(startBlock)])	
-				print('Smart Contract Received at Block {}'.format(startBlock))
-				break	
+# 				sc = w3.eth.contract(abi=abi, address=scReceipt.contractAddress)
+# 				startBlock = scReceipt.blockNumber
+# 				global startStamp
+# 				startStamp = w3.eth.getBlock(startBlock).timestamp
+# 				mainlog.log(['SETUP: Smart Contract Received at Block {}'.format(startBlock)])	
+# 				print('Smart Contract Received at Block {}'.format(startBlock))
+# 				break	
 
-		if sc != None:
-			sc.functions.registerRobot().transact()
-			w3.geth.miner.stop()
-			if globalPeers:
-				break
-			else:
-				pc.w3 = w3
-				pc.kill()
-				if not pc.isPeer():
-					break
-		else:
-			time.sleep(2)
+# 		if sc != None:
+# 			sc.functions.registerRobot().transact()
+# 			w3.geth.miner.stop()
+# 			if globalPeers:
+# 				break
+# 			else:
+# 				pc.w3 = w3
+# 				pc.kill()
+# 				if not pc.isPeer():
+# 					break
+# 		else:
+# 			time.sleep(2)
 
 def registerSC():
-	global sc
 	sc = None
 
 	abiPath = os.getcwd()+'/scs/build/Estimation.abi'
 	abi = json.loads(open(abiPath).read())
 
 	addressPath = os.getcwd()+'/scs/contractAddress.txt'
-	address = open(abiPath).read()
+	address = '0x'+open(addressPath).read().rstrip()
 
-	print(abi)
-	print(address)
-
-	# sc = w3.eth.contract(abi=abi, address=address)
-	# startBlock = 0
-	# global startStamp
-	# startStamp = 0
-	# sc.functions.registerRobot().transact()
+	sc = w3.eth.contract(abi=abi, address=address)
 	
+	return sc
 
 def i2cdetect():
 	i2cFlag = True
@@ -600,6 +597,13 @@ if len(sys.argv) == 1:
 	print('Waiting for Time Sync...')
 	waitForTS()
 
+	# /* Register to the Smart Contract*/
+	sc = registerSC()
+	if sc:
+		sc.functions.registerRobot().transact()
+	else:
+		print('SC register failed')
+
 	# # /* Wait for PC Enode */
 	# print('Waiting for PC Enode...')
 	# waitForPC()
@@ -608,7 +612,7 @@ if len(sys.argv) == 1:
 	# print('Waiting for SC deployment...')
 	# waitForSC()
 
-	registerSC()
+
 	# /* Begin Experiment */
 	#######################################################################
 	START()
@@ -655,6 +659,13 @@ elif len(sys.argv) == 2:
 		# /* Wait for Time Synchronization */ 
 		print('Waiting for Time Sync...')
 		waitForTS()
+
+		# /* Register to the Smart Contract*/
+		sc = registerSC()
+		if sc:
+			sc.functions.registerRobot().transact()
+		else:
+			print('SC register failed')
 
 		# # /* Wait for PC Enode */
 		# print('Waiting for PC Enode...')
