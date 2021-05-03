@@ -4,6 +4,8 @@
 # - The Pi-puck IDs are listed in pi-pucks.txt
 # - Arg1 is the file to send; Arg2 is the folder in /home/pi/
 
+source ../../globalconfig
+
 IDS_FILE="pi-pucks.txt"
 PREFIX="pi@${SUBNET}."
 

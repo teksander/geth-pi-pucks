@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-sys.path.insert(1, '/home/esmi/mygethnode/control/experiment')
+sys.path.insert(1, '/home/eksander/geth-pi-pucks/control/robots')
 from console import *
 from aux import TCP_server
 import json
@@ -20,12 +20,12 @@ def getIds(database = 'geth'):
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
 
     elif database == 'file':
-        keyMap = open('/home/esmi/mygethnode/control/experiment-pc/key-mapping.txt')
+        keyMap = open('/home/eksander/geth-pi-pucks/control/monitor-pc/key-mapping.txt')
         return [line.split()[0] for line in keyMap]
 
 
 def getBalances():
-    keyMap = open('/home/esmi/mygethnode/control/experiment-pc/key-mapping.txt')
+    keyMap = open('/home/eksander/geth-pi-pucks/control/monitor-pc/key-mapping.txt')
 
     for line in keyMap:
         key = line.split()[-1]
@@ -33,7 +33,7 @@ def getBalances():
         print(key, round(w3.fromWei(w3.eth.getBalance(address), 'ether'), 2))
 
 def fundRobots(_value = 0.01):
-    keyMap = open('/home/esmi/mygethnode/control/experiment-pc/key-mapping.txt')
+    keyMap = open('/home/eksander/geth-pi-pucks/control/monitor-pc/key-mapping.txt')
 
     for line in keyMap:
         key = line.split()[-1]
@@ -43,8 +43,8 @@ def fundRobots(_value = 0.01):
 def deploySC():
     fundRobots()
     # Set path to build files
-    abi_path = '/home/esmi/mygethnode/control/experiment/scs/build/Estimation.abi'
-    bin_path = '/home/esmi/mygethnode/control/experiment/scs/build/Estimation.bin'
+    abi_path = '/home/eksander/geth-pi-pucks/control/robots/scs/build/Estimation.abi'
+    bin_path = '/home/eksander/geth-pi-pucks/control/robots/scs/build/Estimation.bin'
 
     # Load build files
     abi = json.loads(open(abi_path).read())

@@ -11,7 +11,7 @@ wait
 
 # Reset GETH folders
 echo "Reseting Pi-Puck Chaindata..."
-rm -r "$MAIN_DIR" /geth
-./ssh-all "rm -r $MAIN_DIR_ROBOTS /geth"
+rm -r "$MAIN_DIR"/geth
+./ssh-all "rm -r $MAIN_DIR_ROBOTS/geth"
 wait
 

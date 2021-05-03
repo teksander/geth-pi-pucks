@@ -4,6 +4,8 @@
 # - CSSH is installed 
 # - The Pi-puck IDs are listed in pi-pucks.txt
 
+source ../../globalconfig
+
 IDS_FILE="pi-pucks.txt"
 PREFIX="pi@${SUBNET}."
 
