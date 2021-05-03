@@ -58,6 +58,7 @@ def deploySC():
 
     global startBlock 
     startBlock = txReceipt.blockNumber
+    print(txReceipt.contractAddress)
     contract = w3.eth.contract(address=txReceipt.contractAddress, abi=abi)
     txUBIFunds = {'from': w3.eth.coinbase,'value': w3.toWei(10000,'ether')}
     contract.functions.sendFund().transact(txUBIFunds)

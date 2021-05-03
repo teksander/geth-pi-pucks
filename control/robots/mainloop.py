@@ -517,40 +517,40 @@ def waitForPC():
 		except:
 			time.sleep(1)
 
-# def waitForSC():
-# 	global sc
-# 	sc = None
+def waitForSC():
+	global sc
+	sc = None
 
-# 	w3.geth.miner.start()
-# 	txFilter = w3.eth.filter('pending')
-# 	while True:
-# 		for txHex in txFilter.get_new_entries():
-# 			tx = w3.eth.getTransaction(txHex)
-# 			if tx['to'] == None:
-# 				scReceipt = w3.eth.waitForTransactionReceipt(tx.hash)
-# 				abiPath = '/scs/build/Estimation.abi'
-# 				abi = json.loads(open(abiPath).read())
+	w3.geth.miner.start()
+	txFilter = w3.eth.filter('pending')
+	while True:
+		for txHex in txFilter.get_new_entries():
+			tx = w3.eth.getTransaction(txHex)
+			if tx['to'] == None:
+				scReceipt = w3.eth.waitForTransactionReceipt(tx.hash)
+				abiPath = '/scs/build/Estimation.abi'
+				abi = json.loads(open(abiPath).read())
 
-# 				sc = w3.eth.contract(abi=abi, address=scReceipt.contractAddress)
-# 				startBlock = scReceipt.blockNumber
-# 				global startStamp
-# 				startStamp = w3.eth.getBlock(startBlock).timestamp
-# 				mainlog.log(['SETUP: Smart Contract Received at Block {}'.format(startBlock)])	
-# 				print('Smart Contract Received at Block {}'.format(startBlock))
-# 				break	
+				sc = w3.eth.contract(abi=abi, address=scReceipt.contractAddress)
+				startBlock = scReceipt.blockNumber
+				global startStamp
+				startStamp = w3.eth.getBlock(startBlock).timestamp
+				mainlog.log(['SETUP: Smart Contract Received at Block {}'.format(startBlock)])	
+				print('Smart Contract Received at Block {}'.format(startBlock))
+				break	
 
-# 		if sc != None:
-# 			sc.functions.registerRobot().transact()
-# 			w3.geth.miner.stop()
-# 			if globalPeers:
-# 				break
-# 			else:
-# 				pc.w3 = w3
-# 				pc.kill()
-# 				if not pc.isPeer():
-# 					break
-# 		else:
-# 			time.sleep(2)
+		if sc != None:
+			sc.functions.registerRobot().transact()
+			w3.geth.miner.stop()
+			if globalPeers:
+				break
+			else:
+				pc.w3 = w3
+				pc.kill()
+				if not pc.isPeer():
+					break
+		else:
+			time.sleep(2)
 
 def registerSC():
 	global sc
