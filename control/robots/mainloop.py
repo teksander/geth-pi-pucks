@@ -602,7 +602,7 @@ if len(sys.argv) == 1:
 	if sc:
 		sc.functions.registerRobot().transact()
 	else:
-		print('SC register failed')
+		print('SC Register Failed')
 
 	# # /* Wait for PC Enode */
 	# print('Waiting for PC Enode...')
