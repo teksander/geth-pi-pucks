@@ -1,0 +1,29 @@
+#!/bin/bash
+# Short script to command all robots via Cluster SSH
+# Assumptions:
+# - CSSH is installed 
+# - The Pi-puck IDs are listed in pi-pucks.txt
+
+source ../../globalconfig
+
+IDS_FILE="pi-pucks.txt"
+PREFIX="pi@${SUBNET}."
+
+# Open TMUX console for each robot
+ALL_IPS=()
+if [ "$#" -eq 0 ]; then
+for ID in $(cat "$IDS_FILE"); do
+	ALL_IPS+=(${PREFIX}${ID})
+done
+fi
+
+split_list=()
+for IP in "${ALL_IPS[@]:1}"; do
+    split_list+=( split-pane ssh "$IP" ';' )
+done
+
+gnome-terminal -- tmux new-session ssh "${ALL_IPS[0]}" ';' \
+    "${split_list[@]}" \
+    select-layout tiled ';' \
+    set-option -w synchronize-panes \
+

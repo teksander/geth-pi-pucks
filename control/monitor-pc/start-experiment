@@ -1,36 +1,85 @@
 #!/bin/bash  
 # Short script begin the an experiment
+source ../../globalconfig
+IDS_FILE="pi-pucks.txt"
 
-# Parameters
-NUM_BYZ=0
-NUM_ROB=2
+# Experiment Parameters
+NUM_ROB=3
+NUM_BYZ=2
+
+echo "Starting experiment with $NUM_ROB robots ($NUM_BYZ byzantines)"
+echo "----//----"
 
 # Update Responding Pi-Pucks
 ./ping-all
 wait
 echo "----//----"
 
-NUM_RESP=$(wc -l < pi-pucks.txt)
 
+# Check responding robot count
+NUM_RESP=$(wc -l < pi-pucks.txt)
 if ((NUM_ROB != NUM_RESP)); then
-	printf '%s\n' "Not enough robot are responding" >&2  # write error message to stderr
+	printf '%s\n' "Not enough robots are responding. STOP" >&2 
 	exit 1         
 fi
 
-# Reset the Genesis File
-echo "Reseting Genesis Block..."
-./reset-genesis
-wait
-echo "----//----"
+# # Check I2C on each robot
+# for ID in $(cat "$IDS_FILE"); do
+# 	IP="${PREFIX}${ID}"
+# 	I2CCOUNT=$(ssh "$IP" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 | 6e ' | wc -l")
+	
+# 	if ((I2CCOUNT != 4)); then
+# 	echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
+# 	echo "STOP" >&2 
+# 	exit 1      
+# 	else
+# 	echo "$SUBNET.$ID I2C success (${I2CCOUNT} devices)"    
+# 	fi
+# done
+# wait
+# echo "----//----"
 
-# Distribute Keys
-echo "Reseting Pi-Puck Keys..."
-./reset-keys
-wait
-echo "----//----"
+# # Reset GETH 
+# echo "Reseting Geth..."
+# ./reset-geth
+# wait
+# echo "----//----"
 
-# # Restart GETH processes
-echo "Rebooting GETH"
-./ssh-all "sudo systemctl enable geth.service"
-./ssh-all "sudo systemctl start geth.service"
-wait
+# # Reset the Genesis File
+# echo "Reseting Genesis Block..."
+# ./reset-genesis
+# wait
+# echo "----//----"
+
+# # Distribute Keys
+# echo "Reseting Pi-Puck Keys..."
+# ./reset-keys
+# wait
+# echo "----//----"
+
+# Open console for time server
+# gnome-terminal --tab -- python3 -i console-pc.py
+
+# Open two TMUX sessions 
+# tmux kill-session -t GETH >/dev/null 2>&1
+# ./tmux-all
+# tmux rename-session GETH
+
+# tmux kill-session -t MAINLOOP >/dev/null 2>&1
+# ./tmux-all
+# tmux rename-session MAINLOOP
+# tmux set-option -w -t MAINLOOP synchronize-panes off
+
+# On the GETH TMUX session we execute setup-geth (all robots)
+# tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
+
+panes_byz=($(shuf -i 0-$(($NUM_ROB-1)) -n $NUM_BYZ))
+echo "${panes_byz[@]}"
+
+# # On the GETH TMUX session we execute mainloop.py with option --byz (byzantine robots)
+# tmux send-keys -t MAINLOOP:0.1 "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz" 
+
+# # On the GETH TMUX session we execute mainloop.py with no additional inputs (good robots)
+# tmux send-keys -t MAINLOOP:0.0 "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py" 
+# tmux send-keys -t MAINLOOP:0.2 "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py" 
+# tmux set-option -w -t MAINLOOP synchronize-panes on

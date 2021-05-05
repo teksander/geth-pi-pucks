@@ -42,3 +42,15 @@ if [ $1 == "control" ]; then
 	done
 	wait
 fi
+
+if [ $1 == "all" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control "$IP:$MAIN_DIR_ROBOTS/"  &
+		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS/"  &
+		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS/"  &
+		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS/"  &
+		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS/"  &
+	done
+	wait
+fi

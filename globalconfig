@@ -2,12 +2,15 @@
 # Define variables used frequently
 
 export BASE_FOLDER="geth-pi-pucks"
+export ROBOTS_NAME="pi"
+export SUBNET="172.27.1"
 
 export MAIN_DIR="/home/$USER/$BASE_FOLDER"
-export MAIN_DIR_ROBOTS="/home/pi/$BASE_FOLDER"
+export MAIN_DIR_ROBOTS="/home/$ROBOTS_NAME/$BASE_FOLDER"
 
 export GENESIS_FILE="$MAIN_DIR/genesis/pipucks.json"
 export CONTRACT_FILE="$MAIN_DIR/control/robots/scs/experiment.sol"
 export CONTRACT_ABI="$MAIN_DIR/control/robots/scs/build/Estimation.abi"
 export CONTRACT_ADDRESS=`cat $MAIN_DIR/control/robots/scs/contractAddress.txt`
-export SUBNET="172.27.1"
+
+export PREFIX="${ROBOTS_NAME}@${SUBNET}."

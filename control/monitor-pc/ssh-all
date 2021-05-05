@@ -23,7 +23,7 @@ ALL_IPS=""
 for ID in $(cat "$IDS_FILE"); do
 	ALL_IPS="$ALL_IPS ${PREFIX}${ID}"
 done
-cssh $ALL_IPS
+cssh $ALL_IPS 
 fi
 
 wait
