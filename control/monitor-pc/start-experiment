@@ -4,8 +4,8 @@ source ../../globalconfig
 IDS_FILE="pi-pucks.txt"
 
 # Experiment Parameters
-NUM_ROB=3
-NUM_BYZ=2
+NUM_ROB=2
+NUM_BYZ=1
 
 echo "Starting experiment with $NUM_ROB robots ($NUM_BYZ byzantines)"
 echo "----//----"
@@ -23,63 +23,84 @@ if ((NUM_ROB != NUM_RESP)); then
 	exit 1         
 fi
 
-# # Check I2C on each robot
-# for ID in $(cat "$IDS_FILE"); do
-# 	IP="${PREFIX}${ID}"
-# 	I2CCOUNT=$(ssh "$IP" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 | 6e ' | wc -l")
+# Check I2C on each robot
+for ID in $(cat "$IDS_FILE"); do
+	IP="${PREFIX}${ID}"
+	I2CCOUNT=$(ssh "$IP" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 | 6e ' | wc -l")
 	
-# 	if ((I2CCOUNT != 4)); then
-# 	echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
-# 	echo "STOP" >&2 
-# 	exit 1      
-# 	else
-# 	echo "$SUBNET.$ID I2C success (${I2CCOUNT} devices)"    
-# 	fi
-# done
-# wait
-# echo "----//----"
+	if ((I2CCOUNT != 4)); then
+	echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
+	echo "STOP" >&2 
+	exit 1      
+	else
+	echo "$SUBNET.$ID I2C success (${I2CCOUNT} devices)"    
+	fi
+done
+wait
+echo "----//----"
 
-# # Reset GETH 
-# echo "Reseting Geth..."
-# ./reset-geth
-# wait
-# echo "----//----"
+# Reset GETH 
+echo "Reseting Geth..."
+./reset-geth
+wait
+echo "----//----"
 
-# # Reset the Genesis File
-# echo "Reseting Genesis Block..."
-# ./reset-genesis
-# wait
-# echo "----//----"
+# Reset the Genesis File
+echo "Reseting Genesis Block..."
+./reset-genesis
+wait
+echo "----//----"
 
-# # Distribute Keys
-# echo "Reseting Pi-Puck Keys..."
-# ./reset-keys
-# wait
-# echo "----//----"
+# Distribute Keys
+echo "Reseting Pi-Puck Keys..."
+./reset-keys
+wait
+echo "----//----"
 
 # Open console for time server
-# gnome-terminal --tab -- python3 -i console-pc.py
+gnome-terminal --tab -- python3 -i console-pc.py
 
-# Open two TMUX sessions 
-# tmux kill-session -t GETH >/dev/null 2>&1
-# ./tmux-all
-# tmux rename-session GETH
+Open two TMUX sessions 
+tmux kill-session -t GETH >/dev/null 2>&1
+./tmux-all
+tmux rename-session GETH
 
-# tmux kill-session -t MAINLOOP >/dev/null 2>&1
-# ./tmux-all
-# tmux rename-session MAINLOOP
-# tmux set-option -w -t MAINLOOP synchronize-panes off
+tmux kill-session -t MAINLOOP >/dev/null 2>&1
+./tmux-all
+tmux rename-session MAINLOOP
 
-# On the GETH TMUX session we execute setup-geth (all robots)
-# tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
+# GETH TMUX session: Execute setup-geth (all robots)
+tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
 
-panes_byz=($(shuf -i 0-$(($NUM_ROB-1)) -n $NUM_BYZ))
-echo "${panes_byz[@]}"
+# MAINLOOP TMUX session: Execute mainloop.py with no option (good robots)
+# MAINLOOP TMUX session: Execute mainloop.py with option --byz (byzantine robots)
+BYZ_COUNT=0
+tmux set-option -w -t MAINLOOP synchronize-panes off
+# Randomely select byzantine robots:
+for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
+	if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz" 
+		let BYZ_COUNT++
+	else
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py" 
+	fi
+done
+tmux set-option -w -t MAINLOOP synchronize-panes on
 
-# # On the GETH TMUX session we execute mainloop.py with option --byz (byzantine robots)
-# tmux send-keys -t MAINLOOP:0.1 "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz" 
 
-# # On the GETH TMUX session we execute mainloop.py with no additional inputs (good robots)
-# tmux send-keys -t MAINLOOP:0.0 "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py" 
-# tmux send-keys -t MAINLOOP:0.2 "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py" 
-# tmux set-option -w -t MAINLOOP synchronize-panes on
+# Record log files
+while true; do
+	echo "What is the title of the experiment?"
+	read EXPERIMENT_NAME
+
+	echo "What is the number of the repetition?"
+	read REP_NUMBER
+
+	LOG_FILENAME=experiment_$EXPERIMENT_NAME/${NUM_ROB}rob-${NUM_BYZ}byz-$REP_NUMBER
+
+	echo "FINISH EXPERIMENT AND RECORD LOGS TO: $LOG_FILENAME ? [Y/N]"
+	read CONF
+	if [ $CONF = "Y" -o $CONF = "y" ]; then
+		break
+	fi
+done
