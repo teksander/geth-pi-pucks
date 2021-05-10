@@ -1,16 +1,17 @@
 #!/bin/bash  
 # Short script to ping the complete list of Pi-Pucks
 # Returns a text file pi-pucks.txt containing the responding Pi-Puck IDs
-# Assumptions:
-# - All known Pi-puck IDs are listed in ~/geth-pi-pucks/swarm-control/pi-pucks-all.txt
 source ../../globalconfig
 
-IDS_FILE="pi-pucks-all.txt"
+
+PIPUCK1_ALL=(101 102 103 104 105 106 107 108 109 110)
+PIPUCK2_ALL=(201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216)
+
 > pi-pucks.txt
 
 touch temp.txt
-for ID in $(cat "$IDS_FILE"); do
-	( ping -n -c 1 -w 1 $SUBNET.$ID 1>/dev/null 2>&1 && echo $ID  >> temp.txt && printf "%-12s %s\n" $SUBNET.$ID responded) &  
+for ID in "${PIPUCK1_ALL[@]}" "${PIPUCK2_ALL[@]}"; do
+	( ping -n -c 1 -w 1 $SUBNET.$ID 1>/dev/null 2>&1 && echo $ID  >> temp.txt && printf "%-12s %s\n" $SUBNET.$ID responded) &
 done 
 wait
 

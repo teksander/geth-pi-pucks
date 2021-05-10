@@ -6,7 +6,6 @@
 
 source ../../globalconfig
 
-IDS_FILE="pi-pucks.txt"
 NUM_NODES=$(cat "$IDS_FILE" | grep -v ^$ | wc -l)
 
 > genesis.conf 

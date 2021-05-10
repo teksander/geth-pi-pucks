@@ -3,14 +3,19 @@
 
 export BASE_FOLDER="geth-pi-pucks"
 export ROBOTS_NAME="pi"
+export MONITOR_NAME="eksander"
+export MONITOR_ID="100"
 export SUBNET="172.27.1"
+
 
 export MAIN_DIR="/home/$USER/$BASE_FOLDER"
 export MAIN_DIR_ROBOTS="/home/$ROBOTS_NAME/$BASE_FOLDER"
 
+export IDS_FILE="pi-pucks.txt"
 export GENESIS_FILE="$MAIN_DIR/genesis/pipucks.json"
 export CONTRACT_FILE="$MAIN_DIR/control/robots/scs/experiment.sol"
 export CONTRACT_ABI="$MAIN_DIR/control/robots/scs/build/Estimation.abi"
 export CONTRACT_ADDRESS=`cat $MAIN_DIR/control/robots/scs/contractAddress.txt`
 
 export PREFIX="${ROBOTS_NAME}@${SUBNET}."
+

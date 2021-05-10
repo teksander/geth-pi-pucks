@@ -20,13 +20,39 @@ class RandomWalk(object):
 		self.MAX_SPEED = MAX_SPEED                          
 		self.__stop = 1
 
+	def __write_data(self, register, data):
+		trials = 0
+		while 1:
+			try:
+				self.__bus.write_word_data(self.__i2c_address, register, data)
+				return
+			except:
+				trials+=1
+				if(trials == 5):
+					print('I2C write error occured')
+					traceback.print_exc(file=sys.stdout)
+					sys.exit(1)
+
+	def __read_data(self, register):
+		trials = 0
+		while(1):
+			try:	
+				return self.__bus.read_word_data(self.__i2c_address, register)
+			except:
+				trials+=1
+				if(trials == 5):
+					print('I2C read error occured')
+					traceback.print_exc(file=sys.stdout)
+					sys.exit(1)			
+
 	def __walking(self):
 		""" This method runs in the background until program is closed """
 
 		# Initialize I2C bus
 		I2C_CHANNEL = 4
 		EPUCK_I2C_ADDR = 0x1f
-		self.bus = smbus.SMBus(I2C_CHANNEL)
+		self.__bus = smbus.SMBus(I2C_CHANNEL)
+		self.__i2c_address = EPUCK_I2C_ADDR
 
 		# Motor register addresses
 		LEFT_MOTOR_SPEED = 2
@@ -48,7 +74,7 @@ class RandomWalk(object):
 		weights_right = [-1 * x for x in weights_left]
 
 		# Turn IR sensors on
-		self.bus.write_word_data(EPUCK_I2C_ADDR, IR_CONTROL, 1)
+		self.__write_data(IR_CONTROL, 1)
 
 		while True:
 
@@ -76,7 +102,7 @@ class RandomWalk(object):
 			# Obstacle avoidance
 			self.ir = [0] * 8
 			for i in range(8):
-				self.ir[i] = self.bus.read_word_data(EPUCK_I2C_ADDR, IR0_REFLECTED + i)
+				self.ir[i] = self.__read_data(IR0_REFLECTED + i)
 				if self.ir[i]>50000:
 					self.ir[i] = 0
 					
@@ -98,14 +124,14 @@ class RandomWalk(object):
 				right = -self.MAX_SPEED
 
 			# Set wheel speeds
-			self.bus.write_word_data(EPUCK_I2C_ADDR, LEFT_MOTOR_SPEED, int(left))
-			self.bus.write_word_data(EPUCK_I2C_ADDR, RIGHT_MOTOR_SPEED, int(right))
+			self.__write_data(LEFT_MOTOR_SPEED, int(left))
+			self.__write_data(RIGHT_MOTOR_SPEED, int(right))
 
 			if self.__stop:
 				# Stop IR and Motor
-				self.bus.write_word_data(EPUCK_I2C_ADDR, IR_CONTROL, 0) 
-				self.bus.write_word_data(EPUCK_I2C_ADDR, LEFT_MOTOR_SPEED, 0) 
-				self.bus.write_word_data(EPUCK_I2C_ADDR, RIGHT_MOTOR_SPEED, 0)
+				self.__write_data(IR_CONTROL, 0) 
+				self.__write_data(LEFT_MOTOR_SPEED, 0) 
+				self.__write_data(RIGHT_MOTOR_SPEED, 0)
 				self.setLEDs(0b00000000) 
 				# self.bus.close()
 				break 
@@ -133,19 +159,15 @@ class RandomWalk(object):
 	def setLEDs(self, state):
 		""" This method is called set the outer LEDs to an 8-bit state """
 		OUTER_LEDS = 0
-		EPUCK_I2C_ADDR = 0x1f
-		# INNER_LEDS = 1
-		try:
-			self.bus.write_word_data(EPUCK_I2C_ADDR, OUTER_LEDS, state)
-		except:
-			print('Failed to set LEDs for whatever reason')
+		self.__write_data(OUTER_LEDS, state)
+
 			
 	def flashLEDs(self, delay = 0.1):
 		self.setLEDs(0b11111111)
 		time.sleep(delay)
 		self.setLEDs(0b00000000)
 
-	def getObs(self):
+	def getIr(self):
 		""" This method returns the IR readings """
 		return self.ir
 

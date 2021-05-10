@@ -3,12 +3,9 @@
 # Assumptions:
 # - The Pi-puck IDs (initial sealers) are listed in pi-pucks.txt
 # - The key files titled "key-i", i = {1, 2 ... n} are in folder keystore-all/
-
 source ../../globalconfig
 
-IDS_FILE="pi-pucks.txt"
-PREFIX="pi@${SUBNET}."
-INDEX=1
+# Delete file that stores key map
 > key-mapping.txt 
 
 # Remove Previous Key Files
@@ -16,6 +13,7 @@ INDEX=1
 
 wait
 # Distribute new key files
+INDEX=1
 for ID in $(cat "$IDS_FILE"); do
 	wait
 	KEY_FILE=$"key-$INDEX"

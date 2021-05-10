@@ -572,12 +572,19 @@ def registerSC():
 def i2cdetect():
 	i2cFlag = True
 	bus = smbus.SMBus(4) # 1 indicates /dev/i2c-1
-	for device in [0x1f, 0x20, 0x60,0x6e]:
-		try:
-			bus.read_byte(device)
-		except:
-			print('I2C Bus not responding: {}'.format(device))
-			i2cFlag = False
+
+	for device in [0x1f, 0x20, 0x60]:
+		trials = 0
+		while True:
+			try:
+				bus.read_byte(device)
+				return
+			except:
+				trials+=1
+				if trials == 5:
+					print('I2C Bus not responding: {}'.format(device))
+					i2cFlag = False
+					return
 
 	return i2cFlag
 

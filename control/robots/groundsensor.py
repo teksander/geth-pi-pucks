@@ -21,6 +21,23 @@ class GroundSensor(object):
 		self.count = 0
 		self.failed = 0
 
+	def __read_reg(self, reg, count):
+		data = bytearray([0] * 6)
+		trials=0
+		while True:
+			try:			
+				data = self.__bus.read_i2c_block_data(self.__GROUNDSENSOR_ADDRESS, reg, count)
+				self.failed = 0
+				return
+			except:
+				trials+=1
+				if trials == 5:
+					print('I2C read error occured')
+					self.failed = 1	
+					return None
+
+		return data
+
 	def __sensing(self):
 		""" This method runs in the background until program is closed 
 		"""  
@@ -87,17 +104,6 @@ class GroundSensor(object):
 		else:
 			return self.groundValue;
 
-	def __read_reg(self, reg, count):
-		data = bytearray([0] * 6)
-		try:			
-			data = self.__bus.read_i2c_block_data(self.__GROUNDSENSOR_ADDRESS, reg, count)
-			self.failed = 0	
-		except:
-			# print("read error")
-			self.failed = 1	
-			return None
-
-		return data
 
 	def hasFailed(self):
 		""" This method returns wether the module failed """

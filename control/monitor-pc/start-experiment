@@ -1,13 +1,14 @@
 #!/bin/bash  
 # Short script begin the an experiment
 source ../../globalconfig
-IDS_FILE="pi-pucks.txt"
+
 
 # Experiment Parameters
-NUM_ROB=2
-NUM_BYZ=1
+EXPERIMENT_NAME=$1
+NUM_ROB=$2
+NUM_BYZ=$3
 
-echo "Starting experiment with $NUM_ROB robots ($NUM_BYZ byzantines)"
+echo "Starting experiment $EXPERIMENT_NAME with $NUM_ROB robots ($NUM_BYZ byzantines)"
 echo "----//----"
 
 # Update Responding Pi-Pucks
@@ -26,9 +27,9 @@ fi
 # Check I2C on each robot
 for ID in $(cat "$IDS_FILE"); do
 	IP="${PREFIX}${ID}"
-	I2CCOUNT=$(ssh "$IP" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 | 6e ' | wc -l")
+	I2CCOUNT=$(ssh "$IP" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 ' | wc -l")
 	
-	if ((I2CCOUNT != 4)); then
+	if ((I2CCOUNT != 3)); then
 	echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
 	echo "STOP" >&2 
 	exit 1      
@@ -60,7 +61,7 @@ echo "----//----"
 # Open console for time server
 gnome-terminal --tab -- python3 -i console-pc.py
 
-Open two TMUX sessions 
+# Open two TMUX sessions 
 tmux kill-session -t GETH >/dev/null 2>&1
 ./tmux-all
 tmux rename-session GETH
@@ -79,28 +80,34 @@ tmux set-option -w -t MAINLOOP synchronize-panes off
 # Randomely select byzantine robots:
 for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
 	if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz" 
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz"
 		let BYZ_COUNT++
 	else
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py" 
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
 	fi
 done
 tmux set-option -w -t MAINLOOP synchronize-panes on
+sleep 3
+tmux send-keys -t MAINLOOP:0.0 Enter
 
+read -p "Press Enter when experiment is concluded"
+
+# Stop the Experiment
+tmux send-keys -t MAINLOOP:0.0 C-c
 
 # Record log files
 while true; do
-	echo "What is the title of the experiment?"
-	read EXPERIMENT_NAME
 
-	echo "What is the number of the repetition?"
+	echo "What is the experiment repetition number?"
 	read REP_NUMBER
 
-	LOG_FILENAME=experiment_$EXPERIMENT_NAME/${NUM_ROB}rob-${NUM_BYZ}byz-$REP_NUMBER
+	LOG_FOLDER=experiment_$EXPERIMENT_NAME/${NUM_ROB}rob-${NUM_BYZ}byz-$REP_NUMBER
 
-	echo "FINISH EXPERIMENT AND RECORD LOGS TO: $LOG_FILENAME ? [Y/N]"
+	echo "RECORD THE ROBOT LOGS TO: $LOG_FOLDER ? [Y/N]"
 	read CONF
 	if [ $CONF = "Y" -o $CONF = "y" ]; then
 		break
 	fi
 done
+
+./collect-logs $LOG_FOLDER

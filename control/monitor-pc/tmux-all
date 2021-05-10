@@ -1,15 +1,14 @@
 #!/bin/bash
-# Short script to command all robots via Cluster SSH
+# Short script to open TMUX console with a pane for each robot
 # Assumptions:
-# - CSSH is installed 
+# - tmux is installed 
 # - The Pi-puck IDs are listed in pi-pucks.txt
-
 source ../../globalconfig
 
-IDS_FILE="pi-pucks.txt"
-PREFIX="pi@${SUBNET}."
 
-# Open TMUX console for each robot
+NUM_ROB=$(wc -l < pi-pucks.txt)
+
+# Collect all robot IP addresses in a list
 ALL_IPS=()
 if [ "$#" -eq 0 ]; then
 for ID in $(cat "$IDS_FILE"); do
@@ -17,13 +16,22 @@ for ID in $(cat "$IDS_FILE"); do
 done
 fi
 
+# Create an sequence of split window action for each robot IP
 split_list=()
 for IP in "${ALL_IPS[@]:1}"; do
-    split_list+=( split-pane ssh "$IP" ';' )
+    split_list+=( split-pane ssh "$IP" ';' select-layout even-vertical ';' )
 done
 
-gnome-terminal -- tmux new-session ssh "${ALL_IPS[0]}" ';' \
-    "${split_list[@]}" \
-    select-layout tiled ';' \
-    set-option -w synchronize-panes \
+# Define the terminal geometry (larger if there are many robots)
+geom="default"
+if [ $NUM_ROB -gt 8 ]; then
+	geomX=$(( $NUM_ROB*5 ))
+	geomY=$(( $NUM_ROB*3 ))
+	geom="${geomX}x${geomY}"
+fi
 
+# Open the terminal and configure it 
+gnome-terminal --geometry="$geom" -- tmux new-session ssh "${ALL_IPS[0]}" ';' \
+    "${split_list[@]}" \
+    set-option -w synchronize-panes ';' \
+	select-layout tiled ';' \

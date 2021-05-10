@@ -25,18 +25,29 @@ class RGBLEDs(object):
 		self.frozen = False
 
 		try:
-			self.bus = smbus.SMBus(self.I2C_CHANNEL)
+			self.__bus = smbus.SMBus(self.I2C_CHANNEL)
 			self.setLED(self.all, 3*[self.off])
 		except:
 			print('RGB Failed')
 
+	def __write_byte_data(self, register, data):
+		trials = 0
+		while 1:
+			try:
+				self.__bus.write_byte_data(self.FT903_I2C_ADDR, register, data)
+				return
+			except:
+				trials+=1
+				if(trials == 5):
+					print('I2C write error occured')
+					traceback.print_exc(file=sys.stdout)
+					sys.exit(1)
+
 	def setLED(self, LED, RGB):
-		# try:
 		if not self.frozen:
 			for i in range(len(LED)):
-				self.bus.write_byte_data(self.FT903_I2C_ADDR, LED[i], RGB[i])
-		# except:
-		# 	pass
+				self.__write_byte_data(LED[i], RGB[i])
+
 
 	def flashRed(self, delay=1):
 		if not self.frozen:

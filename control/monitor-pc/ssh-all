@@ -3,11 +3,8 @@
 # Assumptions:
 # - CSSH is installed 
 # - The Pi-puck IDs are listed in pi-pucks.txt
-
 source ../../globalconfig
 
-IDS_FILE="pi-pucks.txt"
-PREFIX="pi@${SUBNET}."
 
 # Send individual command to each robot
 if [ "$#" -eq 1 ]; then

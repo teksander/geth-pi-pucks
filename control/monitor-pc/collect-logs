@@ -1,0 +1,12 @@
+#!/bin/bash  
+# Short script to extract log files from all robots listed
+# Assumptions:
+# - The Pi-puck IDs are listed in pi-pucks.txt
+source ../../globalconfig
+
+
+rm -rfv $MAIN_DIR/results/data/$1 && mkdir -p $MAIN_DIR/results/data/$1
+
+for ID in $(cat "$IDS_FILE"); do
+	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/logs $MAIN_DIR/results/data/$1/$ID
+done
