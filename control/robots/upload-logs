@@ -9,9 +9,8 @@ FILE="/boot/pi-puck_id"
 ID=$(cat "$FILE")
 
 touch logs/readme.txt
-ssh eksander@${SUBNET}.100 mkdir $MAIN_DIR/results/$1
 wait
-scp -r logs eksander@${SUBNET}.100:$MAIN_DIR/results/$1/$ID
+scp -r logs $MONITOR_NAME@${SUBNET}.${MONITOR_ID}:$MAIN_DIR/results/data/$1/$ID
 
 # mv logs $ID
 # wait
