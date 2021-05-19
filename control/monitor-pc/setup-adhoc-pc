@@ -38,10 +38,10 @@ fi
 # Setup ad hoc connection; run as sudo
 ip link set $IF
 iw $IF set type ibss
-ifconfig $IF mtu 1499
-iwconfig $IF channel 3
+ifconfig $IF mtu 1500
+iwconfig $IF channel 9
 ip link set $IF up
-iw $IF ibss join AdHocPi 2432
+iw $IF ibss join AdHocPi 2452
 
 # Configure batman-adv; run as sudo
 modprobe batman-adv

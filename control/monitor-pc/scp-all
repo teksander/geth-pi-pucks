@@ -3,6 +3,13 @@
 # Assumptions:
 # - The Pi-puck IDs are listed in pi-pucks.txt
 # - Arg1 is the file to send; Arg2 is the folder in /home/pi/
+# Quick options:
+# 'scs'      (uploads smart contract build folder)
+# 'mainloop' (uploads the latest saved mainloop)
+# 'control'  (uploads the full robot control folder)
+# 'all'      (deletes and restores the main directory)
+
+
 source ../../globalconfig
 
 if [ $# -eq 2 ]; then 
@@ -40,13 +47,26 @@ if [ $1 == "control" ]; then
 fi
 
 if [ $1 == "all" ]; then 
+	./ssh-all "rm -r $MAIN_DIR_ROBOTS > /dev/null 2>&1" &
+	wait
+	./ssh-all "mkdir $MAIN_DIR_ROBOTS; mkdir $MAIN_DIR_ROBOTS/control; mkdir $MAIN_DIR_ROBOTS/keystore; mkdir $MAIN_DIR_ROBOTS/genesis" &
+	wait
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control "$IP:$MAIN_DIR_ROBOTS/"  &
-		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS/"  &
-		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS/"  &
-		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS/"  &
-		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS/"  &
+		scp -r $MAIN_DIR/control "$IP:$MAIN_DIR_ROBOTS"  &
+		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS"  &
+		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS"  &
+		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS"  &
+		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS"  &
+		# scp -r [!.]* [!results]* [!monitor]* $MAIN_DIR "$IP:$MAIN_DIR_ROBOTS"  &
+	done
+	wait
+fi
+
+if [ $1 == "custom" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r /home/eksander/Pi-Pucks/AdHoc "$IP:/home/pi/"  &
 	done
 	wait
 fi

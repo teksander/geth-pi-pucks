@@ -4,16 +4,19 @@
 source ../../globalconfig
 
 
-PIPUCK1_ALL=(101 102 103 104 105 106 107 108 109 110)
-PIPUCK2_ALL=(201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216)
+# PIPUCK1_ALL=(101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119)
+# PIPUCK2_ALL=(201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216)
+
+PIPUCK1_ALL=(212)
 
 > pi-pucks.txt
 
 touch temp.txt
 for ID in "${PIPUCK1_ALL[@]}" "${PIPUCK2_ALL[@]}"; do
 	( ping -n -c 1 -w 1 $SUBNET.$ID 1>/dev/null 2>&1 && echo $ID  >> temp.txt && printf "%-12s %s\n" $SUBNET.$ID responded) &
+	sleep 0.1
 done 
-wait
+
 
 wait
 wc -l temp.txt | awk '{ print "Robot Count: " $1 }'
@@ -22,3 +25,7 @@ rm temp.txt
 cp pi-pucks.txt $MAIN_DIR/control/robots/
 
 
+# If user requests signal
+if [ "$1" == "--signal" ]; then 
+	./ssh-all "cd $MAIN_DIR_ROBOTS/control/robots; python3 rgbleds.py"
+fi

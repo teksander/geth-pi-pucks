@@ -1,0 +1,33 @@
+ID TIME BLK EVENT DESCRIPTION
+217 1591917240.134 0 SETUP: Synced Time
+217 1591917240.46 0 SETUP: Peered to PC
+217 1591917270.754 3 SETUP: Smart Contract Received at Block 3
+217 30.926 4 STARTED EXPERIMENT
+217 76.756 4 Failed Vote (No Balance). Balance: 0.01
+217 121.766 4 Failed Vote (No Balance). Balance: 0.01
+217 122.653 4 Added 214 from ERANDB
+217 126.139 4 Killed 214 @ age 2.24
+217 131.184 4 Added 213 from ERANDB
+217 133.697 5 Added 211 from ERANDB
+217 136.23 5 Killed 213 @ age 2.33
+217 150.285 5 Killed 211 @ age 2.14
+217 150.802 5 Added 211 from ERANDB
+217 164.837 5 Killed 211 @ age 2.01
+217 168.078 7 Failed Vote (No Balance). Balance: 20.01
+217 232.236 10 Added 211 from ERANDB
+217 237.759 10 Killed 211 @ age 2.47
+217 332.456 10 Failed Vote (Unexpected). Trying again. Balance: 40.01
+217 367.658 10 Added 211 from ERANDB
+217 376.189 10 Killed 211 @ age 2.53
+217 378.734 10 Added 211 from ERANDB
+217 399.914 15 Killed 211 @ age 2.14
+217 409.48 15 Added 211 from ERANDB
+217 427.07 17 Killed 211 @ age 2.36
+217 432.127 17 Added 211 from ERANDB
+217 453.199 18 Failed Vote (Unexpected). Trying again. Balance: 20.01
+217 453.863 18 Failed Vote (No Balance). Balance: 20.01
+217 455.735 18 Failed Vote (No Balance). Balance: 20.01
+217 500.767 18 Failed Vote (No Balance). Balance: 20.01
+217 511.785 18 Killed 211 @ age 2.05
+217 545.812 18 Failed Vote (No Balance). Balance: 20.01
+217 560.936 18 STOPPED EXPERIMENT

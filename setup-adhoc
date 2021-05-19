@@ -10,7 +10,7 @@ systemctl stop dhcpcd.service
 ip link set wlan0
 iw wlan0 set type ibss
 ifconfig wlan0 mtu 1499
-iwconfig wlan0 channel 3
+iwconfig wlan0 channel 7
 ip link set wlan0 up
 iw wlan0 ibss join AdHocPi 2432
 

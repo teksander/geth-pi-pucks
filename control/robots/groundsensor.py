@@ -28,15 +28,13 @@ class GroundSensor(object):
 			try:			
 				data = self.__bus.read_i2c_block_data(self.__GROUNDSENSOR_ADDRESS, reg, count)
 				self.failed = 0
-				return
+				return data
 			except:
 				trials+=1
 				if trials == 5:
 					print('I2C read error occured')
 					self.failed = 1	
 					return None
-
-		return data
 
 	def __sensing(self):
 		""" This method runs in the background until program is closed 
@@ -75,7 +73,7 @@ class GroundSensor(object):
 				self.__bus.close()
 				break 
 			else:
-				# Communication frequency @ 20 Hz.
+				# Read frequency @ 20 Hz.
 				dfTime = time.time() - stTime
 				if dfTime < (1/self.freq):
 					time.sleep((1/self.freq) - dfTime)

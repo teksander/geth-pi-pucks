@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import time
-import sys
 import smbus
 
 class RGBLEDs(object):
@@ -40,8 +39,9 @@ class RGBLEDs(object):
 				trials+=1
 				if(trials == 5):
 					print('I2C write error occured')
-					traceback.print_exc(file=sys.stdout)
-					sys.exit(1)
+					return
+					# traceback.print_exc(file=sys.stdout)
+					# sys.exit(1)
 
 	def setLED(self, LED, RGB):
 		if not self.frozen:
@@ -82,4 +82,13 @@ class RGBLEDs(object):
 	def stop(self):
 		self.unfreeze()
 		self.setLED([0x00,0x01,0x02], [0x00,0x00,0x00])
-		self.bus.close()
+		self.__bus.close()
+
+# This can be used to make a quick signal
+if __name__ == "__main__":
+
+	rgb = RGBLEDs()
+	rgb.setLED(rgb.all, 3*[rgb.blue])
+	time.sleep(3)
+	rgb.stop()
+

@@ -1,0 +1,80 @@
+ID TIME BLK DETAIL
+226 1591911565.142 0 SETUP: Synced Time
+226 1591911567.141 0 SETUP: Peered to PC
+226 1591911581.964 2 SETUP: Smart Contract Received at Block 2
+226 33.916 3 STARTED EXPERIMENT
+226 35.87 3 Added 222 from ERANDB
+226 39.781 3 Killed 222 @ age 2.41
+226 54.997 3 Added 211 from ERANDB
+226 58.968 3 Killed 211 @ age 2.48
+226 68.912 3 Added 222 from ERANDB
+226 71.543 3 Killed 222 @ age 2.16
+226 79.287 3 Failed Vote (No Balance). Balance: 0.01
+226 109.267 3 Added 218 from ERANDB
+226 113.212 3 Killed 218 @ age 2.32
+226 122.49 3 Added 213 from ERANDB
+226 124.327 3 Failed Vote (No Balance). Balance: 0.01
+226 129.752 3 Killed 213 @ age 2.34
+226 135.739 3 Added 210 from ERANDB
+226 137.05 3 Added 222 from ERANDB
+226 140.415 6 Killed 210 @ age 2.45
+226 141.393 6 Killed 222 @ age 2.23
+226 169.471 6 Failed Vote (No Balance). Balance: 0.01
+226 192.579 6 Added 211 from ERANDB
+226 196.528 6 Killed 211 @ age 2.33
+226 205.848 8 Added 213 from ERANDB
+226 206.512 8 Added 222 from ERANDB
+226 208.509 8 Killed 213 @ age 2.21
+226 209.497 9 Killed 222 @ age 2.18
+226 223.935 9 Added 214 from ERANDB
+226 227.21 9 Killed 214 @ age 2.06
+226 263.811 10 Added 222 from ERANDB
+226 267.085 10 Killed 222 @ age 2.52
+226 271.785 10 Added 210 from ERANDB
+226 275.094 10 Added 218 from ERANDB
+226 275.294 10 Killed 210 @ age 2.13
+226 277.831 10 Killed 218 @ age 2.58
+226 283.293 11 Added 218 from ERANDB
+226 287.486 11 Added 211 from ERANDB
+226 289.851 11 Killed 218 @ age 2.46
+226 291.1 14 Killed 211 @ age 2.04
+226 302.12 14 Added 211 from ERANDB
+226 305.412 14 Killed 211 @ age 2.30
+226 313.453 14 Added 213 from ERANDB
+226 317.422 14 Killed 213 @ age 2.50
+226 337.589 15 Failed Vote (Unexpected). Balance: 40.01
+226 417.077 17 Added 210 from ERANDB
+226 421.064 21 Killed 210 @ age 2.03
+226 425.105 21 Added 214 from ERANDB
+226 429.206 21 Killed 214 @ age 2.27
+226 459.619 21 Failed Vote (Unexpected). Balance: 60.01
+226 460.944 21 Failed Vote (No Balance). Balance: 20.01
+226 464.604 21 Added 224 from ERANDB
+226 467.883 21 Killed 224 @ age 2.47
+226 486.059 23 Added 214 from ERANDB
+226 490.092 25 Killed 214 @ age 2.39
+226 491.473 25 Added 209 from ERANDB
+226 495.501 25 Killed 209 @ age 2.59
+226 498.169 25 Added 222 from ERANDB
+226 501.514 26 Killed 222 @ age 2.67
+226 522.412 26 Added 217 from ERANDB
+226 523.043 26 Added 224 from ERANDB
+226 525.043 26 Added 211 from ERANDB
+226 525.264 26 Killed 217 @ age 2.23
+226 527.113 26 Killed 224 @ age 2.34
+226 529.171 26 Killed 211 @ age 2.12
+226 533.606 28 Voted: 0.3394772117962466; Status: 1
+226 540.252 28 Added 213 from ERANDB
+226 544.599 28 Killed 213 @ age 2.48
+226 595.561 29 Added 218 from ERANDB
+226 598.239 29 Killed 218 @ age 2.29
+226 627.55 30 Added 222 from ERANDB
+226 634.869 30 Killed 222 @ age 2.20
+226 673.053 30 Failed Vote (Unexpected). Balance: 40.01
+226 686.693 30 Added 214 from ERANDB
+226 691.306 33 Killed 214 @ age 2.04
+226 702.018 34 Added 211 from ERANDB
+226 706.669 34 Killed 211 @ age 2.19
+226 710.683 34 Added 222 from ERANDB
+226 715.322 34 Killed 222 @ age 2.12
+226 745.533 36 STOPPED EXPERIMENT

@@ -1,0 +1,109 @@
+ID TIME BLK EVENT DESCRIPTION
+217 1593434906.146 0 SETUP: Synced Time
+217 1593434906.436 0 SETUP: Peered to PC
+217 1593434967.943 5 SETUP: Smart Contract Received at Block 5
+217 5.825 5 STARTED EXPERIMENT
+217 17.955 6 Received 226 enode
+217 21.946 6 Received 210 enode
+217 35.105 7 Killed 210 @ age 2.08
+217 40.146 7 Killed 226 @ age 2.13
+217 40.667 7 Received 224 enode
+217 43.743 7 Received 211 enode
+217 46.396 7 Killed 211 @ age 2.09
+217 48.17 8 Killed 224 @ age 2.23
+217 49.916 8 Received 218 enode
+217 51.01 8 Received 224 enode
+217 54.332 8 Killed 218 @ age 2.41
+217 54.971 8 Killed 224 @ age 2.35
+217 61.427 9 Voted: 0.34036144578313254; Status: 1
+217 65.579 9 Received 224 enode
+217 66.897 9 Received 213 enode
+217 69.173 9 Killed 224 @ age 2.18
+217 70.002 9 Killed 213 @ age 2.20
+217 74.379 9 Received 210 enode
+217 77.207 10 Killed 210 @ age 2.32
+217 79.846 10 Received 210 enode
+217 80.936 10 Received 218 enode
+217 82.945 10 Killed 210 @ age 2.42
+217 88.033 10 Killed 218 @ age 2.30
+217 90.863 11 Received 211 enode
+217 92.061 11 Received 210 enode
+217 94.785 11 Killed 210 @ age 2.72
+217 95.426 11 Killed 211 @ age 2.95
+217 97.555 11 Received 224 enode
+217 100.672 11 Killed 224 @ age 2.59
+217 101.258 11 Failed Vote (No Balance). Balance: 20.01
+217 102.983 11 Received 210 enode
+217 104.859 11 Received 209 enode
+217 107.681 12 Killed 210 @ age 2.26
+217 108.998 12 Killed 209 @ age 2.43
+217 109.646 12 Received 226 enode
+217 116.539 12 Received 218 enode
+217 120.942 13 Killed 218 @ age 2.79
+217 124.575 13 Received 224 enode
+217 130.341 13 Killed 224 @ age 2.26
+217 137.033 14 Received 213 enode
+217 139.209 14 Killed 213 @ age 2.17
+217 139.982 14 Received 213 enode
+217 143.033 14 Received 211 enode
+217 145.689 14 Killed 213 @ age 2.50
+217 147.305 14 Failed Vote (No Balance). Balance: 20.01
+217 147.653 14 Killed 211 @ age 2.79
+217 155.837 15 Received 210 enode
+217 159.279 15 Received 209 enode
+217 161.306 15 Killed 209 @ age 2.37
+217 162.062 15 Killed 210 @ age 2.95
+217 164.282 15 Received 209 enode
+217 167.515 15 Killed 209 @ age 2.35
+217 171.561 16 Received 222 enode
+217 174.713 16 Received 211 enode
+217 178.418 15 Killed 211 @ age 2.91
+217 182.835 16 Killed 222 @ age 3.05
+217 185.299 16 Received 209 enode
+217 188.596 16 Killed 209 @ age 2.66
+217 196.963 17 Received 209 enode
+217 199.819 17 Killed 209 @ age 3.01
+217 206.411 18 Voted: 0.3902654867256637; Status: 1
+217 209.493 18 Received 210 enode
+217 218.106 18 Killed 210 @ age 2.36
+217 221.304 19 Received 213 enode
+217 226.112 19 Killed 213 @ age 2.05
+217 249.379 19 Received 218 enode
+217 256.476 21 Voted: 0.3951048951048951; Status: 1
+217 257.394 21 Killed 218 @ age 2.07
+217 257.965 21 Received 213 enode
+217 260.388 21 Received 209 enode
+217 261.821 21 Killed 209 @ age 2.28
+217 264.176 21 Received 209 enode
+217 264.682 21 Received 224 enode
+217 267.027 22 Killed 209 @ age 2.55
+217 267.858 22 Killed 224 @ age 2.00
+217 269.495 22 Killed 213 @ age 2.47
+217 270.261 22 Received 224 enode
+217 272.278 22 Received 209 enode
+217 275.271 22 Killed 209 @ age 2.28
+217 278.45 22 Received 211 enode
+217 282.484 23 Failed Vote (No Balance). Balance: 20.01
+217 282.814 23 Killed 224 @ age 2.10
+217 284.412 23 Received 209 enode
+217 288.34 23 Killed 211 @ age 2.37
+217 290.902 23 Killed 209 @ age 2.59
+217 291.896 23 Received 218 enode
+217 298.548 24 Received 226 enode
+217 299.566 24 Killed 218 @ age 2.74
+217 318.6 25 Received 226 enode
+217 323.723 25 Failed Vote (No Balance). Balance: 20.01
+217 327.965 25 Killed 226 @ age 2.03
+217 329.516 25 Received 226 enode
+217 333.989 25 Killed 226 @ age 2.10
+217 339.035 25 Received 226 enode
+217 343.599 25 Received 218 enode
+217 347.092 27 Killed 226 @ age 2.45
+217 349.246 27 Killed 218 @ age 2.04
+217 354.944 27 Received 226 enode
+217 357.446 28 Killed 226 @ age 2.39
+217 358.014 28 Received 226 enode
+217 360.314 28 Killed 226 @ age 2.14
+217 369.713 28 Received 218 enode
+217 371.773 29 STOPPED EXPERIMENT
+217 372.033 29 Voted: 0.3662175168431184; Status: 1

@@ -1,0 +1,109 @@
+ID TIME BLK EVENT DESCRIPTION
+226 1593169392.138 0 SETUP: Synced Time
+226 1593169392.259 0 SETUP: Peered to PC
+226 1593169408.73 2 SETUP: Smart Contract Received at Block 2
+226 4.555 2 STARTED EXPERIMENT
+226 5.539 2 Received 211 enode
+226 8.024 2 Received 224 enode
+226 12.095 2 Received 217 enode
+226 14.117 2 Killed 211 @ age 2.23
+226 16.132 2 Killed 224 @ age 2.09
+226 16.76 2 Received 210 enode
+226 18.913 3 Killed 217 @ age 2.17
+226 25.136 3 Killed 210 @ age 2.48
+226 26.714 3 Received 217 enode
+226 28.335 3 Received 213 enode
+226 31.602 4 Killed 213 @ age 2.11
+226 33.197 4 Received 213 enode
+226 34.451 4 Killed 217 @ age 2.55
+226 36.075 4 Killed 213 @ age 2.35
+226 50.86 5 Received 218 enode
+226 62.247 6 Voted: 0.19230769230769232; Status: 1
+226 70.511 6 Killed 218 @ age 2.07
+226 71.021 6 Received 224 enode
+226 72.102 6 Received 218 enode
+226 74.586 6 Killed 224 @ age 2.07
+226 88.747 7 Killed 218 @ age 2.17
+226 95.722 8 Failed Vote (No Balance). Balance: 20.01
+226 97.863 8 Received 209 enode
+226 105.847 8 Killed 209 @ age 2.01
+226 127.492 9 Received 218 enode
+226 128.975 9 Received 224 enode
+226 130.993 9 Received 210 enode
+226 135.073 9 Killed 210 @ age 2.04
+226 136.265 9 Killed 218 @ age 2.15
+226 139.019 10 Received 218 enode
+226 143.448 10 Killed 224 @ age 2.22
+226 143.66 10 Failed Vote (No Balance). Balance: 20.01
+226 152.412 10 Killed 218 @ age 2.08
+226 153.994 10 Received 218 enode
+226 164.205 11 Killed 218 @ age 2.09
+226 176.231 11 Received 224 enode
+226 177.758 11 Received 218 enode
+226 179.734 11 Killed 224 @ age 2.04
+226 183.775 11 Killed 218 @ age 2.09
+226 192.409 12 Received 210 enode
+226 193.412 12 Received 209 enode
+226 196.618 12 Killed 210 @ age 2.11
+226 198.689 13 Voted: 0.3128249566724437; Status: 1
+226 198.517 13 Killed 209 @ age 2.54
+226 199.311 13 Received 210 enode
+226 206.323 13 Killed 210 @ age 2.05
+226 206.926 13 Received 210 enode
+226 209.733 13 Killed 210 @ age 2.26
+226 211.854 13 Received 224 enode
+226 212.711 13 Received 210 enode
+226 215.087 13 Killed 224 @ age 2.39
+226 215.928 13 Received 213 enode
+226 218.127 13 Killed 210 @ age 2.36
+226 218.853 13 Killed 213 @ age 2.05
+226 241.638 13 Received 213 enode
+226 250.21 13 Killed 213 @ age 2.10
+226 253.249 13 Received 213 enode
+226 258.271 13 Received 224 enode
+226 260.77 13 Killed 224 @ age 2.05
+226 261.834 13 Received 224 enode
+226 264.48 13 Killed 213 @ age 2.18
+226 265.247 13 Killed 224 @ age 2.28
+226 266.462 14 Received 224 enode
+226 269.04 14 Killed 224 @ age 2.26
+226 271.849 14 Received 224 enode
+226 275.76 14 Killed 224 @ age 2.21
+226 277.25 14 Received 210 enode
+226 280.354 15 Voted: 0.34582309582309584; Status: 1
+226 283.256 15 Killed 210 @ age 2.81
+226 286.354 15 Received 224 enode
+226 290.414 15 Killed 224 @ age 2.59
+226 291.084 15 Failed Vote (No Balance). Balance: 0.01
+226 293.981 15 Received 213 enode
+226 297.431 16 Killed 213 @ age 2.34
+226 300.116 16 Received 213 enode
+226 302.433 16 Killed 213 @ age 2.49
+226 331.029 16 Received 217 enode
+226 331.897 16 Failed Vote (No Balance). Balance: 0.01
+226 336.032 17 Killed 217 @ age 2.08
+226 338.59 17 Received 213 enode
+226 342.582 17 Killed 213 @ age 2.06
+226 352.13 17 Received 211 enode
+226 357.649 17 Killed 211 @ age 2.07
+226 365.212 20 Received 210 enode
+226 365.777 20 Received 218 enode
+226 366.038 20 Received 213 enode
+226 372.432 20 Killed 218 @ age 2.29
+226 372.904 20 Received 209 enode
+226 373.455 20 Killed 210 @ age 2.12
+226 375.713 21 Killed 213 @ age 2.59
+226 381.998 21 Received 210 enode
+226 384.3 21 Killed 209 @ age 2.43
+226 386.635 21 Killed 210 @ age 2.29
+226 389.982 22 Voted: 0.3848538529672276; Status: 1
+226 420.231 24 Received 213 enode
+226 430.332 24 Received 224 enode
+226 433.839 24 Killed 224 @ age 2.09
+226 438.436 24 Received 217 enode
+226 443.586 25 Killed 217 @ age 2.37
+226 445.178 25 Received 224 enode
+226 446.408 25 Killed 213 @ age 2.06
+226 447.953 25 Killed 224 @ age 2.37
+226 448.72 26 Voted: 0.38334612432847276; Status: 1
+226 450.824 26 STOPPED EXPERIMENT

@@ -1,0 +1,15 @@
+ID TIME BLK EVENT DESCRIPTION
+107 1620675629.138 0 SETUP: Synced Time
+107 0.151 1 STARTED EXPERIMENT
+107 1.144 1 Received 110 enode
+107 1.616 1 Received 109 enode
+107 4.645 1 Received 103 enode
+107 5.541 1 Killed 109 @ age 2.11
+107 6.131 1 Received 109 enode
+107 6.499 1 Received 105 enode
+107 9.482 1 Killed 105 @ age 2.64
+107 11.204 1 Killed 103 @ age 2.76
+107 12.928 1 Received 103 enode
+107 15.377 2 Killed 109 @ age 2.69
+107 15.532 2 STOPPED EXPERIMENT
+107 15.93 2 Killed 110 @ age 2.48

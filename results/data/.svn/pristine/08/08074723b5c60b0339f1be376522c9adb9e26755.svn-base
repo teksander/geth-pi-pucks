@@ -1,0 +1,57 @@
+ID TIME BLK EVENT DESCRIPTION
+209 1591917238.148 0 SETUP: Synced Time
+209 1591917238.335 0 SETUP: Peered to PC
+209 1591917270.367 3 SETUP: Smart Contract Received at Block 3
+209 30.91 4 STARTED EXPERIMENT
+209 76.678 4 Failed Vote (No Balance). Balance: 0.01
+209 121.691 4 Failed Vote (No Balance). Balance: 0.01
+209 137.135 4 Added 226 from ERANDB
+209 139.119 4 Added 222 from ERANDB
+209 140.121 4 Killed 226 @ age 2.11
+209 143.196 5 Killed 222 @ age 2.07
+209 166.695 6 Failed Vote (No Balance). Balance: 0.01
+209 170.906 6 Added 213 from ERANDB
+209 174.403 6 Killed 213 @ age 2.27
+209 201.959 6 Added 214 from ERANDB
+209 206.45 6 Killed 214 @ age 2.32
+209 211.752 6 Failed Vote (No Balance). Balance: 0.01
+209 223.002 6 Added 210 from ERANDB
+209 227.991 6 Killed 210 @ age 2.25
+209 261.177 10 Added 213 from ERANDB
+209 266.165 10 Killed 213 @ age 2.26
+209 284.789 10 Added 213 from ERANDB
+209 290.777 10 Killed 213 @ age 2.50
+209 293.746 12 Voted: 0.19430379746835444; Status: 1
+209 300.377 12 Added 226 from ERANDB
+209 301.979 12 Failed Vote (No Balance). Balance: 0.01
+209 305.379 12 Killed 226 @ age 2.25
+209 316.922 13 Added 213 from ERANDB
+209 321.445 13 Added 224 from ERANDB
+209 321.524 13 Killed 213 @ age 2.28
+209 325.936 13 Killed 224 @ age 2.08
+209 343.496 13 Added 210 from ERANDB
+209 346.541 13 Killed 210 @ age 2.21
+209 347.023 13 Added 222 from ERANDB
+209 347.6 13 Failed Vote (No Balance). Balance: 0.01
+209 352.044 13 Killed 222 @ age 2.17
+209 352.582 13 Added 226 from ERANDB
+209 357.103 13 Killed 226 @ age 2.06
+209 395.285 13 Added 226 from ERANDB
+209 400.787 14 Killed 226 @ age 2.19
+209 409.893 15 Added 222 from ERANDB
+209 411.924 16 Added 218 from ERANDB
+209 418.949 16 Killed 218 @ age 2.50
+209 420.448 16 Killed 222 @ age 2.02
+209 457.179 16 Added 210 from ERANDB
+209 460.745 19 Killed 210 @ age 2.18
+209 505.928 19 Added 222 from ERANDB
+209 512.072 19 Failed Vote (Unexpected). Trying again. Balance: 20.01
+209 512.672 19 Failed Vote (No Balance). Balance: 20.01
+209 514.528 19 Failed Vote (No Balance). Balance: 20.01
+209 516.442 19 Killed 222 @ age 2.05
+209 540.522 19 Added 218 from ERANDB
+209 543.022 19 Added 226 from ERANDB
+209 544.005 19 Killed 218 @ age 2.12
+209 551.036 19 Killed 226 @ age 2.46
+209 559.527 19 Failed Vote (No Balance). Balance: 20.01
+209 560.891 19 STOPPED EXPERIMENT

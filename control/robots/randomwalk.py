@@ -30,8 +30,9 @@ class RandomWalk(object):
 				trials+=1
 				if(trials == 5):
 					print('I2C write error occured')
-					traceback.print_exc(file=sys.stdout)
-					sys.exit(1)
+					return
+					# traceback.print_exc(file=sys.stdout)
+					# sys.exit(1)
 
 	def __read_data(self, register):
 		trials = 0
@@ -42,8 +43,9 @@ class RandomWalk(object):
 				trials+=1
 				if(trials == 5):
 					print('I2C read error occured')
-					traceback.print_exc(file=sys.stdout)
-					sys.exit(1)			
+					return
+					# traceback.print_exc(file=sys.stdout)
+					# sys.exit(1)			
 
 	def __walking(self):
 		""" This method runs in the background until program is closed """
@@ -133,7 +135,7 @@ class RandomWalk(object):
 				self.__write_data(LEFT_MOTOR_SPEED, 0) 
 				self.__write_data(RIGHT_MOTOR_SPEED, 0)
 				self.setLEDs(0b00000000) 
-				# self.bus.close()
+				self.bus.close()
 				break 
 			else:
 				time.sleep(0.1)

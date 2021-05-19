@@ -25,8 +25,8 @@ done
 # Define the terminal geometry (larger if there are many robots)
 geom="default"
 if [ $NUM_ROB -gt 8 ]; then
-	geomX=$(( $NUM_ROB*5 ))
-	geomY=$(( $NUM_ROB*3 ))
+	geomX=$(( $NUM_ROB*8 ))
+	geomY=$(( $NUM_ROB*5 ))
 	geom="${geomX}x${geomY}"
 fi
 
@@ -35,3 +35,21 @@ gnome-terminal --geometry="$geom" -- tmux new-session ssh "${ALL_IPS[0]}" ';' \
     "${split_list[@]}" \
     set-option -w synchronize-panes ';' \
 	select-layout tiled ';' \
+
+
+# if [ "$1" == "geth" ]; then 
+# 	# Open the TMUX session called GETH
+# 	tmux kill-session -t GETH >/dev/null 2>&1
+# 	tmux rename-session GETH
+# 	# GETH TMUX session: Execute setup-geth (all robots)
+# 	tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
+# fi
+
+
+# if [ "$1" == "mainloop" ]; then 
+# 	# Open the TMUX session called MAINLOOP
+# 	tmux kill-session -t MAINLOOP >/dev/null 2>&1
+# 	tmux rename-session MAINLOOP
+# 	# MAINLOOP TMUX session: Move to control directory
+# 	tmux send-keys -t MAINLOOP "cd $MAIN_DIR_ROBOTS/control/robots" Enter
+# fi

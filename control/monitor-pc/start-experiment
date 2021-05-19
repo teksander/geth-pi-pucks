@@ -16,7 +16,6 @@ echo "----//----"
 wait
 echo "----//----"
 
-
 # Check responding robot count
 NUM_RESP=$(wc -l < pi-pucks.txt)
 if ((NUM_ROB != NUM_RESP)); then
@@ -24,39 +23,39 @@ if ((NUM_ROB != NUM_RESP)); then
 	exit 1         
 fi
 
-# Check I2C on each robot
-for ID in $(cat "$IDS_FILE"); do
-	IP="${PREFIX}${ID}"
-	I2CCOUNT=$(ssh "$IP" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 ' | wc -l")
-	
-	if ((I2CCOUNT != 3)); then
-	echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
-	echo "STOP" >&2 
-	exit 1      
-	else
-	echo "$SUBNET.$ID I2C success (${I2CCOUNT} devices)"    
-	fi
-done
-wait
-echo "----//----"
-
 # Reset GETH 
 echo "Reseting Geth..."
 ./reset-geth
 wait
 echo "----//----"
 
-# Reset the Genesis File
-echo "Reseting Genesis Block..."
-./reset-genesis
-wait
-echo "----//----"
+if [ "$4" == "--fast" ]; then 
+	pass
+else
+	# Verify I2C on all robots
+	echo "Checking I2C devices..."
+	./i2cdetect-all >> temp2.txt
+	if cat temp2.txt | grep -q "failed"; then
+		cat temp2.txt | grep "failed"
+		printf '%s\n' "I2C-check failed. STOP" >&2 
+		rm temp2.txt  
+		exit 1  
+	fi  
+	wait
+	echo "----//----"
 
-# Distribute Keys
-echo "Reseting Pi-Puck Keys..."
-./reset-keys
-wait
-echo "----//----"
+	# Reset the Genesis File
+	echo "Reseting Genesis Block..."
+	./reset-genesis
+	wait
+	echo "----//----"
+
+	# Distribute Keys
+	echo "Reseting Pi-Puck Keys..."
+	./reset-keys
+	wait
+	echo "----//----"
+fi
 
 # Open console for time server
 gnome-terminal --tab -- python3 -i console-pc.py
@@ -94,6 +93,12 @@ read -p "Press Enter when experiment is concluded"
 
 # Stop the Experiment
 tmux send-keys -t MAINLOOP:0.0 C-c
+sleep 0.5
+tmux send-keys -t MAINLOOP:0.0 C-d
+sleep 1
+tmux send-keys -t GETH:0.0 C-c
+sleep 1
+tmux kill-session -t GETH
 
 # Record log files
 while true; do

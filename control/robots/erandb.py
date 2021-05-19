@@ -5,7 +5,8 @@ import subprocess
 import time
 import smbus
 import math
-
+import sys
+import traceback
 
 I2C_CHANNEL = 4
 RANDB_I2C_ADDR = 0x20
@@ -21,10 +22,31 @@ __data_length = 16
 
 
 def __write_data(addr, data):
-	bus.write_byte_data(RANDB_I2C_ADDR, addr, data)
+	trials = 0
+	while 1:
+		try:
+			bus.write_byte_data(RANDB_I2C_ADDR, addr, data)
+			return
+		except:
+			trials+=1
+			print('I2C failed. Trials=', trials)
+			if(trials == 10):
+				print('I2C write error occured')
+				traceback.print_exc(file=sys.stdout)
+				sys.exit(1)
 
 def __read_data(addr):
-	return bus.read_byte_data(RANDB_I2C_ADDR, addr)
+	trials = 0
+	while 1:
+		try:
+			return bus.read_byte_data(RANDB_I2C_ADDR, addr)
+		except:
+			trials+=1
+			print('I2C failed. Trials=', trials)
+			if(trials == 10):
+				print('I2C read error occured')
+				traceback.print_exc(file=sys.stdout)
+				sys.exit(1)
 
 def __nop_delay(t):
 	time.sleep(t * NOP_TIME)
@@ -32,8 +54,16 @@ def __nop_delay(t):
 
 def e_init_randb():
 	global bus
-	bus = smbus.SMBus(I2C_CHANNEL)
-	return bus
+	while 1:
+		try:
+			bus = smbus.SMBus(I2C_CHANNEL)
+			return
+		except:
+			trials+=1
+			if(trials == 5):
+				print('Error initializing ERB')
+				traceback.print_exc(file=sys.stdout)
+				sys.exit(1)
 
 def e_randb_get_if_received():
 	data = __read_data(0)
@@ -168,7 +198,7 @@ class ERANDB(object):
         """ This method runs in the background until program is closed """
 
         # /* Init E-RANDB board */
-        bus = e_init_randb() 
+        e_init_randb() 
         # /* Range is tunable by software. 
         #  * 0 -> Full Range ((1m. approx depending on light conditions ))
         #  * 255 --> No Range (0cm. approx, depending on light conditions */

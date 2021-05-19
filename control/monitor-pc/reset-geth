@@ -4,14 +4,14 @@
 source ../../globalconfig
 
 # Stop GETH Processes 
-echo "Stopping GETH"
-killall geth
-./ssh-all "killall geth"
+echo "Stopping all GETH processes..."
+killall geth 2>/dev/null &
+./ssh-all "killall geth 2>/dev/null" &
 wait
 
 # Reset GETH folders
-echo "Reseting Pi-Puck Chaindata..."
-rm -r "$MAIN_DIR"/geth > /dev/null 2>&1
-./ssh-all "rm -r $MAIN_DIR_ROBOTS/geth > /dev/null 2>&1"
+echo "Removing Pi-Puck chaindata..."
+rm -r "$MAIN_DIR"/geth > /dev/null 2>&1 &
+./ssh-all "rm -r $MAIN_DIR_ROBOTS/geth > /dev/null 2>&1" &
 wait
 

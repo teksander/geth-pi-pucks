@@ -1,0 +1,38 @@
+ID TIME BLK EVENT DESCRIPTION
+209 1593008213.142 0 SETUP: Synced Time
+209 1593008213.261 0 SETUP: Peered to PC
+209 1593008229.025 2 SETUP: Smart Contract Received at Block 2
+209 4.93 2 STARTED EXPERIMENT
+209 35.004 3 Received 224 enode
+209 56.133 5 Killed 224 @ age 2.08
+209 60.23 5 Received 224 enode
+209 65.717 5 Received 218 enode
+209 68.237 5 Killed 224 @ age 2.09
+209 73.313 5 Killed 218 @ age 2.12
+209 112.009 7 Received 213 enode
+209 116.546 9 Killed 213 @ age 2.06
+209 170.972 10 Failed Vote (Unexpected). Trying again. Balance: 80.01
+209 210.572 10 Received 218 enode
+209 213.095 10 Killed 218 @ age 2.07
+209 291.676 13 Failed Vote (Unexpected). Trying again. Balance: 80.01
+209 298.51 13 Received 213 enode
+209 304.544 13 Killed 213 @ age 2.13
+209 307.14 17 Voted: 0.22326350606394707; Status: 1
+209 310.506 17 Failed Vote (No Balance). Balance: 0.01
+209 330.308 17 Received 224 enode
+209 334.803 17 Killed 224 @ age 2.03
+209 339.364 18 Received 213 enode
+209 342.867 18 Killed 213 @ age 2.12
+209 344.894 18 Received 217 enode
+209 349.688 19 Received 218 enode
+209 350.524 19 Killed 217 @ age 2.02
+209 356.137 20 Killed 218 @ age 2.54
+209 377.281 20 Received 218 enode
+209 383.286 20 Killed 218 @ age 2.04
+209 386.195 21 Voted: 0.2283085013146363; Status: 1
+209 402.468 21 Received 218 enode
+209 410.002 21 Killed 218 @ age 2.08
+209 444.648 21 Received 224 enode
+209 463.26 23 Voted: 0.27004373177842567; Status: 1
+209 464.532 23 Failed Vote (No Balance). Balance: 20.01
+209 468.703 23 STOPPED EXPERIMENT

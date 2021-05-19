@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 # This is the main control loop running on the foreground in each robot
+# Optional flags:
+# --byz       (starts experiment as a byzantine robot)
+# --sandbox   (control sensors and actuators without starting experiment)
+# --synctime  (synchronizes clocks and enters sandbox)
+# --peer2pc   (peers to the computer and enters sandbox)
+# --i2cdetect (verifies i2c ports and enters sandbox) 
+
 from console import *
 import time
 import sys
@@ -578,15 +585,14 @@ def i2cdetect():
 		while True:
 			try:
 				bus.read_byte(device)
-				return
+				return i2cFlag
 			except:
 				trials+=1
 				if trials == 5:
 					print('I2C Bus not responding: {}'.format(device))
 					i2cFlag = False
-					return
+					return i2cFlag
 
-	return i2cFlag
 
 # /* BEGIN EXPERIMENT */ 
 #######################################################################
@@ -624,7 +630,7 @@ if len(sys.argv) == 1:
 	#######################################################################
 	START()
 	print('Type Ctrl+C to stop experiment')
-
+	print('ID:', myID)
 elif len(sys.argv) == 2:
 
 	if sys.argv[1] == '--sandbox':

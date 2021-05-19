@@ -1,0 +1,111 @@
+ID TIME BLK EVENT DESCRIPTION
+210 1593616988.17 0 SETUP: Synced Time
+210 1593616988.359 0 SETUP: Peered to PC
+210 1593617019.074 3 SETUP: Smart Contract Received at Block 3
+210 5.831 3 STARTED EXPERIMENT
+210 6.82 3 Received 209 enode
+210 7.321 3 Received 224 enode
+210 14.861 3 Killed 209 @ age 2.04
+210 22.545 4 Received 222 enode
+210 22.708 4 Received 213 enode
+210 28.216 4 Killed 222 @ age 2.01
+210 29.525 4 Killed 213 @ age 2.19
+210 32.531 5 Received 211 enode
+210 33.323 5 Received 222 enode
+210 36.464 5 Killed 224 @ age 2.54
+210 37.077 5 Killed 222 @ age 2.39
+210 39.169 5 Killed 211 @ age 2.24
+210 39.815 5 Received 224 enode
+210 40.859 5 Received 211 enode
+210 43.63 5 Killed 224 @ age 2.79
+210 46.569 6 Killed 211 @ age 2.22
+210 47.65 6 Received 211 enode
+210 50.401 6 Killed 211 @ age 2.03
+210 53.786 6 Received 211 enode
+210 57.83 6 Killed 211 @ age 2.34
+210 60.861 6 Received 217 enode
+210 67.302 7 Killed 217 @ age 2.63
+210 72.141 7 Received 224 enode
+210 75.825 7 Killed 224 @ age 2.82
+210 78.153 8 Voted: 0.3944723618090452; Status: 1
+210 80.013 8 Received 209 enode
+210 81.107 8 Received 224 enode
+210 83.956 8 Killed 209 @ age 2.05
+210 84.488 8 Killed 224 @ age 2.55
+210 89.197 8 Received 218 enode
+210 99.872 9 Failed Vote (No Balance). Balance: 0.01
+210 100.812 9 Killed 218 @ age 2.44
+210 121.095 10 Received 211 enode
+210 123.598 11 Killed 211 @ age 2.09
+210 124.233 11 Received 218 enode
+210 126.834 11 Received 211 enode
+210 129.933 11 Killed 211 @ age 2.02
+210 130.43 11 Killed 218 @ age 2.19
+210 131.752 11 Received 209 enode
+210 134.551 11 Killed 209 @ age 2.19
+210 135.199 11 Received 211 enode
+210 139.869 12 Killed 211 @ age 2.09
+210 144.221 12 Received 211 enode
+210 146.841 12 Received 209 enode
+210 147.845 12 Killed 211 @ age 2.01
+210 150.521 12 Killed 209 @ age 2.42
+210 152.281 13 Voted: 0.3580097087378641; Status: 1
+210 154.769 13 Received 211 enode
+210 155.477 13 Received 209 enode
+210 159.314 13 Killed 211 @ age 2.70
+210 161.74 13 Killed 209 @ age 2.90
+210 162.627 13 Received 209 enode
+210 165.202 13 Killed 209 @ age 2.32
+210 166.139 13 Received 209 enode
+210 169.195 14 Killed 209 @ age 2.29
+210 171.411 14 Received 209 enode
+210 174.551 14 Received 217 enode
+210 177.736 14 Killed 209 @ age 2.15
+210 180.342 14 Killed 217 @ age 2.72
+210 181.097 14 Received 209 enode
+210 183.582 15 Killed 209 @ age 2.17
+210 184.577 15 Received 217 enode
+210 187.349 15 Received 209 enode
+210 190.868 15 Killed 217 @ age 2.63
+210 194.204 15 Killed 209 @ age 2.33
+210 199.633 16 Received 222 enode
+210 203.546 16 Killed 222 @ age 2.93
+210 211.729 16 Received 226 enode
+210 216.595 17 Voted: 0.3702090592334495; Status: 1
+210 218.232 17 Received 226 enode
+210 223.828 17 Received 213 enode
+210 226.561 18 Killed 213 @ age 2.05
+210 227.105 18 Killed 226 @ age 2.81
+210 232.546 18 Received 226 enode
+210 235.232 18 Failed Vote (No Balance). Balance: 0.01
+210 235.869 18 Killed 226 @ age 2.65
+210 238.876 18 Received 226 enode
+210 241.91 19 Killed 226 @ age 2.45
+210 248.529 19 Received 213 enode
+210 250.882 19 Received 224 enode
+210 252.764 19 Received 226 enode
+210 253.386 19 Killed 224 @ age 2.23
+210 254.294 19 Received 224 enode
+210 255.902 19 Killed 226 @ age 2.32
+210 257.116 19 Killed 224 @ age 2.37
+210 258.946 20 Received 224 enode
+210 262.093 20 Killed 213 @ age 2.44
+210 264.675 20 Killed 224 @ age 2.69
+210 265.92 20 Received 224 enode
+210 268.625 20 Killed 224 @ age 2.05
+210 287.56 21 Received 211 enode
+210 298.534 21 Received 224 enode
+210 302.697 21 Received 209 enode
+210 303.766 21 Killed 211 @ age 2.24
+210 305.781 23 Voted: 0.3936298076923077; Status: 1
+210 306.445 23 Killed 224 @ age 2.06
+210 311.723 23 Killed 209 @ age 2.17
+210 338.081 23 Received 224 enode
+210 343.886 25 Voted: 0.40856236786469347; Status: 1
+210 344.66 25 Killed 224 @ age 2.01
+210 354.837 25 Received 222 enode
+210 361.841 26 Killed 222 @ age 2.01
+210 362.75 26 Received 209 enode
+210 363.079 26 Received 222 enode
+210 363.414 26 Received 213 enode
+210 364.495 26 STOPPED EXPERIMENT

@@ -1,0 +1,115 @@
+ID TIME BLK EVENT DESCRIPTION
+217 1593696063.125 0 SETUP: Synced Time
+217 1593696063.233 0 SETUP: Peered to PC
+217 1593696094.414 3 SETUP: Smart Contract Received at Block 3
+217 5.541 3 STARTED EXPERIMENT
+217 6.961 3 Received 214 enode
+217 12.535 3 Received 226 enode
+217 15.023 3 Killed 214 @ age 2.00
+217 26.726 4 Killed 226 @ age 2.02
+217 45.785 5 Received 209 enode
+217 46.288 5 Received 213 enode
+217 48.293 5 Killed 213 @ age 2.07
+217 49.399 5 Received 213 enode
+217 54.28 6 Killed 213 @ age 2.20
+217 55.071 6 Received 224 enode
+217 56.9 6 Killed 209 @ age 2.45
+217 57.637 6 Killed 224 @ age 2.46
+217 58.566 6 Received 209 enode
+217 60.631 7 Voted: 0; Status: 1
+217 61.84 7 Killed 209 @ age 2.37
+217 66.509 7 Received 214 enode
+217 72.407 7 Received 226 enode
+217 76.08 8 Killed 214 @ age 2.70
+217 78.292 8 Killed 226 @ age 2.72
+217 81.381 8 Received 214 enode
+217 83.857 8 Killed 214 @ age 2.41
+217 93.002 8 Received 210 enode
+217 95.53 8 Killed 210 @ age 2.17
+217 96.142 8 Received 210 enode
+217 98.836 8 Failed Vote (No Balance). Balance: 0.01
+217 101.641 8 Killed 210 @ age 2.46
+217 102.16 8 Received 224 enode
+217 107.241 8 Killed 224 @ age 2.20
+217 113.301 10 Received 213 enode
+217 116.847 10 Received 211 enode
+217 116.926 10 Received 226 enode
+217 119.927 10 Killed 213 @ age 2.05
+217 122.494 10 Killed 211 @ age 2.07
+217 122.99 10 Killed 226 @ age 2.04
+217 131.881 11 Received 209 enode
+217 132.456 11 Received 214 enode
+217 134.144 11 Killed 209 @ age 2.22
+217 134.568 11 Received 222 enode
+217 135.051 11 Killed 214 @ age 2.02
+217 136.75 11 Received 214 enode
+217 139.823 11 Killed 214 @ age 2.05
+217 145.87 12 Failed Vote (No Balance). Balance: 20.01
+217 152.562 12 Killed 222 @ age 2.27
+217 155.093 12 Received 214 enode
+217 158.722 12 Killed 214 @ age 2.09
+217 179.671 13 Received 224 enode
+217 185.723 13 Received 211 enode
+217 187.231 13 Killed 224 @ age 2.26
+217 189.776 13 Killed 211 @ age 2.17
+217 192.52 13 Received 226 enode
+217 196.376 15 Received 218 enode
+217 198.497 15 Killed 226 @ age 2.32
+217 201.704 16 Voted: 0; Status: 1
+217 203.579 16 Killed 218 @ age 2.81
+217 211.182 16 Received 213 enode
+217 213.703 16 Killed 213 @ age 2.29
+217 215.159 17 Received 213 enode
+217 216.944 17 Received 210 enode
+217 218.553 17 Killed 213 @ age 2.06
+217 222.53 17 Received 218 enode
+217 223.863 17 Killed 210 @ age 2.32
+217 224.551 17 Received 213 enode
+217 229.506 17 Killed 218 @ age 2.45
+217 232.908 18 Received 226 enode
+217 235.893 18 Killed 213 @ age 2.14
+217 238.546 18 Killed 226 @ age 2.45
+217 243.632 18 Received 209 enode
+217 245.058 18 Received 210 enode
+217 245.903 19 Voted: 0; Status: 1
+217 248.287 19 Killed 209 @ age 2.26
+217 249.269 19 Killed 210 @ age 3.08
+217 251.381 19 Received 218 enode
+217 252.587 19 Received 211 enode
+217 256.366 19 Killed 218 @ age 3.15
+217 257.52 19 Received 210 enode
+217 261.603 20 Killed 211 @ age 2.57
+217 263.584 20 Killed 210 @ age 2.76
+217 265.416 20 Received 210 enode
+217 268.549 20 Killed 210 @ age 2.47
+217 285.126 21 Received 224 enode
+217 288.495 21 Killed 224 @ age 2.75
+217 291.32 22 Voted: 0; Status: 1
+217 301.84 22 Received 214 enode
+217 304.907 22 Killed 214 @ age 2.07
+217 307.001 23 Received 214 enode
+217 309.514 23 Killed 214 @ age 2.13
+217 312.695 23 Received 224 enode
+217 313.801 23 Killed 224 @ age 2.68
+217 315.854 23 Received 224 enode
+217 316.91 23 Killed 224 @ age 2.06
+217 318.949 23 Received 224 enode
+217 329.612 24 Killed 224 @ age 2.20
+217 334.254 24 Received 209 enode
+217 337.15 25 Killed 209 @ age 2.49
+217 340.498 25 Received 211 enode
+217 340.884 25 Received 218 enode
+217 341.967 25 Received 222 enode
+217 344.064 25 Killed 218 @ age 2.33
+217 344.568 25 Killed 211 @ age 2.05
+217 346.003 25 Received 209 enode
+217 351.941 26 Killed 222 @ age 2.44
+217 351.887 26 Voted: 0; Status: 1
+217 354.474 26 Killed 209 @ age 3.37
+217 363.144 26 Received 210 enode
+217 365.778 27 Killed 210 @ age 2.56
+217 366.361 27 Received 210 enode
+217 371.6 27 Killed 210 @ age 2.61
+217 382.11 28 Voted: 0; Status: 1
+217 389.313 28 Received 210 enode
+217 388.878 28 STOPPED EXPERIMENT
