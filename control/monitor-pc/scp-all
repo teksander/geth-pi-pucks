@@ -63,10 +63,18 @@ if [ $1 == "all" ]; then
 	wait
 fi
 
+if [ $1 == "adhocfile" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r /home/eksander/geth-pi-pucks/setup-adhoc "$IP:/home/pi"  &
+	done
+	wait
+fi
+
 if [ $1 == "custom" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r /home/eksander/Pi-Pucks/AdHoc "$IP:/home/pi/"  &
+		scp -r /home/eksander/geth-pi-pucks/setup-adhoc "$IP:/home/pi"  &
 	done
 	wait
 fi
