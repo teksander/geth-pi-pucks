@@ -84,11 +84,11 @@ class RGBLEDs(object):
 		self.setLED([0x00,0x01,0x02], [0x00,0x00,0x00])
 		self.__bus.close()
 
-# This can be used to make a quick signal
+# This can be used to make a quick LED signal
 if __name__ == "__main__":
 
 	rgb = RGBLEDs()
-	rgb.setLED(rgb.all, 3*[rgb.blue])
+	rgb.setLED(rgb.all, 3*[rgb.red])
 	time.sleep(3)
 	rgb.stop()
 

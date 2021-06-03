@@ -4,6 +4,7 @@ import sys
 import threading
 import socket
 import subprocess
+import smbus
 
 class TicToc(object):
     """ Pendulum Class to Synchronize Output Times
@@ -222,3 +223,20 @@ class Peer(object):
         except:
             print('didnt return gethEnodes for whatever reason')
 
+def i2cdetect():
+    i2cFlag = True
+    bus = smbus.SMBus(4) # 1 indicates /dev/i2c-1
+
+    for device in [0x1f, 0x20, 0x60]:
+        trials = 0
+        while True:
+            try:
+                bus.read_byte(device)
+                return
+            except:
+                trials+=1
+                if trials == 5:
+                    print('I2C Bus not responding: {}'.format(device))
+                    i2cFlag = False
+                    return i2cFlag
+    bus.close()

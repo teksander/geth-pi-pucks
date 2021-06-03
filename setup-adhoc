@@ -1,32 +1,49 @@
-#!/bin/bash 
-# Short script for Pi-pucks to join the ad-hoc network
-# Running this script will disable internet connection
+#!/bin/bash
+#  Initalize/join Ad-hoc network 
+#  Place this script in /usr/local/bin on the Pi-Pucks
+#  Running this script will disable internet connection
+#  Optional Inputs: ID and network IF
 
-# Disable wpa_supplicant and dhcpcd
-systemctl stop wpa_supplicant.service
-systemctl stop dhcpcd.service
+# Run as SUDO
+[ "$UID" -eq 0 ] || exec sudo bash "$0" "$@"
 
-# Setup Ad-Hoc Network
-ip link set wlan0
-iw wlan0 set type ibss
-ifconfig wlan0 mtu 1499
-iwconfig wlan0 channel 7
-ip link set wlan0 up
-iw wlan0 ibss join AdHocPi 2432
+ID_FILE="/boot/pi-puck_id"
 
-# Configure batman-adv virtual network
-modprobe batman-adv
-batctl if add wlan0
-ip link set up dev wlan0
-ip link set up dev bat0
+if test -f "$ID_FILE"; then
+	# Pi-Puck ID and network IF
+	ID=$(cat $ID_FILE)
+	IF=wlan0
+	echo "Joining Ad-hoc network with Pi-Puck ID $ID"
+else
+	# Monitor-PC ID and network IF
+	ID="100"
+	IF=wlx801f025a9a7f
+	echo "Joining Ad-hoc network with ID $ID"
+fi
 
-IP=$(cat /boot/pi-puck_id) #<---- Set any desired last three digits of IP here
-ifconfig bat0 172.27.1.${IP}/16
+	# User chosen ID/IF 
+if [ "$#" -eq 1 ]; then
+	ID=$1
+elif [ "$#" -eq 2 ]; then
+	ID=$1
+	IF=$2
+	echo "Joining Ad-hoc network with ID $ID"
+fi
 
+# Disable wpa_supplicant and dhcpcd	on the Pi-Pucks
+if test -f "$ID_FILE"; then
+    systemctl stop wpa_supplicant.service
+    systemctl disable wpa_supplicant.service
+    systemctl stop dhcpcd.service
+    systemctl disable dhcpcd.service
+fi
 
+# Setup Ad-Hoc Mesh Network
+ip link set $IF
+iw $IF set type ibss
+ifconfig $IF mtu 1499
+iwconfig $IF channel 9
+ip link set $IF up
+iw $IF ibss join AdHocPi 2452
 
-
-
-
-
-
+ifconfig $IF 172.27.1.${ID}/16

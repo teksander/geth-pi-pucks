@@ -5,17 +5,6 @@
 cd $(dirname $0)
 source globalconfig
 
-# Check GETH installation
-# if [ ! -f "/usr/local/bin/geth" ] 
-# then
-# echo "GETH was not found"
-# echo "Installing GETH Version 1.10.2"
-# wget https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.10.2-97d11b01.tar.gz
-# tar zxvf geth-linux-amd64-1.10.2-97d11b01.tar.gz
-# cd geth-linux-amd64-1.10.2-97d11b01.tar.gz
-# sudo cp geth /usr/local/bin/
-# fi
-
 # If data directory is not found
 if [ ! -d "$MAIN_DIR" ] 
 then
@@ -51,6 +40,7 @@ geth --datadir $MAIN_DIR \
 --rpcapi "personal,eth,net,web3,txpool,miner" \
 --networkid 1515 \
 --allow-insecure-unlock \
+--lightkdf \
 --nodiscover \
 --verbosity 3 \
 --miner.gaslimit "0x9000000000000" \

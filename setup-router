@@ -1,0 +1,16 @@
+#!/bin/bash 
+# Short script for Pi-pucks to join the router network
+# Running this script will enable internet connection
+
+# Run as SUDO
+[ "$UID" -eq 0 ] || exec sudo bash "$0" "$@"
+
+# Disable adhoc network
+systemctl disable adhoc.service
+
+# Enable wpa_supplicant and dhcpcd
+systemctl enable wpa_supplicant.service
+systemctl enable dhcpcd.service
+
+# Reboot the system (Possible to do without reboot?)
+reboot now

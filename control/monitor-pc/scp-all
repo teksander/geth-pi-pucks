@@ -53,20 +53,30 @@ if [ $1 == "all" ]; then
 	wait
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control "$IP:$MAIN_DIR_ROBOTS"  &
-		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS"  &
-		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS"  &
-		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS"  &
-		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS"  &
-		# scp -r [!.]* [!results]* [!monitor]* $MAIN_DIR "$IP:$MAIN_DIR_ROBOTS"  &
+		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control" &
+		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS" &
+		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS" &
+		scp -r $MAIN_DIR/setup-router "$IP:$MAIN_DIR_ROBOTS" &
+		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS" &
+		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS" &
 	done
 	wait
 fi
 
-if [ $1 == "adhocfile" ]; then 
+if [ $1 == "setup-adhoc" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r /home/eksander/geth-pi-pucks/setup-adhoc "$IP:/home/pi"  &
+		cat /home/eksander/geth-pi-pucks/setup-adhoc | ssh $IP "sudo tee /usr/local/bin/setup-adhoc"
+	done
+	wait
+fi
+
+if [ $1 == "pb" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r /home/eksander/geth-pi-pucks/powerbutton.py "$IP:/home/pi/geth-pi-pucks"  &
+		scp -r /home/eksander/geth-pi-pucks/setup-router "$IP:/home/pi/geth-pi-pucks"  &
+		scp -r /home/eksander/geth-pi-pucks/powerbutton.service "$IP:/home/pi/geth-pi-pucks"  &
 	done
 	wait
 fi
@@ -74,7 +84,7 @@ fi
 if [ $1 == "custom" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r /home/eksander/geth-pi-pucks/setup-adhoc "$IP:/home/pi"  &
+		scp -r $MAIN_DIR/geth-linux-arm6-1.10.3-991384a7.tar.gz "$IP:$MAIN_DIR_ROBOTS"  &
 	done
 	wait
 fi

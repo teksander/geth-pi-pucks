@@ -30,7 +30,7 @@ def __write_data(addr, data):
 		except:
 			trials+=1
 			print('I2C failed. Trials=', trials)
-			if(trials == 10):
+			if(trials == 25):
 				print('I2C write error occured')
 				traceback.print_exc(file=sys.stdout)
 				sys.exit(1)
@@ -43,7 +43,7 @@ def __read_data(addr):
 		except:
 			trials+=1
 			print('I2C failed. Trials=', trials)
-			if(trials == 10):
+			if(trials == 25):
 				print('I2C read error occured')
 				traceback.print_exc(file=sys.stdout)
 				sys.exit(1)
@@ -190,6 +190,7 @@ class ERANDB(object):
         """
         self.dist = dist
         self.__stop = 1
+        self.transmit_data = None
          # This robot ID
         self.id = open("/boot/pi-puck_id", "r").read().strip()
         self.newIds = set()
@@ -217,17 +218,24 @@ class ERANDB(object):
                 if newId != self.id: 
                     self.newIds.add(newId)
 
-            if self.__stop:
-                bus.close()
-                break 
+            sleep(0.01)
 
-            time.sleep(0.1)
+            if transmitData != None:
+            	e_randb_send_all_data(transmitData)
+            	time.sleep(0.01)
+            	transmit_data = None
+
+            if self.__stop:
+                break 
+            else:
+            	time.sleep(0.1)
 
 
     def transmit(self,data):
+    	self.transmitData = int(data)
         # e_randb_store_data(0, int(data))
         # e_randb_send_data()
-        e_randb_send_all_data(int(data))
+        # e_randb_send_all_data(int(data))
         # print("Sent:", data)
 
     def getNew(self):
@@ -243,15 +251,17 @@ class ERANDB(object):
         if self.__stop:
             self.__stop = 0
             # Initialize background daemon thread
-            thread = threading.Thread(target=self.__listening, args=())
-            thread.daemon = True 
+            self.thread = threading.Thread(target=self.__listening, args=())
+            self.thread.daemon = True 
 
             # Start the execution                         
-            thread.start()   
+            self.thread.start()   
         else:
             print('E-RANDB already ON')
 
     def stop(self):
         """ This method is called before a clean exit """   
         self.__stop = 1
+        self.thread.join()
+        bus.close()
         print('E-RANDB OFF') 

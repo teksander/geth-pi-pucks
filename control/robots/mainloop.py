@@ -19,8 +19,7 @@ from erandb import ERANDB
 from randomwalk import RandomWalk
 from groundsensor import GroundSensor
 from rgbleds import RGBLEDs
-from aux import TicToc, TCP_server, Peer
-import smbus
+from aux import TicToc, TCP_server, Peer, i2cdetect
 
 global startFlag
 global isbyz
@@ -30,8 +29,8 @@ isbyz = 0
 # /* Experiment Parameters */
 #######################################################################
 tcpPort = 40421 
-erbDist = 175
-gsFreq = 2
+erbDist = 100
+gsFreq = 20
 rwSpeed = 500
 pcID = '100'
 
@@ -66,7 +65,7 @@ print('Initialising E-RANDB board...')
 erb = ERANDB(erbDist)
 # /* Init Ground-Sensors, __mapping process and vote function */
 print('Initialising Ground-Sensors...')
-gs = GroundSensor()
+gs = GroundSensor(gsFreq)
 # /* Init Random-Walk, __walking process */
 print('Initialising Random-Walk...')
 rw = RandomWalk(rwSpeed)
@@ -528,41 +527,6 @@ def waitForPC():
 		except:
 			time.sleep(1)
 
-# def waitForSC():
-# 	global sc
-# 	sc = None
-
-# 	w3.geth.miner.start()
-# 	txFilter = w3.eth.filter('pending')
-# 	while True:
-# 		for txHex in txFilter.get_new_entries():
-# 			tx = w3.eth.getTransaction(txHex)
-# 			if tx['to'] == None:
-# 				scReceipt = w3.eth.waitForTransactionReceipt(tx.hash)
-# 				abiPath = os.getcwd()+'/scs/build/Estimation.abi'
-# 				abi = json.loads(open(abiPath).read())
-
-# 				sc = w3.eth.contract(abi=abi, address=scReceipt.contractAddress)
-# 				startBlock = scReceipt.blockNumber
-# 				global startStamp
-# 				startStamp = w3.eth.getBlock(startBlock).timestamp
-# 				mainlog.log(['SETUP: Smart Contract Received at Block {}'.format(startBlock)])	
-# 				print('Smart Contract Received at Block {}'.format(startBlock))
-# 				break	
-
-# 		if sc != None:
-# 			sc.functions.registerRobot().transact()
-# 			w3.geth.miner.stop()
-# 			if globalPeers:
-# 				break
-# 			else:
-# 				pc.w3 = w3
-# 				pc.kill()
-# 				if not pc.isPeer():
-# 					break
-# 		else:
-# 			time.sleep(2)
-
 def registerSC():
 	sc = None
 
@@ -575,23 +539,6 @@ def registerSC():
 	sc = w3.eth.contract(abi=abi, address=address)
 	
 	return sc
-
-def i2cdetect():
-	i2cFlag = True
-	bus = smbus.SMBus(4) # 1 indicates /dev/i2c-1
-
-	for device in [0x1f, 0x20, 0x60]:
-		trials = 0
-		while True:
-			try:
-				bus.read_byte(device)
-				return i2cFlag
-			except:
-				trials+=1
-				if trials == 5:
-					print('I2C Bus not responding: {}'.format(device))
-					i2cFlag = False
-					return i2cFlag
 
 
 # /* BEGIN EXPERIMENT */ 
@@ -617,47 +564,13 @@ if len(sys.argv) == 1:
 	else:
 		print('SC Register Failed')
 
-	# # /* Wait for PC Enode */
-	# print('Waiting for PC Enode...')
-	# waitForPC()
-
-	# # /* Wait for Smart Contract */
-	# print('Waiting for SC deployment...')
-	# waitForSC()
-
-
-	# /* Begin Experiment */
-	#######################################################################
 	START()
 	print('Type Ctrl+C to stop experiment')
 	print('ID:', myID)
+
+
 elif len(sys.argv) == 2:
-
-	if sys.argv[1] == '--sandbox':
-		print('---//--- SANDBOX-MODE ---//---')		
-		startFlag = 1	
-
-	elif sys.argv[1] == '--synctime':
-		print('---//--- SYNC-TIME ---//---')
-		# /* Wait for Time Synchronization */ 
-		waitForTS()
-		startFlag = 1
-
-	elif sys.argv[1] == '--peer2pc':
-		print('---//--- PEER-PC ---//---')
-		# /* Wait for PC Enode */
-		waitForPC()
-		startFlag = 1	
-
-	elif sys.argv[1] == '--i2cdetect':
-		# /* Check for I2C */ 
-		print('Checking I2C Connections...')
-		if i2cdetect():
-			print('All I2C Devices OK')
-		else:
-			print('I2C Device Failed')
-
-	elif sys.argv[1] == '--byz':
+	if sys.argv[1] == '--byz':
 		isbyz = 1
 
 		# /* Requests to monitor PC (Centralized Bit) */
@@ -680,14 +593,32 @@ elif len(sys.argv) == 2:
 		else:
 			print('SC register failed')
 
-		# # /* Wait for PC Enode */
-		# print('Waiting for PC Enode...')
-		# waitForPC()
-
-		# # /* Wait for Smart Contract */
-		# print('Waiting for SC deployment...')
-		# waitForSC()
-
 		START()
 		print('Type Ctrl+C to stop experiment')
-		print('This Robot Is BYZANTINE')
+		print('ID:', myID,' (Byzantine)')
+
+
+	# Alternative start executions
+	elif sys.argv[1] == '--sandbox':
+		print('---//--- SANDBOX-MODE ---//---')		
+		startFlag = 1	
+
+	elif sys.argv[1] == '--synctime':
+		print('---//--- SYNC-TIME ---//---')
+		# /* Wait for Time Synchronization */ 
+		waitForTS()
+		startFlag = 1
+
+	elif sys.argv[1] == '--peer2pc':
+		print('---//--- PEER-PC ---//---')
+		# /* Wait for PC Enode */
+		waitForPC()
+		startFlag = 1	
+
+	elif sys.argv[1] == '--i2cdetect':
+		# /* Check for I2C */ 
+		print('Checking I2C Connections...')
+		if i2cdetect():
+			print('All I2C Devices OK')
+		else:
+			print('I2C Device Failed')

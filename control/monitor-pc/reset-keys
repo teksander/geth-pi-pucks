@@ -9,20 +9,21 @@ source ../../globalconfig
 > key-mapping.txt 
 
 # Remove Previous Key Files
-./ssh-all "rm -rf $MAIN_DIR_ROBOTS/keystore/*"
+./ssh-all "rm -rf $MAIN_DIR_ROBOTS/keystore; mkdir $MAIN_DIR_ROBOTS/keystore"
 
 wait
 # Distribute new key files
+
 INDEX=1
 for ID in $(cat "$IDS_FILE"); do
-	wait
 	KEY_FILE=$"key-$INDEX"
 	IP="${PREFIX}${ID}"
 	
-	scp keystore-all/"$KEY_FILE" "$IP":$MAIN_DIR_ROBOTS/keystore/
+	scp "keystore-all/$INDEX" "$IP":$MAIN_DIR_ROBOTS/keystore/"$INDEX" &
 
 	# Return key to Pi-puck ID mapping
-	KEY=$(cat "keystore-all/$KEY_FILE")
+	KEY=$(cat "keystore-all/$INDEX")
 	echo "$ID $KEY_FILE 0x${KEY:12:40}" >> key-mapping.txt &
 	let "INDEX+=1" 
+	sleep 0.01
 done

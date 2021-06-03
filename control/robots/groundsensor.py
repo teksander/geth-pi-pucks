@@ -70,7 +70,6 @@ class GroundSensor(object):
 				self.count += 1
 
 			if self.__stop:
-				self.__bus.close()
 				break 
 			else:
 				# Read frequency @ 20 Hz.
@@ -112,15 +111,17 @@ class GroundSensor(object):
 		if self.__stop:
 			self.__stop = 0
 			# Initialize background daemon thread
-			thread = threading.Thread(target=self.__sensing, args=())
-			thread.daemon = True 
+			self.thread = threading.Thread(target=self.__sensing, args=())
+			self.thread.daemon = True 
 
 			# Start the execution                         
-			thread.start()   
+			self.thread.start()   
 		else:
 			print('Ground-Sensor already ON')
 
 	def stop(self):
 		""" This method is called before a clean exit """
 		self.__stop = 1
+		self.thread.join()
+		self.__bus.close()
 		print('Ground-Sensor OFF') 

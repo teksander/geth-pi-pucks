@@ -79,6 +79,9 @@ class RandomWalk(object):
 		self.__write_data(IR_CONTROL, 1)
 
 		while True:
+			if self.__stop:
+				# Stop IR and Motor
+				break 			
 
 			# Random Walk
 			if (remaining_walk_time == 0):
@@ -127,15 +130,10 @@ class RandomWalk(object):
 
 			# Set wheel speeds
 			self.__write_data(LEFT_MOTOR_SPEED, int(left))
+			time.sleep(0.01)
 			self.__write_data(RIGHT_MOTOR_SPEED, int(right))
 
 			if self.__stop:
-				# Stop IR and Motor
-				self.__write_data(IR_CONTROL, 0) 
-				self.__write_data(LEFT_MOTOR_SPEED, 0) 
-				self.__write_data(RIGHT_MOTOR_SPEED, 0)
-				self.setLEDs(0b00000000) 
-				self.bus.close()
 				break 
 			else:
 				time.sleep(0.1)
@@ -143,20 +141,31 @@ class RandomWalk(object):
 	def start(self):
 		""" This method is called to start __walking """
 		if self.__stop:
-			self.__stop = 0
+			self.__stop = False
 			# Initialize background daemon thread
-			thread = threading.Thread(target=self.__walking, args=())
-			thread.daemon = True 
+			self.thread = threading.Thread(target=self.__walking, args=())
+			self.thread.daemon = True 
 
 			# Start the execution                         
-			thread.start()   
+			self.thread.start()   
 		else:
 			print('Already Walking')
 
 	def stop(self):
 		""" This method is called before a clean exit """
-		self.__stop = 1
+		self.__stop = True
+		self.thread.join()
 		print('Random-Walk OFF') 
+		
+		self.__write_data(6, 0)
+		time.sleep(0.05)
+		self.__write_data(2, 0) 
+		time.sleep(0.05)
+		self.__write_data(3, 0)
+		time.sleep(0.05)
+		self.setLEDs(0b00000000)
+		time.sleep(0.05) 
+		self.__bus.close()
 
 	def setLEDs(self, state):
 		""" This method is called set the outer LEDs to an 8-bit state """
@@ -174,7 +183,10 @@ class RandomWalk(object):
 		return self.ir
 
 
+if __name__ == "__main__":
 
+    rw = RandomWalk(500)
+    rw.start()
 
 
 

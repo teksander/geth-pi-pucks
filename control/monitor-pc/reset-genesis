@@ -22,8 +22,7 @@ echo "15" >> genesis.conf # 15 seconds block time
 # List of sealers
 for INDEX in $(seq 1 $NUM_NODES);
 do
-	KEY_FILE=$"key-$INDEX"
-    KEY=$(cat "keystore-all/$KEY_FILE")
+    KEY=$(cat "keystore-all/$INDEX")
     echo ${KEY:12:40} >> genesis.conf 
 done
 echo "" >> genesis.conf 
@@ -31,8 +30,7 @@ echo "" >> genesis.conf
 # Pre-fund all accounts
 for INDEX in $(seq 0 $NUM_NODES);
 do
-    KEY_FILE=$"key-$INDEX"
-    KEY=$(cat "keystore-all/$KEY_FILE")
+    KEY=$(cat "keystore-all/$INDEX")
     echo ${KEY:12:40} >> genesis.conf 
 done
 

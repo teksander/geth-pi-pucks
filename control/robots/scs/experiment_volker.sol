@@ -9,7 +9,7 @@ contract Estimation {
   int  public threshold = 0; // meaningless!
   uint public ticketPrice = 0;
   int  public tau = 0;
-  uint public consensusReached = 0;
+  bool public consensusReached = false;
   uint public startBlock = 0;
   uint public valueUBI = 20;
   uint public publicPayoutUBI = 0;
@@ -57,7 +57,9 @@ contract Estimation {
   function getBalance() public view returns (uint) {
     return msg.sender.balance;
   }
-
+  function isConverged() public view returns (bool) {
+    return consensusReached;
+  }
   function isNewRound() public view returns (bool) {
     return newRound;
   }
@@ -187,7 +189,7 @@ payable(msg.sender).transfer(payoutUBI * 1 ether);
     int myTau = 20000;
 
     if ((abs(oldMean - mean) < myTau) && voteOkCount > 2 * robotCount) {
-      consensusReached = 2;
+      consensusReached = true;
     }
 
     lastUpdate += 1;

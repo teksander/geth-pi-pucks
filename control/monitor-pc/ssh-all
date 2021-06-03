@@ -11,6 +11,7 @@ if [ "$#" -eq 1 ]; then
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		ssh "$IP" "$1" &
+		sleep 0.02
 	done
 fi
 

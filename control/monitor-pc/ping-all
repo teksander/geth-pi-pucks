@@ -4,17 +4,13 @@
 source ../../globalconfig
 > pi-pucks.txt
 
-# PIPUCK1_ALL=(101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119)
-# PIPUCK2_ALL=(201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216)
-
-
 # If user requests signal
 if [ "$SUBNET" == "172.27.1" ]; then 
-	echo "Scanning Ad-Hoc Network"
+	echo "Scanning Ad-Hoc Network..."
 	PIPUCK1_ALL=(101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119)
 	PIPUCK2_ALL=(201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216)
 else
-	echo "Scanning Router Network"
+	echo "Scanning Router Network..."
 	PIPUCK1_ALL=($(nmap -sn 192.168.1.* -oG - | grep '()' | cut -b 17-19))
 fi
 
@@ -22,7 +18,7 @@ fi
 touch temp.txt
 for ID in "${PIPUCK1_ALL[@]}" "${PIPUCK2_ALL[@]}"; do
 	( ping -n -c 1 -w 1 $SUBNET.$ID 1>/dev/null 2>&1 && echo $ID  >> temp.txt && printf "%-12s %s\n" $SUBNET.$ID responded) &
-	sleep 0.1
+	sleep 0.03
 done 
 
 
@@ -37,3 +33,4 @@ cp pi-pucks.txt $MAIN_DIR/control/robots/
 if [ "$1" == "--signal" ]; then 
 	./ssh-all "cd $MAIN_DIR_ROBOTS/control/robots; python3 rgbleds.py"
 fi
+
