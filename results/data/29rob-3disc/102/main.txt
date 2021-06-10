@@ -1,0 +1,10 @@
+ID TIME EVENT DESCRIPTION
+102 1623182498.139 SETUP: Synced Time
+102 0.151 STARTED EXPERIMENT
+102 1.323 Added Geth peer 113
+102 2.406 Added Geth peer 101
+102 2.792 Killed peer 113 @ age 2.1
+102 5.19 Killed peer 101 @ age 2.2
+102 8.047 Timing out peer 213
+102 8.049 Killed peer 213 @ age 2.1
+102 18.992 STOPPED EXPERIMENT

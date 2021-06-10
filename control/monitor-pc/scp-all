@@ -22,10 +22,19 @@ fi
 
 # Customizable list of often uploaded folders/files
 if [ $1 == "scs" ]; then 
-	solc -o $MAIN_DIR/control/robots/scs/build/ --bin-runtime --abi --overwrite $CONTRACT_FILE
+	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/control/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/scs "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+		scp -r $MAIN_DIR/control/robots/scs/build "$IP:$MAIN_DIR_ROBOTS/control/robots/scs/"  &
+	done
+	wait
+fi
+
+if [ $1 == "abi" ]; then 
+	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/control/robots/scs/build" "$CONTRACT_FILE"
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/scs/build/Estimation.abi "$IP:$MAIN_DIR_ROBOTS/control/robots/scs/build/"  &
 	done
 	wait
 fi
@@ -38,10 +47,34 @@ if [ $1 == "mainloop" ]; then
 	wait
 fi
 
+if [ $1 == "erandb" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/erandb.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+	done
+	wait
+fi
+
+if [ $1 == "console" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/console.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+	done
+	wait
+fi
+
 if [ $1 == "control" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control/"  &
+	done
+	wait
+fi
+
+if [ $1 == "setup-geth" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS" &
 	done
 	wait
 fi

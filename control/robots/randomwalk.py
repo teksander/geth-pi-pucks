@@ -5,6 +5,10 @@ import threading
 import random
 import math
 import numpy as np
+import logging
+
+logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logger = logging.getLogger(__name__)
 
 class RandomWalk(object):
 	""" Set up a Random-Walk loop on a background thread
@@ -19,33 +23,32 @@ class RandomWalk(object):
 		"""
 		self.MAX_SPEED = MAX_SPEED                          
 		self.__stop = 1
+		self.__walk = True
 
 	def __write_data(self, register, data):
 		trials = 0
-		while 1:
+		while True:
 			try:
 				self.__bus.write_word_data(self.__i2c_address, register, data)
 				return
 			except:
 				trials+=1
+				time.sleep(0.1)
 				if(trials == 5):
-					print('I2C write error occured')
+					logger.error('RW I2C write error')
 					return
-					# traceback.print_exc(file=sys.stdout)
-					# sys.exit(1)
 
 	def __read_data(self, register):
 		trials = 0
-		while(1):
+		while True:
 			try:	
 				return self.__bus.read_word_data(self.__i2c_address, register)
 			except:
 				trials+=1
+				time.sleep(0.1)
 				if(trials == 5):
-					print('I2C read error occured')
-					return
-					# traceback.print_exc(file=sys.stdout)
-					# sys.exit(1)			
+					logger.error('RW I2C read error')
+					return		
 
 	def __walking(self):
 		""" This method runs in the background until program is closed """
@@ -63,21 +66,28 @@ class RandomWalk(object):
 		# IR Sensors register addresses
 		IR_CONTROL = 6
 		IR0_REFLECTED = 7
-		
+		self.irDist = 250
+		# LEDs
+		OUTER_LEDS = 0
+		self.__LEDState = 0b00000000
+		self.__isLEDset = True # Remove when Pi-puck2s are upgraded
+
 		# Random walk parameters
 		remaining_walk_time = 3
 		my_lambda = 10 # Parameter for straight movement
 		turn = 4
 		possible_directions = ["straight", "cw", "ccw"]
 		actual_direction = "straight"
-
+		
+		
 		# Obstacle Avoidance parameters
 		weights_left  = [-10, -10, -5, 0, 0, 5, 10, 10]
 		weights_right = [-1 * x for x in weights_left]
 
 		# Turn IR sensors on
 		self.__write_data(IR_CONTROL, 1)
-
+		self.__write_data(OUTER_LEDS, self.__LEDState)
+		
 		while True:
 			if self.__stop:
 				# Stop IR and Motor
@@ -113,7 +123,7 @@ class RandomWalk(object):
 					
 			# Find Wheel Speed for Obstacle Avoidance
 			for i, reading in enumerate(self.ir):
-				if(reading > 400):
+				if(reading > self.irDist ):
 					left  = self.MAX_SPEED/2 + weights_left[i] * reading
 					right = self.MAX_SPEED/2 + weights_right[i] * reading
 
@@ -128,10 +138,23 @@ class RandomWalk(object):
 			elif right < -self.MAX_SPEED:
 				right = -self.MAX_SPEED
 
-			# Set wheel speeds
-			self.__write_data(LEFT_MOTOR_SPEED, int(left))
-			time.sleep(0.01)
-			self.__write_data(RIGHT_MOTOR_SPEED, int(right))
+			if self.__walk:
+				# Set wheel speeds
+				self.__write_data(LEFT_MOTOR_SPEED, int(left))
+				time.sleep(0.01)
+				self.__write_data(RIGHT_MOTOR_SPEED, int(right))
+				time.sleep(0.01)
+			else:
+				# Set wheel speeds
+				self.__write_data(LEFT_MOTOR_SPEED, 0)
+				time.sleep(0.01)
+				self.__write_data(RIGHT_MOTOR_SPEED, 0)
+				time.sleep(0.01)
+
+			# Set the LED ring
+			if not self.__isLEDset: # Remove when Pi-puck2s are upgraded
+				self.__write_data(OUTER_LEDS, self.__LEDState)
+				self.__isLEDset = True
 
 			if self.__stop:
 				break 
@@ -149,35 +172,34 @@ class RandomWalk(object):
 			# Start the execution                         
 			self.thread.start()   
 		else:
-			print('Already Walking')
+			logger.warning('Already Walking')
 
 	def stop(self):
 		""" This method is called before a clean exit """
 		self.__stop = True
 		self.thread.join()
-		print('Random-Walk OFF') 
-		
 		self.__write_data(6, 0)
 		time.sleep(0.05)
 		self.__write_data(2, 0) 
 		time.sleep(0.05)
 		self.__write_data(3, 0)
 		time.sleep(0.05)
-		self.setLEDs(0b00000000)
+		self.__write_data(0, 0b00000000)
 		time.sleep(0.05) 
 		self.__bus.close()
+		logger.info('Random-Walk OFF') 
+		
+
+	def setWalk(self, state):
+		""" This method is called set the random-walk to on without disabling I2C"""
+		self.__walk = state
 
 	def setLEDs(self, state):
 		""" This method is called set the outer LEDs to an 8-bit state """
-		OUTER_LEDS = 0
-		self.__write_data(OUTER_LEDS, state)
-
-			
-	def flashLEDs(self, delay = 0.1):
-		self.setLEDs(0b11111111)
-		time.sleep(delay)
-		self.setLEDs(0b00000000)
-
+		if self.__LEDState != state:
+			self.__isLEDset = False
+			self.__LEDState = state
+		
 	def getIr(self):
 		""" This method returns the IR readings """
 		return self.ir

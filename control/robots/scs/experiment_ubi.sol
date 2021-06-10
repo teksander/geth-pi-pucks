@@ -40,7 +40,7 @@ mapping(address => int) public payoutForAddress;
 mapping(address => int256) public weights;
 
 constructor() {
-    mean = 5000000;
+    mean = 1500000;
     count = 0;
     roundthreshold = 2000000;
     ticketPrice = 40;

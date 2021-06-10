@@ -35,7 +35,7 @@ contract Estimation {
   mapping(uint => voteInfo[]) public round;
 
   constructor() {
-      mean = 5000000;
+      mean = 1500000;
       threshold = 2000000;
       ticketPrice = 40;
       tau = 100000;

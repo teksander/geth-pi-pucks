@@ -1,0 +1,58 @@
+ID TIME EVENT DESCRIPTION
+212 1623078957.236 SETUP: Synced Time
+212 0.18 STARTED EXPERIMENT
+212 32.257 Failed to add peer 115
+212 40.388 Added Geth peer 208
+212 45.438 Failed to add peer 115
+212 45.494 Added Geth peer 214
+212 45.57 Added Geth peer 206
+212 45.647 Killed peer 208 @ age 2.82
+212 45.857 Added Geth peer 213
+212 45.974 Added Geth peer 210
+212 46.525 Added Geth peer 215
+212 51.599 Added Geth peer 119
+212 51.759 Killed peer 214 @ age 2.01
+212 56.824 Added Geth peer 208
+212 56.925 Killed peer 206 @ age 5.75
+212 62.104 Killed peer 210 @ age 1.97
+212 63.403 Failed to add peer 115
+212 63.744 Added Geth peer 214
+212 64.363 Killed peer 213 @ age 2.03
+212 65.273 Added Geth peer 210
+212 69.693 Added Geth peer 213
+212 70.24 Failed to add peer 206
+212 72.906 Killed peer 215 @ age 2.01
+212 73.358 Failed to add peer 102
+212 75.905 Failed to add peer 115
+212 76.345 Killed peer 119 @ age 2.39
+212 76.795 Added Geth peer 215
+212 82.232 Added Geth peer 119
+212 82.397 Killed peer 214 @ age 1.96
+212 82.767 Failed to add peer 206
+212 85.434 Killed peer 208 @ age 2.01
+212 88.383 Failed to add peer 115
+212 88.455 Added Geth peer 214
+212 88.559 Killed peer 210 @ age 2.36
+212 88.58 Failed to add peer 102
+212 89.069 Added Geth peer 208
+212 94.703 Added Geth peer 210
+212 95.167 Killed peer 215 @ age 1.98
+212 95.219 Added Geth peer 206
+212 98.199 Killed peer 213 @ age 2.03
+212 100.859 Failed to add peer 115
+212 104.202 Added Geth peer 215
+212 104.312 Killed peer 119 @ age 2.23
+212 104.341 Failed to add peer 102
+212 107.177 Killed peer 206 @ age 6.07
+212 107.252 Added Geth peer 101
+212 110.433 Added Geth peer 119
+212 110.663 Added Geth peer 102
+212 110.786 Killed peer 215 @ age 6.85
+212 113.559 Killed peer 214 @ age 13.82
+212 116.459 Failed to add peer 115
+212 119.752 Killed peer 208 @ age 13.07
+212 126.027 Killed peer 210 @ age 4.97
+212 128.943 Failed to add peer 115
+212 132.148 Killed peer 101 @ age 6.34
+212 132.24 Added Geth peer 214
+212 132.972 STOPPED EXPERIMENT

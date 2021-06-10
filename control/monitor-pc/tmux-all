@@ -37,12 +37,16 @@ gnome-terminal --geometry="$geom" -- tmux new-session ssh "${ALL_IPS[0]}" ';' \
 	select-layout tiled ';' \
 
 
+# if [ "$1" == "--nosync" ]; then 
+# 	tmux set-option -w synchronize-panes off
+# fi
+
 # if [ "$1" == "geth" ]; then 
 # 	# Open the TMUX session called GETH
-# 	tmux kill-session -t GETH >/dev/null 2>&1
+#   tmux kill-session -t GETH >/dev/null 2>&1
 # 	tmux rename-session GETH
 # 	# GETH TMUX session: Execute setup-geth (all robots)
-# 	tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
+# 	# tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
 # fi
 
 

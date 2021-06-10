@@ -23,7 +23,7 @@ for ID in $(cat "$IDS_FILE"); do
 
 	# Return key to Pi-puck ID mapping
 	KEY=$(cat "keystore-all/$INDEX")
-	echo "$ID $KEY_FILE 0x${KEY:12:40}" >> key-mapping.txt &
+	echo "$ID $KEY_FILE 0x${KEY:12:40}" >> key-mapping.txt
 	let "INDEX+=1" 
 	sleep 0.01
 done

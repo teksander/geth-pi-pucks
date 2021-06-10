@@ -1,0 +1,15 @@
+ID TIME EVENT DESCRIPTION
+118 1623182464.137 SETUP: Synced Time
+118 0.097 STARTED EXPERIMENT
+118 4.324 Added Geth peer 116
+118 7.987 Killed peer 116 @ age 2.1
+118 8.248 Added Geth peer 116
+118 9.163 Added Geth peer 107
+118 12.416 Added Geth peer 101
+118 13.045 Killed peer 107 @ age 2.2
+118 16.477 Added Geth peer 103
+118 16.509 Killed peer 116 @ age 2.5
+118 16.725 Killed peer 101 @ age 2.1
+118 17.562 Added Geth peer 104
+118 18.761 Killed peer 103 @ age 2.3
+118 18.991 STOPPED EXPERIMENT

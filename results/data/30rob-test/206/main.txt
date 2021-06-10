@@ -1,0 +1,35 @@
+ID TIME EVENT DESCRIPTION
+206 1623078981.341 SETUP: Synced Time
+206 0.265 STARTED EXPERIMENT
+206 1.26 Added Geth peer 214
+206 1.46 Added Geth peer 210
+206 2.234 Added Geth peer 213
+206 13.469 Added Geth peer 109
+206 13.619 Killed peer 213 @ age 2.03
+206 18.79 Killed peer 214 @ age 4.01
+206 20.139 Failed to add peer 115
+206 20.212 Added Geth peer 213
+206 20.293 Added Geth peer 212
+206 20.868 Added Geth peer 215
+206 20.973 Added Geth peer 214
+206 25.332 Killed peer 109 @ age 0.12
+206 26.386 Added Geth peer 109
+206 28.344 Killed peer 212 @ age 9.07
+206 28.361 Failed to add peer 108
+206 30.914 Failed to add peer 106
+206 32.992 Added Geth peer 106
+206 36.083 Killed peer 214 @ age 0.97
+206 38.119 Added Geth peer 214
+206 67.309 Added Geth peer 212
+206 70.203 Killed peer 106 @ age 0.96
+206 71.334 Added Geth peer 106
+206 75.214 Killed peer 214 @ age 2.02
+206 75.678 Added Geth peer 208
+206 81.053 Killed peer 212 @ age 6.95
+206 86.32 Killed peer 208 @ age 6.75
+206 90.911 Added Geth peer 209
+206 91.289 Killed peer 210 @ age 13.60
+206 93.58 Failed to add peer 115
+206 96.91 Killed peer 213 @ age 23.44
+206 99.881 Added Geth peer 101
+206 107.94 STOPPED EXPERIMENT

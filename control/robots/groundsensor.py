@@ -3,6 +3,10 @@ from smbus import SMBus
 import sys
 import time
 import threading
+import logging
+
+logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logger = logging.getLogger(__name__)
 
 class GroundSensor(object):
 	""" Set up a ground-sensor data acquisition loop on a background thread
@@ -20,6 +24,9 @@ class GroundSensor(object):
 		self.groundCumsum = [0 for x in range(3)]
 		self.count = 0
 		self.failed = 0
+		self.__I2C_CHANNEL = 4
+		self.__GROUNDSENSOR_ADDRESS = 0x60  # Device address
+		self.__bus = None
 
 	def __read_reg(self, reg, count):
 		data = bytearray([0] * 6)
@@ -31,23 +38,19 @@ class GroundSensor(object):
 				return data
 			except:
 				trials+=1
+				time.sleep(0.1)
 				if trials == 5:
-					print('I2C read error occured')
+					logger.warning('GS I2C read error')
 					self.failed = 1	
 					return None
 
 	def __sensing(self):
 		""" This method runs in the background until program is closed 
 		"""  
-
-		I2C_CHANNEL = 4
-		self.__GROUNDSENSOR_ADDRESS = 0x60  # Device address
-		self.__bus = None
-
 		try:
-			self.__bus = SMBus(I2C_CHANNEL)
+			self.__bus = SMBus(self.__I2C_CHANNEL )
 		except:
-			print("Ground Sensor Error")
+			logger.critical("Ground Sensor Error")
 
 		while True:
 			# Initialize variables
@@ -85,8 +88,9 @@ class GroundSensor(object):
 			groundAverage =  [round(x/self.count) for x in self.groundCumsum]
 		except:
 			groundAverage = None
+
 		if self.__stop:
-			print('Error: Ground Sensor is OFF')
+			logger.warning('getAvg: Ground Sensor is OFF')
 			return None
 		else:
 			self.count = 0
@@ -96,7 +100,7 @@ class GroundSensor(object):
 	def getNew(self):
 		""" This method returns the instant ground value """
 		if self.__stop:
-			print('Error: Ground Sensor is OFF')
+			logger.warning('getNew: Ground Sensor is OFF')
 			return None
 		else:
 			return self.groundValue;
@@ -117,11 +121,11 @@ class GroundSensor(object):
 			# Start the execution                         
 			self.thread.start()   
 		else:
-			print('Ground-Sensor already ON')
+			logger.warning('Ground-Sensor already ON')
 
 	def stop(self):
 		""" This method is called before a clean exit """
 		self.__stop = 1
 		self.thread.join()
 		self.__bus.close()
-		print('Ground-Sensor OFF') 
+		logger.info('Ground-Sensor OFF') 

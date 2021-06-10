@@ -82,7 +82,7 @@ for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz"
 		let BYZ_COUNT++
 	else
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --nowalk"
 	fi
 done
 tmux set-option -w -t MAINLOOP synchronize-panes on

@@ -1,0 +1,176 @@
+ID TIME EVENT DESCRIPTION
+205 1623094555.237 SETUP: Synced Time
+205 0.137 STARTED EXPERIMENT
+205 15.599 Added Geth peer 116
+205 20.709 Failed to add peer 115
+205 20.896 Added Geth peer 105
+205 26.0 Added Geth peer 107
+205 26.164 Killed peer 116 @ age 11.39
+205 32.175 Killed peer 107 @ age 6.79
+205 37.243 Killed peer 105 @ age 2.02
+205 43.25 Failed to add peer 115
+205 43.577 Added Geth peer 105
+205 43.736 Added Geth peer 113
+205 47.756 Voted: 0.0034482758620689655; Status: 1
+205 48.934 Killed peer 105 @ age 5.34
+205 49.144 Added Geth peer 106
+205 54.412 Added Geth peer 112
+205 54.496 Killed peer 113 @ age 4.51
+205 57.561 Killed peer 106 @ age 4.46
+205 57.69 Added Geth peer 119
+205 62.794 Failed to add peer 115
+205 62.848 Added Geth peer 105
+205 62.91 Killed peer 112 @ age 7.34
+205 68.044 Killed peer 119 @ age 3.07
+205 68.111 Added Geth peer 106
+205 74.09 Killed peer 106 @ age 2.03
+205 74.169 Killed peer 105 @ age 15.71
+205 80.232 Added Geth peer 212
+205 80.442 Added Geth peer 111
+205 85.774 Failed to add peer 115
+205 85.828 Killed peer 212 @ age 6.07
+205 91.008 Killed peer 111 @ age 8.40
+205 97.097 Added Geth peer 106
+205 104.168 Failed to add peer 115
+205 105.277 Killed peer 106 @ age 7.48
+205 106.322 Failed to add peer 119
+205 107.315 Failed to add peer 107
+205 108.338 Added Geth peer 105
+205 111.452 Added Geth peer 210
+205 116.52 Failed to add peer 115
+205 116.63 Killed peer 105 @ age 2.02
+205 121.722 Killed peer 210 @ age 4.32
+205 122.718 Failed to add peer 107
+205 122.771 Added Geth peer 210
+205 128.867 Added Geth peer 107
+205 133.935 Killed peer 210 @ age 2.04
+205 139.031 Failed to add peer 115
+205 140.605 Killed peer 107 @ age 10.57
+205 147.125 Failed to add peer 106
+205 154.34 Failed to add peer 206
+205 157.271 Voted: 0.001059322033898305; Status: 1
+205 159.38 Failed to add peer 115
+205 164.477 Added Geth peer 108
+205 168.195 Failed to add peer 107
+205 170.676 Voted: 0.0009784735812133072; Status: 1
+205 174.166 Killed peer 108 @ age 16.14
+205 179.21 Failed to add peer 206
+205 179.517 Added Geth peer 105
+205 184.656 Killed peer 105 @ age 3.00
+205 186.237 Failed to add peer 115
+205 187.654 Added Geth peer 106
+205 195.314 Killed peer 106 @ age 7.52
+205 204.528 Failed to add peer 206
+205 209.576 Added Geth peer 102
+205 209.656 Added Geth peer 106
+205 209.839 Failed to add peer 105
+205 210.692 Added Geth peer 119
+205 211.452 Failed to add peer 115
+205 216.534 Killed peer 102 @ age 9.18
+205 221.543 Killed peer 119 @ age 4.45
+205 226.577 Failed to add peer 206
+205 226.618 Killed peer 106 @ age 22.17
+205 230.467 Added Geth peer 109
+205 239.185 Killed peer 109 @ age 8.53
+205 246.318 Failed to add peer 206
+205 246.477 Voted: 0.0006765899864682003; Status: 1
+205 251.51 Failed to add peer 115
+205 253.666 Added Geth peer 105
+205 256.793 Failed to add peer 117
+205 261.85 Killed peer 105 @ age 12.24
+205 265.666 Added Geth peer 208
+205 265.802 Added Geth peer 117
+205 268.272 Added Geth peer 206
+205 273.289 Failed to add peer 115
+205 273.403 Added Geth peer 106
+205 273.506 Added Geth peer 102
+205 273.992 Killed peer 208 @ age 3.76
+205 276.737 Voted: 0.0006031363088057901; Status: 1
+205 284.313 Added Geth peer 214
+205 284.362 Added Geth peer 212
+205 284.55 Killed peer 106 @ age 7.44
+205 286.636 Added Geth peer 109
+205 286.785 Killed peer 117 @ age 18.88
+205 290.604 Failed to add peer 115
+205 290.745 Killed peer 102 @ age 19.71
+205 298.24 Added Geth peer 210
+205 298.662 Killed peer 214 @ age 14.72
+205 304.867 Failed to add peer 115
+205 305.404 Failed to add peer 106
+205 306.042 Killed peer 109 @ age 16.82
+205 310.545 Voted: 0.0005387931034482759; Status: 1
+205 312.136 Killed peer 210 @ age 6.88
+205 312.22 Added Geth peer 105
+205 317.48 Killed peer 206 @ age 3.10
+205 319.435 Failed to add peer 115
+205 324.043 Killed peer 212 @ age 40.54
+205 330.942 Killed peer 105 @ age 11.99
+205 338.003 Failed to add peer 115
+205 340.018 Failed to add peer 206
+205 345.244 Added Geth peer 108
+205 345.449 Added Geth peer 105
+205 351.603 Added Geth peer 206
+205 352.066 Added Geth peer 210
+205 355.282 Voted: 0.00047036688617121356; Status: 1
+205 357.478 Killed peer 108 @ age 7.24
+205 357.556 Added Geth peer 109
+205 362.753 Failed to add peer 115
+205 362.756 Killed peer 210 @ age 8.34
+205 368.061 Killed peer 105 @ age 22.53
+205 374.084 Killed peer 206 @ age 1.35
+205 374.844 Failed to add peer 115
+205 375.079 Killed peer 109 @ age 17.01
+205 388.703 Added Geth peer 206
+205 393.768 Added Geth peer 211
+205 393.813 Killed peer 206 @ age 6.49
+205 396.556 Added Geth peer 115
+205 397.737 Failed to add peer 108
+205 399.997 Voted: 0.00041841004184100416; Status: 1
+205 402.97 Added Geth peer 107
+205 406.824 Killed peer 211 @ age 19.19
+205 413.838 Killed peer 107 @ age 8.60
+205 441.916 Failed to add peer 107
+205 442.94 Added Geth peer 102
+205 445.932 Failed to add peer 106
+205 446.817 Voted: 0.00037425149700598805; Status: 1
+205 451.062 Added Geth peer 107
+205 453.0 Killed peer 102 @ age 8.51
+205 463.012 Killed peer 107 @ age 5.35
+205 473.036 Killed peer 115 @ age 0.96
+205 494.118 Failed to add peer 115
+205 504.241 Added Geth peer 112
+205 514.48 Failed to add peer 115
+205 514.509 Killed peer 112 @ age 9.90
+205 528.518 Failed to add peer 115
+205 549.033 Added Geth peer 111
+205 549.122 Added Geth peer 211
+205 553.711 Added Geth peer 116
+205 556.032 Failed to add peer 115
+205 556.318 Killed peer 111 @ age 5.40
+205 558.172 Voted: 0.0002995805871779509; Status: 1
+205 566.559 Killed peer 116 @ age 2.28
+205 572.603 Killed peer 211 @ age 22.88
+205 578.611 Failed to add peer 115
+205 583.494 Failed to add peer 115
+205 598.572 Added Geth peer 212
+205 600.078 Voted: 0.0002785515320334262; Status: 1
+205 608.689 Failed to add peer 115
+205 608.827 Killed peer 212 @ age 3.54
+205 609.943 Added Geth peer 105
+205 622.913 Killed peer 105 @ age 2.05
+205 626.739 Failed to add peer 115
+205 632.035 Added Geth peer 208
+205 636.695 Voted: 0.0002627430373095113; Status: 1
+205 642.956 Added Geth peer 112
+205 643.094 Killed peer 208 @ age 9.48
+205 649.1 Failed to add peer 115
+205 649.238 Added Geth peer 108
+205 654.376 Killed peer 112 @ age 4.35
+205 660.489 Killed peer 108 @ age 11.10
+205 670.633 Failed to add peer 115
+205 675.783 Added Geth peer 211
+205 676.183 Failed to add peer 107
+205 677.068 Voted: 0.00024715768660405336; Status: 1
+205 681.863 Killed peer 211 @ age 10.53
+205 686.001 STOPPED EXPERIMENT
+205 687.011 Added Geth peer 113

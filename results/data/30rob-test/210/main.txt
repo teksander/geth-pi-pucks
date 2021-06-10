@@ -1,0 +1,47 @@
+ID TIME EVENT DESCRIPTION
+210 1623078961.145 SETUP: Synced Time
+210 0.114 STARTED EXPERIMENT
+210 1.112 Added Geth peer 214
+210 1.171 Added Geth peer 213
+210 25.966 Added Geth peer 206
+210 33.318 Added Geth peer 109
+210 33.399 Killed peer 214 @ age 2.01
+210 38.531 Killed peer 213 @ age 2.00
+210 46.72 Failed to add peer 115
+210 46.828 Added Geth peer 212
+210 46.891 Added Geth peer 119
+210 46.997 Killed peer 206 @ age 2.01
+210 47.131 Added Geth peer 215
+210 51.375 Added Geth peer 213
+210 51.579 Killed peer 109 @ age 1.41
+210 56.777 Added Geth peer 206
+210 56.976 Killed peer 119 @ age 14.49
+210 62.096 Added Geth peer 109
+210 70.813 Failed to add peer 115
+210 71.026 Killed peer 212 @ age 2.01
+210 72.127 Added Geth peer 212
+210 73.05 Failed to add peer 119
+210 74.034 Killed peer 215 @ age 0.97
+210 75.588 Added Geth peer 215
+210 77.075 Failed to add peer 119
+210 85.099 Killed peer 109 @ age 0.96
+210 86.389 Failed to add peer 119
+210 87.205 Added Geth peer 109
+210 92.184 Failed to add peer 119
+210 93.202 Added Geth peer 208
+210 96.231 Failed to add peer 106
+210 96.294 Added Geth peer 119
+210 103.669 Added Geth peer 106
+210 103.957 Killed peer 109 @ age 2.04
+210 108.978 Failed to add peer 115
+210 109.035 Added Geth peer 101
+210 109.374 Killed peer 206 @ age 5.25
+210 114.74 Killed peer 215 @ age 8.14
+210 119.852 Added Geth peer 102
+210 120.159 Killed peer 208 @ age 10.88
+210 120.165 Killed peer 106 @ age 5.66
+210 125.359 Killed peer 119 @ age 4.99
+210 126.443 Failed to add peer 115
+210 126.877 Added Geth peer 119
+210 131.344 STOPPED EXPERIMENT
+210 132.724 Added Geth peer 214

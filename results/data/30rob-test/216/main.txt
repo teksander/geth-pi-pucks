@@ -1,0 +1,20 @@
+ID TIME EVENT DESCRIPTION
+216 1623079009.264 SETUP: Synced Time
+216 0.233 STARTED EXPERIMENT
+216 6.846 Added Geth peer 205
+216 19.624 Killed peer 205 @ age 2.03
+216 27.769 Failed to add peer 115
+216 27.832 Failed to add peer 119
+216 32.929 Added Geth peer 205
+216 42.993 Killed peer 205 @ age 2.02
+216 49.021 Failed to add peer 115
+216 49.079 Added Geth peer 205
+216 49.285 Added Geth peer 211
+216 54.594 Killed peer 205 @ age 5.09
+216 60.653 Killed peer 211 @ age 10.01
+216 66.803 Added Geth peer 211
+216 71.838 Failed to add peer 115
+216 71.871 Killed peer 211 @ age 4.55
+216 75.132 Added Geth peer 205
+216 78.374 Added Geth peer 211
+216 80.134 STOPPED EXPERIMENT

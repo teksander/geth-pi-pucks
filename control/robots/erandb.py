@@ -7,6 +7,10 @@ import smbus
 import math
 import sys
 import traceback
+import logging
+
+logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logger = logging.getLogger(__name__)
 
 I2C_CHANNEL = 4
 RANDB_I2C_ADDR = 0x20
@@ -23,30 +27,30 @@ __data_length = 16
 
 def __write_data(addr, data):
 	trials = 0
-	while 1:
+	while True:
 		try:
 			bus.write_byte_data(RANDB_I2C_ADDR, addr, data)
 			return
 		except:
 			trials+=1
-			print('I2C failed. Trials=', trials)
+			logger.debug('RaB I2C failed. Trials=%i', trials)
+			time.sleep(0.1)
 			if(trials == 25):
-				print('I2C write error occured')
-				traceback.print_exc(file=sys.stdout)
-				sys.exit(1)
+				logger.error('RaB I2C write error occured')
+				return
 
 def __read_data(addr):
 	trials = 0
-	while 1:
+	while True:
 		try:
 			return bus.read_byte_data(RANDB_I2C_ADDR, addr)
 		except:
 			trials+=1
-			print('I2C failed. Trials=', trials)
+			logger.debug('RaB I2C failed. Trials=%i', trials)
+			time.sleep(0.1)
 			if(trials == 25):
-				print('I2C read error occured')
-				traceback.print_exc(file=sys.stdout)
-				sys.exit(1)
+				logger.error('RaB I2C read error occured')
+				return
 
 def __nop_delay(t):
 	time.sleep(t * NOP_TIME)
@@ -54,14 +58,14 @@ def __nop_delay(t):
 
 def e_init_randb():
 	global bus
-	while 1:
+	while True:
 		try:
 			bus = smbus.SMBus(I2C_CHANNEL)
 			return
 		except:
 			trials+=1
 			if(trials == 5):
-				print('Error initializing ERB')
+				logger.critical('Error initializing RaB')
 				traceback.print_exc(file=sys.stdout)
 				sys.exit(1)
 
@@ -181,7 +185,7 @@ class ERANDB(object):
     The __listen() method will be started and it will run in the background
     until the application exits.
     """
-    def __init__(self,dist):
+    def __init__(self, dist, tData = None, tFreq = 0):
         """ Constructor
         :type dist: int
         :param dist: E-randb communication range (0=1meter; 255=0m)
@@ -189,27 +193,26 @@ class ERANDB(object):
         :param freq: E-randb transmit frequency (tip: 0 = no transmission)
         """
         self.dist = dist
-        self.__stop = 1
-        self.transmit_data = None
+        self.__stop = True
+        self.tData = tData
+        self.tFreq = tFreq
          # This robot ID
         self.id = open("/boot/pi-puck_id", "r").read().strip()
         self.newIds = set()
 
     def __listening(self):
         """ This method runs in the background until program is closed """
-
+        tTime = 0
         # /* Init E-RANDB board */
         e_init_randb() 
-        # /* Range is tunable by software. 
-        #  * 0 -> Full Range ((1m. approx depending on light conditions ))
-        #  * 255 --> No Range (0cm. approx, depending on light conditions */
+        # /* Range is tunable by software. 0 -> Full Range; 255 --> No Range
         e_randb_set_range(self.dist)
         #  * Do the calculations on the erandb board*/
         e_randb_set_calculation(ON_BOARD)
         # /* Store light conditions to improve range and bearing calculations */
         e_randb_store_light_conditions()
 
-        print('E-RANDB OK')
+        logger.info('E-RANDB OK')
 
         while True:
             if e_randb_get_if_received() != 0:
@@ -218,29 +221,25 @@ class ERANDB(object):
                 if newId != self.id: 
                     self.newIds.add(newId)
 
-            sleep(0.01)
+            time.sleep(0.01)
 
-            if transmitData != None:
-            	e_randb_send_all_data(transmitData)
-            	time.sleep(0.01)
-            	transmit_data = None
+            if (self.tData != None) and (self.tFreq != 0):
+                if time.time()-tTime > self.tFreq:
+                    e_randb_send_all_data(int(self.tData))
+                    tTime = time.time()
 
             if self.__stop:
                 break 
             else:
-            	time.sleep(0.1)
+                pass
 
 
-    def transmit(self,data):
-    	self.transmitData = int(data)
-        # e_randb_store_data(0, int(data))
-        # e_randb_send_data()
-        # e_randb_send_all_data(int(data))
-        # print("Sent:", data)
+    def setData(self, tData):
+        self.tData = int(tData)
 
     def getNew(self):
         if self.__stop:
-            print('Warning: E-RANDB is OFF')
+            logger.warning('getNew: E-RANDB is OFF')
 
         temp = self.newIds
         self.newIds = set()
@@ -249,19 +248,19 @@ class ERANDB(object):
     def start(self):
         """ This method is called to start __listening to E-Randb messages """
         if self.__stop:
-            self.__stop = 0
+            self.__stop = False
+
             # Initialize background daemon thread
             self.thread = threading.Thread(target=self.__listening, args=())
             self.thread.daemon = True 
-
             # Start the execution                         
             self.thread.start()   
         else:
-            print('E-RANDB already ON')
+            logger.warning('E-RANDB already ON')
 
     def stop(self):
         """ This method is called before a clean exit """   
-        self.__stop = 1
+        self.__stop = True
         self.thread.join()
         bus.close()
-        print('E-RANDB OFF') 
+        logger.info('E-RANDB OFF') 

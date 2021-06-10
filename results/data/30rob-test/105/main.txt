@@ -1,0 +1,14 @@
+ID TIME EVENT DESCRIPTION
+105 1623079003.273 SETUP: Synced Time
+105 0.349 STARTED EXPERIMENT
+105 17.814 Failed to add peer 114
+105 23.325 Failed to add peer 115
+105 39.923 Failed to add peer 114
+105 45.422 Failed to add peer 115
+105 51.029 Added Geth peer 114
+105 61.153 Killed peer 114 @ age 2.03
+105 62.348 Failed to add peer 115
+105 63.202 Added Geth peer 114
+105 72.617 Killed peer 114 @ age 2.04
+105 75.709 Failed to add peer 115
+105 86.422 STOPPED EXPERIMENT

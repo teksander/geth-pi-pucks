@@ -1,0 +1,15 @@
+ID TIME EVENT DESCRIPTION
+213 1623095883.119 SETUP: Synced Time
+213 0.097 STARTED EXPERIMENT
+213 11.662 Added Geth peer 116
+213 17.118 Killed peer 116 @ age 5.27
+213 17.146 Failed to add peer 102
+213 17.195 Added Geth peer 103
+213 20.191 Failed to add peer 115
+213 20.262 Added Geth peer 212
+213 25.379 Killed peer 103 @ age 4.79
+213 30.456 Killed peer 212 @ age 4.76
+213 41.492 Failed to add peer 115
+213 165.981 Failed Vote (Unexpected). Trying again. Balance: 21.00
+213 286.522 Failed Vote (Unexpected). Trying again. Balance: 21.00
+213 403.64 STOPPED EXPERIMENT

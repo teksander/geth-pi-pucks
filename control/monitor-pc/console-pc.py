@@ -8,6 +8,14 @@ import os
 import threading
 import time
 import socket
+import logging
+
+logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logger = logging.getLogger('console-pc')
+
+logging.getLogger('console').setLevel(logging.INFO)
+logger.setLevel(logging.INFO)
+
 
 # /* FUNCTIONS */ 
 #######################################################################
@@ -23,22 +31,24 @@ def getIds(database = 'geth'):
         keyMap = open('/home/eksander/geth-pi-pucks/control/monitor-pc/key-mapping.txt')
         return [line.split()[0] for line in keyMap]
 
+def getIps(database = 'geth'):
+    if database == 'geth':
+        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
+
+def getKeys(database = 'file'):
+    keyMap = open('/home/eksander/geth-pi-pucks/control/monitor-pc/key-mapping.txt')
+    return [line.split()[-1] for line in keyMap]
+
 
 def getBalances():
-    keyMap = open('/home/eksander/geth-pi-pucks/control/monitor-pc/key-mapping.txt')
-
-    for line in keyMap:
-        key = line.split()[-1]
+    for key in getKeys:
         address = w3.toChecksumAddress(key)
         print(key, round(w3.fromWei(w3.eth.getBalance(address), 'ether'), 2))
 
-def fundRobots(_value = 0.01):
-    keyMap = open('/home/eksander/geth-pi-pucks/control/monitor-pc/key-mapping.txt')
-
-    for line in keyMap:
-        key = line.split()[-1]
+def fundRobots(value = 0.01):
+    for key in getKeys:
         address = w3.toChecksumAddress(key)
-        w3.eth.sendTransaction({'to': address, 'from': w3.eth.coinbase,'value': w3.toWei(_value, 'ether')})
+        w3.eth.sendTransaction({'to': address, 'from': w3.eth.coinbase,'value': w3.toWei(value, 'ether')})
 
 def deploySC():
     fundRobots()
@@ -97,7 +107,7 @@ try:
     tcpKEY.start()
 
 except:
-    print('No connection to running Geth process')
+    logger.info('No connection to Geth process')
 
 
 

@@ -1,0 +1,20 @@
+ID TIME EVENT DESCRIPTION
+210 1623095899.141 SETUP: Synced Time
+210 0.123 STARTED EXPERIMENT
+210 20.012 Added Geth peer 107
+210 25.089 Failed to add peer 115
+210 25.154 Added Geth peer 215
+210 25.226 Added Geth peer 111
+210 25.252 Killed peer 107 @ age 9.07
+210 31.31 Killed peer 111 @ age 6.54
+210 37.484 Added Geth peer 116
+210 37.53 Killed peer 215 @ age 10.81
+210 39.469 Failed to add peer 115
+210 45.604 Killed peer 116 @ age 5.14
+210 46.177 Added Geth peer 216
+210 56.612 Voted: 0.0029069767441860465; Status: 1
+210 56.744 Killed peer 216 @ age 6.05
+210 61.831 Failed to add peer 115
+210 211.114 Failed Vote (Unexpected). Trying again. Balance: 21.00
+210 331.826 Failed Vote (Unexpected). Trying again. Balance: 21.00
+210 403.69 STOPPED EXPERIMENT

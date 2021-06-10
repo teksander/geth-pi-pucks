@@ -1,0 +1,17 @@
+ID TIME EVENT DESCRIPTION
+215 1623094554.158 SETUP: Synced Time
+215 0.12 STARTED EXPERIMENT
+215 7.596 Added Geth peer 107
+215 10.689 Failed to add peer 115
+215 15.783 Killed peer 107 @ age 3.11
+215 26.867 Added Geth peer 117
+215 31.998 Failed to add peer 115
+215 32.067 Added Geth peer 106
+215 32.22 Killed peer 117 @ age 2.99
+215 38.255 Killed peer 106 @ age 10.76
+215 51.668 Voted: 0.0031847133757961785; Status: 1
+215 211.15 Failed Vote (Unexpected). Trying again. Balance: 21.00
+215 331.782 Failed Vote (Unexpected). Trying again. Balance: 21.00
+215 452.445 Failed Vote (Unexpected). Trying again. Balance: 21.00
+215 573.12 Failed Vote (Unexpected). Trying again. Balance: 21.00
+215 685.944 STOPPED EXPERIMENT

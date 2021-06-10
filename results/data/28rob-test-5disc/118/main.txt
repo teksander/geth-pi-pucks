@@ -1,0 +1,341 @@
+ID TIME EVENT DESCRIPTION
+118 1623179976.235 SETUP: Synced Time
+118 0.108 STARTED EXPERIMENT
+118 1.017 Added Geth peer 208
+118 2.663 Added Geth peer 105
+118 4.89 Killed peer 105 @ age 2.1
+118 9.306 Killed peer 208 @ age 2.2
+118 10.859 Added Geth peer 205
+118 15.144 Killed peer 205 @ age 2.2
+118 16.189 Added Geth peer 205
+118 20.828 Killed peer 205 @ age 2.2
+118 40.591 Added Geth peer 111
+118 40.627 Added Geth peer 216
+118 43.062 Added Geth peer 206
+118 44.89 Killed peer 216 @ age 2.1
+118 45.126 Killed peer 111 @ age 2.1
+118 45.762 Added Geth peer 210
+118 47.374 Killed peer 206 @ age 2.1
+118 50.216 Killed peer 210 @ age 2.2
+118 52.051 Timing out peer 206
+118 54.078 Killed peer 206 @ age 2.0
+118 54.319 Voted: 0.0030120481927710845; Status: 1
+118 62.812 Added Geth peer 205
+118 66.792 Killed peer 205 @ age 2.2
+118 77.268 Added Geth peer 102
+118 79.489 Killed peer 102 @ age 2.3
+118 83.53 Added Geth peer 107
+118 86.422 Added Geth peer 206
+118 86.442 Killed peer 107 @ age 2.1
+118 88.486 Added Geth peer 107
+118 89.55 Killed peer 206 @ age 2.1
+118 90.744 Killed peer 107 @ age 2.2
+118 96.514 Added Geth peer 113
+118 96.601 Added Geth peer 114
+118 98.945 Killed peer 113 @ age 2.2
+118 100.725 Killed peer 114 @ age 2.2
+118 102.554 Added Geth peer 210
+118 105.656 Killed peer 210 @ age 2.1
+118 106.048 Voted: 0.001567398119122257; Status: 1
+118 111.145 Added Geth peer 104
+118 116.18 Killed peer 104 @ age 5.1
+118 116.915 Killed peer 211 @ age 0.7
+118 117.937 Added Geth peer 107
+118 119.203 Added Geth peer 101
+118 121.831 Killed peer 107 @ age 2.2
+118 122.423 Killed peer 101 @ age 2.2
+118 125.034 Added Geth peer 108
+118 127.885 Killed peer 108 @ age 2.2
+118 128.321 Added Geth peer 101
+118 129.511 Added Geth peer 108
+118 130.307 Killed peer 101 @ age 2.0
+118 132.498 Killed peer 108 @ age 2.2
+118 135.068 Added Geth peer 212
+118 137.446 Killed peer 212 @ age 2.1
+118 141.693 Added Geth peer 208
+118 144.536 Killed peer 208 @ age 2.1
+118 146.007 Voted: 0.0011389521640091116; Status: 1
+118 151.19 Added Geth peer 105
+118 154.195 Killed peer 105 @ age 2.2
+118 156.578 Added Geth peer 111
+118 156.874 Added Geth peer 112
+118 159.023 Killed peer 111 @ age 2.2
+118 160.416 Killed peer 112 @ age 2.2
+118 167.644 Added Geth peer 111
+118 170.469 Killed peer 111 @ age 2.2
+118 176.153 Added Geth peer 111
+118 177.903 Added Geth peer 103
+118 179.522 Killed peer 111 @ age 2.1
+118 181.651 Added Geth peer 114
+118 182.732 Killed peer 103 @ age 2.2
+118 184.792 Killed peer 114 @ age 2.1
+118 185.663 Added Geth peer 102
+118 187.303 Added Geth peer 114
+118 187.991 Killed peer 102 @ age 2.2
+118 191.574 Killed peer 114 @ age 2.2
+118 194.771 Voted: 0.0008532423208191126; Status: 1
+118 198.717 Added Geth peer 102
+118 201.887 Killed peer 102 @ age 2.0
+118 209.139 Killed peer 211 @ age 5.0
+118 214.755 Added Geth peer 107
+118 217.587 Killed peer 107 @ age 2.2
+118 225.018 Added Geth peer 107
+118 227.042 Timing out peer 112
+118 227.14 Killed peer 107 @ age 2.1
+118 227.32 Killed peer 112 @ age 2.7
+118 238.013 Added Geth peer 210
+118 240.45 Voted: 0.0006934812760055479; Status: 1
+118 240.616 Killed peer 210 @ age 2.2
+118 242.618 Added Geth peer 102
+118 246.11 Killed peer 102 @ age 2.1
+118 247.649 Added Geth peer 119
+118 250.405 Killed peer 119 @ age 2.1
+118 260.36 Added Geth peer 210
+118 262.25 Added Geth peer 215
+118 262.639 Killed peer 210 @ age 2.0
+118 265.028 Killed peer 215 @ age 2.2
+118 266.954 Added Geth peer 101
+118 269.854 Killed peer 101 @ age 2.2
+118 271.324 Added Geth peer 107
+118 274.104 Killed peer 107 @ age 2.1
+118 284.546 Added Geth peer 119
+118 287.275 Killed peer 119 @ age 2.0
+118 305.409 Added Geth peer 103
+118 309.761 Killed peer 103 @ age 2.3
+118 317.827 Added Geth peer 209
+118 319.853 Killed peer 209 @ age 2.0
+118 325.343 Added Geth peer 210
+118 329.58 Added Geth peer 215
+118 331.831 Killed peer 215 @ age 2.2
+118 333.037 Killed peer 210 @ age 2.2
+118 338.848 Killed peer 116 @ age 5.0
+118 339.728 Added Geth peer 209
+118 340.949 Killed peer 209 @ age 2.1
+118 341.805 Added Geth peer 113
+118 347.88 Killed peer 113 @ age 2.2
+118 349.016 Added Geth peer 216
+118 352.015 Added Geth peer 208
+118 352.494 Killed peer 216 @ age 2.0
+118 354.518 Killed peer 208 @ age 2.0
+118 373.382 Killed peer 116 @ age 3.1
+118 377.474 Added Geth peer 113
+118 379.569 Killed peer 113 @ age 2.1
+118 381.271 Added Geth peer 117
+118 383.757 Voted: 0.0004347826086956522; Status: 1
+118 386.476 Killed peer 109 @ age 2.1
+118 387.578 Added Geth peer 212
+118 389.646 Killed peer 212 @ age 2.1
+118 399.277 Killed peer 117 @ age 2.1
+118 400.362 Added Geth peer 117
+118 402.365 Voted: 0.00041425020712510354; Status: 1
+118 410.275 Added Geth peer 212
+118 412.208 Killed peer 212 @ age 2.0
+118 420.942 Timing out peer 112
+118 421.966 Killed peer 112 @ age 2.0
+118 424.21 Added Geth peer 112
+118 426.807 Killed peer 112 @ age 2.2
+118 430.459 Killed peer 117 @ age 2.2
+118 432.883 Added Geth peer 109
+118 435.333 Killed peer 109 @ age 2.0
+118 437.078 Added Geth peer 215
+118 440.136 Killed peer 215 @ age 2.2
+118 440.966 Added Geth peer 109
+118 445.174 Killed peer 109 @ age 2.2
+118 457.121 Added Geth peer 109
+118 461.321 Killed peer 109 @ age 2.2
+118 462.282 Added Geth peer 212
+118 463.209 Voted: 0.0003604902667627974; Status: 1
+118 464.221 Added Geth peer 208
+118 465.231 Killed peer 212 @ age 2.1
+118 467.259 Killed peer 208 @ age 2.2
+118 477.549 Added Geth peer 107
+118 478.442 Added Geth peer 109
+118 480.059 Killed peer 107 @ age 2.1
+118 480.461 Killed peer 109 @ age 2.1
+118 483.106 Added Geth peer 107
+118 485.61 Killed peer 107 @ age 2.0
+118 501.126 Added Geth peer 107
+118 504.593 Killed peer 107 @ age 2.2
+118 506.81 Timing out peer 112
+118 508.189 Added Geth peer 216
+118 509.1 Added Geth peer 112
+118 510.343 Killed peer 112 @ age 2.1
+118 511.13 Killed peer 216 @ age 2.1
+118 514.571 Added Geth peer 215
+118 516.753 Added Geth peer 112
+118 516.755 Voted: 0.00032278889606197545; Status: 1
+118 518.21 Added Geth peer 209
+118 519.823 Killed peer 215 @ age 2.0
+118 522.277 Killed peer 209 @ age 2.1
+118 526.886 Killed peer 112 @ age 2.0
+118 528.702 Timing out peer 113
+118 533.796 Killed peer 113 @ age 5.5
+118 534.276 Added Geth peer 216
+118 534.276 Killed peer 211 @ age 0.5
+118 534.351 Added Geth peer 113
+118 535.962 Killed peer 216 @ age 2.1
+118 537.981 Killed peer 113 @ age 2.2
+118 538.601 Added Geth peer 113
+118 540.426 Added Geth peer 117
+118 545.451 Killed peer 113 @ age 2.2
+118 546.468 Killed peer 117 @ age 2.0
+118 546.842 Added Geth peer 107
+118 549.58 Killed peer 107 @ age 2.1
+118 550.9 Added Geth peer 117
+118 552.067 Voted: 0.0003022974607013301; Status: 1
+118 553.903 Killed peer 117 @ age 2.4
+118 554.4 Added Geth peer 107
+118 555.626 Killed peer 107 @ age 2.1
+118 560.469 Added Geth peer 112
+118 562.269 Added Geth peer 117
+118 562.526 Killed peer 112 @ age 2.1
+118 562.998 Added Geth peer 113
+118 564.742 Killed peer 117 @ age 2.2
+118 566.402 Added Geth peer 117
+118 566.79 Killed peer 113 @ age 2.3
+118 568.54 Killed peer 117 @ age 2.0
+118 578.64 Timing out peer 105
+118 578.696 Added Geth peer 216
+118 580.339 Killed peer 105 @ age 2.2
+118 580.78 Killed peer 216 @ age 2.1
+118 588.264 Voted: 0.00028376844494892167; Status: 1
+118 590.437 Added Geth peer 215
+118 596.633 Killed peer 215 @ age 2.0
+118 604.195 Killed peer 116 @ age 3.1
+118 622.894 Added Geth peer 109
+118 625.87 Killed peer 109 @ age 2.1
+118 625.906 Voted: 0.00026652452025586353; Status: 1
+118 634.105 Added Geth peer 109
+118 639.122 Killed peer 109 @ age 2.2
+118 641.796 Added Geth peer 109
+118 644.425 Killed peer 109 @ age 2.2
+118 653.703 Added Geth peer 109
+118 658.789 Killed peer 109 @ age 2.2
+118 674.936 Added Geth peer 108
+118 677.164 Killed peer 108 @ age 2.1
+118 678.484 Added Geth peer 111
+118 681.183 Killed peer 111 @ age 2.1
+118 684.238 Added Geth peer 101
+118 687.199 Killed peer 101 @ age 2.2
+118 696.969 Added Geth peer 101
+118 698.755 Voted: 0.0002390057361376673; Status: 1
+118 701.429 Killed peer 101 @ age 2.1
+118 704.361 Added Geth peer 104
+118 706.69 Added Geth peer 109
+118 707.005 Killed peer 104 @ age 2.4
+118 707.549 Voted: 0.00023596035865974517; Status: 1
+118 707.7 Killed peer 109 @ age 2.1
+118 723.061 Added Geth peer 101
+118 726.075 Killed peer 101 @ age 2.0
+118 734.048 Added Geth peer 101
+118 736.975 Killed peer 101 @ age 2.1
+118 737.416 Added Geth peer 101
+118 740.585 Killed peer 101 @ age 2.2
+118 752.422 Voted: 0.00022182786157941438; Status: 1
+118 770.91 Added Geth peer 101
+118 773.557 Killed peer 101 @ age 2.0
+118 773.772 Added Geth peer 104
+118 777.066 Killed peer 104 @ age 2.1
+118 778.003 Added Geth peer 107
+118 780.171 Killed peer 107 @ age 2.1
+118 783.961 Added Geth peer 101
+118 786.088 Killed peer 101 @ age 2.2
+118 795.626 Added Geth peer 112
+118 799.309 Killed peer 112 @ age 2.0
+118 804.493 Added Geth peer 101
+118 804.517 Added Geth peer 112
+118 806.477 Voted: 0.00020695364238410596; Status: 1
+118 807.339 Killed peer 112 @ age 2.2
+118 808.796 Added Geth peer 112
+118 809.179 Killed peer 101 @ age 2.0
+118 810.785 Killed peer 112 @ age 2.0
+118 813.409 Added Geth peer 102
+118 814.093 Added Geth peer 112
+118 815.547 Killed peer 112 @ age 2.1
+118 816.352 Killed peer 102 @ age 2.2
+118 825.571 Timing out peer 119
+118 825.678 Added Geth peer 102
+118 828.073 Killed peer 119 @ age 2.5
+118 828.492 Timing out peer 106
+118 828.519 Killed peer 102 @ age 0.4
+118 828.7 Killed peer 106 @ age 2.3
+118 831.772 Added Geth peer 102
+118 835.988 Killed peer 102 @ age 2.2
+118 840.764 Timing out peer 104
+118 840.766 Killed peer 104 @ age 2.6
+118 845.343 Added Geth peer 114
+118 847.717 Killed peer 114 @ age 2.1
+118 848.289 Added Geth peer 103
+118 849.83 Added Geth peer 108
+118 850.765 Killed peer 103 @ age 2.3
+118 850.98 Voted: 0.00019623233908948196; Status: 1
+118 851.986 Killed peer 108 @ age 2.1
+118 854.4 Added Geth peer 114
+118 857.212 Killed peer 114 @ age 2.0
+118 857.417 Added Geth peer 103
+118 859.606 Killed peer 103 @ age 2.2
+118 859.909 Added Geth peer 205
+118 860.347 Added Geth peer 114
+118 863.098 Killed peer 205 @ age 2.1
+118 863.912 Added Geth peer 103
+118 868.899 Killed peer 114 @ age 4.2
+118 868.899 Killed peer 116 @ age 0.0
+118 869.111 Killed peer 103 @ age 6.0
+118 874.262 Killed peer 114 @ age 3.0
+118 874.302 Killed peer 116 @ age 3.1
+118 874.639 Added Geth peer 114
+118 877.414 Killed peer 114 @ age 3.1
+118 877.606 Killed peer 116 @ age 0.2
+118 882.721 Added Geth peer 114
+118 885.383 Killed peer 114 @ age 2.0
+118 888.641 Added Geth peer 101
+118 888.764 Added Geth peer 119
+118 891.001 Killed peer 101 @ age 2.2
+118 892.603 Killed peer 119 @ age 2.2
+118 892.884 Added Geth peer 104
+118 894.843 Killed peer 104 @ age 2.3
+118 899.461 Voted: 0.00018573551263001485; Status: 1
+118 912.662 Added Geth peer 103
+118 913.463 Added Geth peer 104
+118 915.326 Added Geth peer 109
+118 916.753 Killed peer 104 @ age 2.0
+118 917.588 Added Geth peer 104
+118 918.15 Killed peer 103 @ age 2.2
+118 918.371 Killed peer 109 @ age 2.2
+118 920.577 Added Geth peer 105
+118 922.976 Killed peer 104 @ age 2.2
+118 923.379 Killed peer 105 @ age 2.2
+118 935.165 Added Geth peer 205
+118 938.229 Killed peer 205 @ age 2.2
+118 941.734 Voted: 0.000177430801987225; Status: 1
+118 942.33 Added Geth peer 108
+118 945.125 Killed peer 108 @ age 2.0
+118 946.737 Added Geth peer 108
+118 955.796 Killed peer 108 @ age 2.2
+118 961.257 Added Geth peer 111
+118 963.928 Added Geth peer 108
+118 964.348 Killed peer 111 @ age 2.1
+118 966.552 Killed peer 108 @ age 2.2
+118 968.801 Added Geth peer 114
+118 971.558 Killed peer 114 @ age 2.1
+118 976.23 Added Geth peer 111
+118 978.869 Killed peer 111 @ age 2.3
+118 979.694 Added Geth peer 113
+118 982.297 Killed peer 113 @ age 2.2
+118 985.123 Timing out peer 109
+118 985.72 Added Geth peer 105
+118 985.721 Killed peer 109 @ age 2.6
+118 986.397 Voted: 0.00016931933626820184; Status: 1
+118 987.919 Killed peer 105 @ age 2.1
+118 993.434 Added Geth peer 111
+118 995.096 Killed peer 111 @ age 2.2
+118 997.14 Added Geth peer 108
+118 1000.101 Added Geth peer 104
+118 1000.898 Killed peer 108 @ age 2.2
+118 1001.166 Added Geth peer 109
+118 1002.76 Killed peer 104 @ age 2.1
+118 1003.853 Killed peer 109 @ age 2.1
+118 1005.105 Added Geth peer 206
+118 1006.785 Killed peer 206 @ age 2.2
+118 1010.807 STOPPED EXPERIMENT
+118 1011.198 Timing out peer 104

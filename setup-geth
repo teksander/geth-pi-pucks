@@ -31,8 +31,7 @@ else
 	ID="100"
 fi
 
-echo ${ID}
-geth --datadir $MAIN_DIR \
+geth --datadir ${MAIN_DIR} \
 --syncmode "full" \
 --port 30311 \
 --rpc --rpcaddr "localhost" \
@@ -41,7 +40,12 @@ geth --datadir $MAIN_DIR \
 --networkid 1515 \
 --allow-insecure-unlock \
 --lightkdf \
+--verbosity 0 \
 --nodiscover \
---verbosity 3 \
---miner.gaslimit "0x9000000000000" \
+--miner.gasprice "0x1" \
+--miner.gastarget "0x1" \
+--miner.gaslimit "0x9000000000" \
 --nat=extip:"${SUBNET}.${ID}"
+
+echo ${ID}
+# --miner.gaslimit "0x9000000000000" \

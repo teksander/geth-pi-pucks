@@ -1,0 +1,14 @@
+ID TIME EVENT DESCRIPTION
+210 1623182477.132 SETUP: Synced Time
+210 0.121 STARTED EXPERIMENT
+210 1.231 Added Geth peer 114
+210 6.911 Killed peer 114 @ age 0.0
+210 6.945 Added Geth peer 108
+210 7.078 Killed peer 212 @ age 0.2
+210 7.501 Added Geth peer 114
+210 13.06 Killed peer 108 @ age 6.2
+210 13.071 Killed peer 114 @ age 0.0
+210 13.23 Killed peer 104 @ age 6.3
+210 13.43 Killed peer 212 @ age 0.4
+210 18.672 Killed peer 212 @ age 5.0
+210 18.993 STOPPED EXPERIMENT

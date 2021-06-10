@@ -1,0 +1,110 @@
+ID TIME EVENT DESCRIPTION
+216 1623095889.137 SETUP: Synced Time
+216 0.126 STARTED EXPERIMENT
+216 9.202 Added Geth peer 206
+216 14.316 Killed peer 206 @ age 3.20
+216 19.343 Failed to add peer 115
+216 28.257 Failed to add peer 206
+216 30.27 Failed to add peer 115
+216 34.509 Added Geth peer 102
+216 39.574 Failed to add peer 115
+216 39.597 Killed peer 102 @ age 3.15
+216 51.828 Added Geth peer 116
+216 51.957 Added Geth peer 210
+216 53.236 Added Geth peer 208
+216 57.044 Voted: 0.0029069767441860465; Status: 1
+216 58.331 Failed to add peer 115
+216 58.609 Added Geth peer 119
+216 65.894 Killed peer 116 @ age 6.08
+216 69.489 Added Geth peer 108
+216 69.564 Killed peer 208 @ age 8.48
+216 72.164 Added Geth peer 111
+216 72.382 Killed peer 210 @ age 14.72
+216 75.201 Failed to add peer 115
+216 78.385 Killed peer 119 @ age 5.00
+216 84.606 Killed peer 111 @ age 2.46
+216 87.675 Failed to add peer 115
+216 87.686 Killed peer 108 @ age 17.72
+216 93.961 Failed to add peer 208
+216 100.155 Failed to add peer 115
+216 106.447 Added Geth peer 212
+216 106.941 Added Geth peer 106
+216 112.64 Failed to add peer 115
+216 112.719 Killed peer 212 @ age 3.18
+216 116.119 Added Geth peer 116
+216 116.162 Killed peer 106 @ age 8.31
+216 119.002 Added Geth peer 205
+216 125.122 Failed to add peer 115
+216 131.371 Killed peer 116 @ age 14.04
+216 139.916 Voted: 0.0011876484560570072; Status: 1
+216 140.717 Failed to add peer 115
+216 140.765 Killed peer 205 @ age 13.69
+216 159.515 Failed to add peer 109
+216 159.587 Added Geth peer 119
+216 162.161 Voted: 0.001026694045174538; Status: 1
+216 162.803 Failed to add peer 115
+216 165.972 Killed peer 119 @ age 5.70
+216 175.275 Failed to add peer 115
+216 187.755 Failed to add peer 115
+216 191.975 Failed to add peer 119
+216 194.175 Added Geth peer 211
+216 200.244 Failed to add peer 115
+216 201.933 Voted: 0.0008237232289950577; Status: 1
+216 202.356 Killed peer 211 @ age 4.95
+216 203.815 Added Geth peer 209
+216 207.058 Added Geth peer 113
+216 207.283 Failed to add peer 107
+216 216.317 Failed to add peer 115
+216 216.409 Killed peer 209 @ age 2.03
+216 218.424 Killed peer 113 @ age 11.19
+216 229.714 Added Geth peer 113
+216 235.915 Failed to add peer 115
+216 239.055 Killed peer 113 @ age 9.30
+216 242.224 Added Geth peer 108
+216 245.38 Failed to add peer 209
+216 251.595 Failed to add peer 109
+216 254.778 Added Geth peer 119
+216 254.834 Killed peer 108 @ age 11.78
+216 255.737 Voted: 0.0006527415143603133; Status: 1
+216 260.955 Failed to add peer 115
+216 260.989 Added Geth peer 117
+216 264.109 Killed peer 119 @ age 6.47
+216 270.339 Killed peer 117 @ age 5.39
+216 273.435 Failed to add peer 115
+216 273.464 Failed to add peer 113
+216 282.86 Added Geth peer 113
+216 289.196 Killed peer 113 @ age 5.03
+216 289.764 Added Geth peer 106
+216 296.077 Failed to add peer 115
+216 299.274 Failed to add peer 109
+216 299.276 Killed peer 106 @ age 6.92
+216 314.955 Failed to add peer 108
+216 321.754 Failed to add peer 115
+216 321.989 Failed to add peer 116
+216 333.236 Voted: 0.0005015045135406219; Status: 1
+216 335.853 Added Geth peer 113
+216 345.835 Failed to add peer 105
+216 345.849 Killed peer 113 @ age 14.14
+216 345.966 Added Geth peer 112
+216 346.09 Added Geth peer 102
+216 349.275 Failed to add peer 115
+216 352.952 Failed to add peer 106
+216 355.837 Added Geth peer 214
+216 359.048 Killed peer 112 @ age 11.83
+216 365.319 Killed peer 102 @ age 12.83
+216 371.681 Failed to add peer 109
+216 371.689 Voted: 0.0004488330341113106; Status: 1
+216 374.806 Failed to add peer 115
+216 374.908 Added Geth peer 205
+216 374.984 Killed peer 214 @ age 13.24
+216 377.97 Added Geth peer 117
+216 379.24 Added Geth peer 118
+216 381.169 Failed to add peer 103
+216 384.284 Killed peer 205 @ age 2.28
+216 387.275 Failed to add peer 115
+216 387.328 Killed peer 117 @ age 3.75
+216 388.696 Voted: 0.00042918454935622315; Status: 1
+216 393.603 Killed peer 118 @ age 14.45
+216 399.755 Failed to add peer 115
+216 399.799 Added Geth peer 113
+216 403.63 STOPPED EXPERIMENT

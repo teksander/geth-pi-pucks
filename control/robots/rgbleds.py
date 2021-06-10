@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 import time
 import smbus
+import logging
+
+logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logger = logging.getLogger(__name__)
 
 class RGBLEDs(object):
 	""" Request a measurement from the Ground Sensors
@@ -27,7 +31,7 @@ class RGBLEDs(object):
 			self.__bus = smbus.SMBus(self.I2C_CHANNEL)
 			self.setLED(self.all, 3*[self.off])
 		except:
-			print('RGB Failed')
+			logger.error('RGB Failed')
 
 	def __write_byte_data(self, register, data):
 		trials = 0
@@ -38,10 +42,8 @@ class RGBLEDs(object):
 			except:
 				trials+=1
 				if(trials == 5):
-					print('I2C write error occured')
+					logger.error('I2C write error occured')
 					return
-					# traceback.print_exc(file=sys.stdout)
-					# sys.exit(1)
 
 	def setLED(self, LED, RGB):
 		if not self.frozen:
@@ -89,6 +91,6 @@ if __name__ == "__main__":
 
 	rgb = RGBLEDs()
 	rgb.setLED(rgb.all, 3*[rgb.red])
-	time.sleep(3)
+	time.sleep(15)
 	rgb.stop()
 

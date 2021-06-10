@@ -55,7 +55,7 @@ rm genesis.conf
 
 ########## Compile and Deploy Smart Contract ############
 echo "Compiling the Smart Contract..."
-solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/control/robots/scs/build" "$CONTRACT_FILE"
+./scp-all abi
 BINDATA=`cat $MAIN_DIR/control/robots/scs/build/Estimation.bin-runtime`
 
 echo "Contract address:" `cat $MAIN_DIR/control/robots/scs/contractAddress.txt ` 
@@ -65,7 +65,7 @@ sed -i "s|123\": {|123\": {\n\"code\": \"0xBINDATA\",|g" ${GENESIS_FILE}
 sed -i "s|BINDATA|$BINDATA|g" ${GENESIS_FILE}
 
 # Change the gas limit
-sed -i "s|0x47b760|0x9000000000000|g" ${GENESIS_FILE}
+sed -i "s|0x47b760|0x9000000000|g" ${GENESIS_FILE}
 
 # Change the value of the pre-funded accounts
 sed -i "s|\"0x200000000000000000000000000000000000000000000000000000000000000\"|\"0x1236efcbcbb340000\"|g" ${GENESIS_FILE}

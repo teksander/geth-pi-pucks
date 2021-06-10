@@ -4,10 +4,15 @@ import sys
 import threading
 import socket
 import subprocess
-import smbus
+import os
+import logging
+
+logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logger = logging.getLogger(__name__)
+
 
 class TicToc(object):
-    """ Pendulum Class to Synchronize Output Times
+    """ Pendulum Class to Synchronize Output Timess
     """
     def __init__(self, delay, name = None):
         """ Constructor
@@ -26,7 +31,7 @@ class TicToc(object):
         if dtime < self.delay:
             time.sleep(self.delay - dtime)
         else:
-            # print('{} Pendulum too Slow. Elapsed: {}'.format(self.name,dtime))
+            # logger.warning('{} Pendulum too Slow. Elapsed: {}'.format(self.name,dtime))
             pass
 
 class TCP_server(object):
@@ -52,6 +57,8 @@ class TCP_server(object):
         self.newIds = set()
         self.allowed = set()
         self.unlocked = unlocked
+        self.count = 0 # For debugging
+        self.allowedCount = 0 # For debugging
 
     def __hosting(self):
         """ This method runs in the background until program is closed """ 
@@ -64,7 +71,7 @@ class TCP_server(object):
         # bind to the port
         __socket.bind((__host, self.port))  
 
-        print('TCP Server OK')  
+        logger.info('TCP Server OK')  
 
         while True:
             try:
@@ -74,11 +81,13 @@ class TCP_server(object):
                 __socket.listen(1)    
                 # establish a connection
                 __clientsocket,addr = __socket.accept()   
-                # print("TCP request from %s" % str(addr))
+                logger.debug("TCP request from %s" % str(addr))
+                self.count += 1
 
                 if (addr[0][-3:] in self.allowed) or self.unlocked:
                     __clientsocket.send(self.data.encode('ascii'))
                     self.unallow(addr[0][-3:])
+                    self.allowedCount += 1
 
                 __clientsocket.close()
 
@@ -88,6 +97,8 @@ class TCP_server(object):
 
             except socket.timeout:
                 pass
+
+            time.sleep(0.5)
 
             if self.__stop:
                 __socket.close()
@@ -113,7 +124,6 @@ class TCP_server(object):
 
         return 
 
-
     def lock(self):
         self.unlocked = False
     def unlock(self):
@@ -128,7 +138,7 @@ class TCP_server(object):
     def getNew(self):
         if self.__stop:
             return set()
-            print('Warning: TCP is OFF')
+            logger.warning('getNew: TCP is OFF')
 
         temp = self.newIds
         self.newIds = set()
@@ -145,19 +155,19 @@ class TCP_server(object):
             # Start the execution                         
             thread.start()   
         else:
-            print('TCP Server already ON')  
+            logger.warning('TCP Server already ON')  
 
     def stop(self):
         """ This method is called before a clean exit """   
         self.__stop = 1
-        print('TCP Server OFF') 
+        logger.info('TCP Server OFF') 
 
 
 
 class Peer(object):
     """ Establish the Peer class 
     """
-    def __init__(self, id__, enode = None, key=None, ageLimit = 0, w3 = None):
+    def __init__(self, id__, enode = None, key = None):
         """ Constructor
         :type id__: str
         :param id__: id of the peer
@@ -165,78 +175,191 @@ class Peer(object):
         # Add the known peer details
         self.id = id__
         self.ip = '172.27.1.' + id__
-        self.__tStamp = time.time()
+        self.tStamp = time.time()
         self.enode = enode
         self.key = key
-        self.ageLimit = ageLimit
-        self.w3 = w3
-        self.isdead = 0
+        # self.ageLimit = ageLimit
+        self.isDead = False
         self.age = 0
+        self.trials = 0
+        self.timeout = 0
         
+    def resetAge(self):
+        """ This method resets the timestamp of the robot meeting """ 
+        self.tStamp = time.time()
 
-        # Initialize background daemon thread
-        thread = threading.Thread(target=self.__aging, args=())
-        thread.daemon = True   
-        # Start the execution                         
-        thread.start()   
+    def kill(self):
+        """ This method sets a flag which identifies aged out peers """
+        self.isDead = True
+
+class PeerBuffer(object):
+    """ Establish the Peer class 
+    """
+    def __init__(self, ageLimit = 2):
+        """ Constructor
+        :type id__: str
+        :param id__: id of the peer
+        """
+        # Add the known peer details
+        self.buffer = []
+        self.ageLimit = ageLimit
+        self.__stop = True
 
     def __aging(self):
         """ This method runs in the background until program is closed 
         self.age is the time elapsed since the robots meeting.
         """            
         while True:
-            self.age = time.time() - self.__tStamp
+            # Age each peer in the buffer
+            for peer in self.buffer:
+                peer.age = time.time() - peer.tStamp
 
-            if (self.enode != None) & (self.w3 != None):
+                if peer.age > self.ageLimit:
+                    peer.kill()
 
-                if not self.isPeer():
-                    self.w3.geth.admin.addPeer(self.enode)
+                if peer.timeout != 0:
+                    peer.timeout -= 0.05
 
-                if (self.ageLimit != 0) & (self.age > self.ageLimit):
-                    self.kill()
-
-            if self.isdead:
-                break 
+            if self.__stop:
+                break
             else:
-                time.sleep(0.1);   
+                time.sleep(0.05);   
 
-    def reset_age(self):
-        """ This method resets the timestamp of the robot meeting """ 
-        self.__tStamp = time.time()
-        # print('reseted peer age')
+    def addPeer(self, newId):
+        """ This method is called to add a peer Id
+            newPeer is the new peer object
+        """   
+        if newId not in self.getIds():
+            newPeer = Peer(newId)  
+            self.buffer.append(newPeer)
+        else:
+            self.getPeerById(newId).resetAge()
 
-    def kill(self):
-        """ This method kills the peer and ends the thread """
-        self.isdead = 1
-        cmd = "admin.removePeer(\"{}\")".format(self.enode)
-        subprocess.call(["geth","--exec",cmd,"attach","/home/pi/geth-pi-pucks/geth.ipc"], stdout=subprocess.DEVNULL)   
+    def removePeer(self, oldId):
+        """ This method is called to remove a peer Id
+            newPeer is the new peer object
+        """   
+        self.buffer.pop(self.getIds().index(oldId))
 
+    def getIds(self): 
+        return [peer.id for peer in self.buffer]
+    def getAges(self):
+        return [peer.age for peer in self.buffer]
+    def getEnodes(self):
+        return [peer.enode for peer in self.buffer]
+    def getIps(self):
+        return [peer.ip for peer in self.buffer]       
+    def getkeys(self):
+        return [peer.key for peer in self.buffer]
 
-    def isPeer(self):
-        """ Checks if the peer is in geth list of peers """
-        return self.enode in self.__gethEnodes()
+    def getPeerById(self, id):
+        return self.buffer[self.getIds().index(id)]
 
+    def getPeerByEnode(self, enode):
+        return self.buffer[self.getEnodes().index(enode)]
 
-    def __gethEnodes(self):
-        try:
-            return [peer.enode for peer in self.w3.geth.admin.peers()]
-        except:
-            print('didnt return gethEnodes for whatever reason')
+    def start(self,):
+        """ This method is called to start calculating peer ages"""
+        if self.__stop:  
+            self.__stop = False
 
-def i2cdetect():
-    i2cFlag = True
-    bus = smbus.SMBus(4) # 1 indicates /dev/i2c-1
+            # Initialize background daemon thread
+            self.thread = threading.Thread(target=self.__aging, args=())
+            self.thread.daemon = True   
+            # Start the execution                         
+            self.thread.start()   
 
-    for device in [0x1f, 0x20, 0x60]:
-        trials = 0
-        while True:
+    def stop(self):
+        """ This method is called before a clean exit """   
+        self.__stop = True
+        self.thread.join()
+        logger.info('Peer aging stopped') 
+
+class Logger(object):
+    """ Logging Class to Record Data to a File
+    """
+    def __init__(self, logfile, header, rate = 0):
+
+        self.file = open(logfile, 'w+')
+        self.rate = rate
+        self.tStamp = 0
+        self.tStart = 0
+        pHeader = ' '.join([str(x) for x in header])
+        self.file.write('{} {} {}\n'.format('ID', 'TIME', pHeader))
+        self.id = open("/boot/pi-puck_id", "r").read().strip()
+
+    def log(self, data):
+        """ Method to log row of data
+        :param data: row of data to log
+        :type data: list
+        """ 
+        
+        if self.isReady():
+            self.tStamp = time.time()
             try:
-                bus.read_byte(device)
-                return
+                tString = str(round(self.tStamp-self.tStart, 3))
+                pData = ' '.join([str(x) for x in data])
+                self.file.write('{} {} {}\n'.format(self.id, tString, pData))
             except:
-                trials+=1
-                if trials == 5:
-                    print('I2C Bus not responding: {}'.format(device))
-                    i2cFlag = False
-                    return i2cFlag
-    bus.close()
+                pass
+                logger.warning('Failed to log data to file')
+
+    def isReady(self):
+        return time.time()-self.tStamp > self.rate
+
+    def start(self):
+        self.tStart = time.time()
+
+    def close(self):
+        self.file.close()
+
+
+def readEnode(enode, output = 'id'):
+    # Read IP or ID from an enode
+    ip_ = enode.split('@',2)[1].split(':',2)[0]
+
+    if output == 'ip':
+        return ip_
+    elif output == 'id':
+        return ip_.split('.')[-1] 
+    
+def getCPUPercent():
+    return str(round(float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline()),2))
+
+def getFolderSize(folder):
+    # Return the size of a folder
+    total_size = os.path.getsize(folder)
+    for item in os.listdir(folder):
+        itempath = os.path.join(folder, item)
+        if os.path.isfile(itempath):
+            total_size += os.path.getsize(itempath)
+        elif os.path.isdir(itempath):
+            total_size += getFolderSize(itempath)
+    return total_size
+
+
+# pb = PeerBuffer(5000)
+# me = '212'
+# he = '200'
+# pb.addPeer(me)
+# pb.addPeer(he)
+# pb.start()
+
+# time.sleep(1)
+
+
+# print(pb.buffer[0].age, pb.buffer[1].age)
+
+# # pb.addPeer(me)
+# # pb.addPeer(he)
+
+# time.sleep(0.2)
+
+# if pb.buffer:
+#     print('theres peers')
+
+# print(pb.buffer[0].age, pb.buffer[1].age)
+
+# for peer in pb.buffer:
+#     if peer.isDead:
+#         pb.buffer.pop(pb.getIds().index(peer.id))
