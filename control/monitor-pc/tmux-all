@@ -10,50 +10,63 @@ NUM_ROB=$(wc -l < pi-pucks.txt)
 
 # Collect all robot IP addresses in a list
 ALL_IPS=()
-if [ "$#" -eq 0 ]; then
 for ID in $(cat "$IDS_FILE"); do
 	ALL_IPS+=(${PREFIX}${ID})
 done
+
+
+tmux_ALL() {
+	# Create an sequence of split window action for each robot IP
+	split_list=()
+	for IP in "${ALL_IPS[@]:1}"; do
+	    split_list+=( split-pane ssh "$IP" ';' select-layout even-vertical ';' )
+	done
+
+	# Define the terminal geometry (larger if there are many robots)
+	geom="default"
+	if [ $NUM_ROB -gt 8 ]; then
+		geomX=$(( $NUM_ROB*8 ))
+		geomY=$(( $NUM_ROB*5 ))
+		geom="${geomX}x${geomY}"
+	fi
+
+	# Open the terminal and configure it 
+	gnome-terminal --geometry="$geom" -- tmux new-session ssh "${ALL_IPS[0]}" ';' \
+	    "${split_list[@]}" \
+	    set-option -w synchronize-panes ';' \
+		select-layout tiled ';' 
+}
+
+if [[ $# -eq 0 ]]; then 
+	tmux_ALL
+
+elif [[ $# -eq 1 ]]; then 
+
+	if [[ $1 == "geth" ]]; then 
+		tmux_ALL
+		# Rename to GETH and setup Geth
+		tmux kill-session -t GETH >/dev/null 2>&1
+		tmux rename-session GETH
+		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth"
+
+	elif [[ $1 == "mainloop" ]]; then 
+		tmux_ALL
+		# Rename to MAINLOOP and setup mainloop
+		tmux kill-session -t MAINLOOP >/dev/null 2>&1
+		tmux rename-session MAINLOOP
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --nowalk"
+
+	else 
+		tmux_ALL
+		# Rename to GETH and setup Geth
+		tmux kill-session -t GETH >/dev/null 2>&1
+		tmux rename-session GETH
+		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth"
+		
+		tmux_ALL
+		# Rename to MAINLOOP and setup mainloop
+		tmux kill-session -t MAINLOOP >/dev/null 2>&1
+		tmux rename-session MAINLOOP
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --nowalk"
+	fi
 fi
-
-# Create an sequence of split window action for each robot IP
-split_list=()
-for IP in "${ALL_IPS[@]:1}"; do
-    split_list+=( split-pane ssh "$IP" ';' select-layout even-vertical ';' )
-done
-
-# Define the terminal geometry (larger if there are many robots)
-geom="default"
-if [ $NUM_ROB -gt 8 ]; then
-	geomX=$(( $NUM_ROB*8 ))
-	geomY=$(( $NUM_ROB*5 ))
-	geom="${geomX}x${geomY}"
-fi
-
-# Open the terminal and configure it 
-gnome-terminal --geometry="$geom" -- tmux new-session ssh "${ALL_IPS[0]}" ';' \
-    "${split_list[@]}" \
-    set-option -w synchronize-panes ';' \
-	select-layout tiled ';' \
-
-
-# if [ "$1" == "--nosync" ]; then 
-# 	tmux set-option -w synchronize-panes off
-# fi
-
-# if [ "$1" == "geth" ]; then 
-# 	# Open the TMUX session called GETH
-#   tmux kill-session -t GETH >/dev/null 2>&1
-# 	tmux rename-session GETH
-# 	# GETH TMUX session: Execute setup-geth (all robots)
-# 	# tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
-# fi
-
-
-# if [ "$1" == "mainloop" ]; then 
-# 	# Open the TMUX session called MAINLOOP
-# 	tmux kill-session -t MAINLOOP >/dev/null 2>&1
-# 	tmux rename-session MAINLOOP
-# 	# MAINLOOP TMUX session: Move to control directory
-# 	tmux send-keys -t MAINLOOP "cd $MAIN_DIR_ROBOTS/control/robots" Enter
-# fi

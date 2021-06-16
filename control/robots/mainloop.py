@@ -12,6 +12,7 @@ import sys
 import signal
 import threading
 import subprocess
+import random
 from console import init_web3, registerSC
 from erandb import ERANDB
 from randomwalk import RandomWalk
@@ -19,6 +20,7 @@ from groundsensor import GroundSensor
 from rgbleds import RGBLEDs
 from aux import *
 import logging
+
 
 global startFlag
 global isbyz
@@ -31,7 +33,7 @@ isbyz = 0
 
 # /* Experiment Parameters */
 #######################################################################
-LOGLEVEL = logging.DEBUG
+LOGLEVEL = 10
 tcpPort = 40421 
 erbDist = 200
 erbtFreq = 0.25
@@ -41,7 +43,7 @@ pcID = '100'
 
 estimateRate = 1
 voteRate = 45 
-bufferRate = 0.1
+bufferRate = 0.25
 eventRate = 1
 globalPeers = 0
 ageLimit = 2
@@ -95,7 +97,7 @@ logging.getLogger('buffer').setLevel(LOGLEVEL)
 logging.getLogger('events').setLevel(LOGLEVEL)
 logging.getLogger('voting').setLevel(logging.DEBUG)
 logging.getLogger('console').setLevel(LOGLEVEL)
-logging.getLogger('erandb').setLevel(LOGLEVEL)
+logging.getLogger('erandb').setLevel(10)
 logging.getLogger('randomwalk').setLevel(LOGLEVEL)
 logging.getLogger('groundsensor').setLevel(LOGLEVEL)
 logging.getLogger('aux').setLevel(LOGLEVEL)
@@ -112,6 +114,7 @@ w3 = init_web3()
 myID  = open("/boot/pi-puck_id", "r").read().strip()
 myEN  = w3.geth.admin.nodeInfo().enode
 myKEY = w3.eth.coinbase
+
 me = Peer(myID, myEN, myKEY)
 # /* Init an instance of peer for the monitor PC */
 pc = Peer(pcID)
@@ -140,7 +143,7 @@ rw = RandomWalk(rwSpeed)
 rgb = RGBLEDs()
 
 # List of submodules --> iterate .start() to start all
-submodules = [w3.geth.miner, tcp, erb, gs, rw, pb]
+submodules = [w3.geth.miner, tcp, erb, gs, rw]
 
 # /* Define Main-modules */
 #######################################################################
@@ -240,41 +243,105 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 				# If the enode is unknown: Query enode and add to Geth. If fail, continue
 				elif not peer.enode and peer.timeout<=0:
-					try:
-						peer.enode = tcp.request(peer.ip, tcp.port)
-						w3.geth.admin.addPeer(peer.enode)  
-						mainlog.log(['Added Geth peer {}'.format(peer.id)])
-						bufferlogger.debug('Added peer %s @ age %.2f', peer.id, peer.age)
-						rw.setLEDs(0b11111111)
-						peer.trials = 0
-						continue 	   		 
-					except:
-						peer.trials += 1
-						if peer.trials == 5: 
-							peer.timeout = 2
+
+					if peer.id in enodesDict:
+						peer.enode = enodesDict[peer.id]
+						bufferlogger.debug('Got enode from dict')
+					else:
+						try:
+							peer.enode = tcp.request(peer.ip, tcp.port)
 							peer.trials = 0
-							mainlog.log(['Timing out peer {}'.format(peer.id)])
-							bufferlogger.debug('Timing out peer %s', peer.id)
-						continue
+							enodesDict[peer.id] = peer.enode
+							bufferlogger.debug('Requested enode')   		 
+						except:
+							peer.trials += 1
+							if peer.trials == 5: 
+								peer.setTimeout()
+								mainlog.log(['Timing out peer {}'.format(peer.id)])
+								bufferlogger.debug('Timing out peer %s', peer.id)
+							continue
+
+					if int(me.id) > int(peer.id):
+						w3.geth.admin.addPeer(peer.enode)  
+						bufferlogger.debug('I am adding peer %s', peer.id)
+					else:
+						bufferlogger.debug('I am being added by peer %s', peer.id)
+						rw.setLEDs(0b11111111)
+	def localBufferV2():
+		pb.aging()
+		erbIds = erb.getNew()
+		gethIds = getIds()
+
+		# If there are peers in buffer; perform buffering tasks for each peer
+		for peer in pb.buffer:
+			if int(me.id) < int(peer.id) and peer.id not in gethIds:
+				bufferlogger.debug('I am being added by', peer.id)
+
+			else:
+				if peer.isDead:
+					if peer.enode:
+						w3.provider.make_request("admin_removePeer",[peer.enode])
+					tcp.unallow(peer.id)
+					pb.removePeer(peer.id)
+					mainlog.log(['Killed peer {} @ age {:.1f}'.format(peer.id, peer.age)])
+					bufferlogger.debug('Killed peer %s @ age %.2f', peer.id, peer.age)
+					continue
+
+				# If the enode is unknown: Query enode and add to Geth. If fail, continue
+				elif not peer.enode and peer.timeout<=0:
+
+					if peer.id in enodesDict:
+						peer.enode = enodesDict[peer.id]
+						bufferlogger.debug('Got enode from database')
+					else:
+						try:
+							peer.enode = tcp.request(peer.ip, tcp.port)
+							peer.trials = 0
+							enodesDict[peer.id] = peer.enode
+							bufferlogger.debug('Requested enode')   		 
+						except:
+							peer.trials += 1
+							if peer.trials == 5: 
+								peer.timeout = 10
+								peer.trials = 0
+								bufferlogger.debug('Timing out peer %s', peer.id)
+							continue
+
+					w3.geth.admin.addPeer(peer.enode)  
+					bufferlogger.debug('Added peer %s @ age %.2f', peer.id, peer.age)
+
+		# Collect new peer IDs from E-RANDB to the buffer
+		pb.addPeer(erbIds)
+		tcp.allow(erbIds)			
+
+		# Turn on LEDs accordingly
+		nPeers = len(gethIds)
+		if nPeers > 2:
+			rw.setLEDs(0b11111111)
+		elif nPeers == 1:
+			rw.setLEDs(0b01010101)
+		elif nPeers == 0:
+			rw.setLEDs(0b00000000)
+
 
 		if bufferlog.isReady():
 			gethIds = getIds()
 			bufferIds = pb.getIds()
 			bufferlog.log([len(gethIds), len(bufferIds), len(tcp.allowed), ';'.join(bufferIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
 
-
+	enodesDict = dict()
 	while True:
 		if not startFlag:
 			mainlogger.info('Stopped Buffering')
 			break
 
 		tic = TicToc(rate, 'Buffer')
-		
+				
 		if globalPeers:
 			globalBuffer()
 			break
 		else:
-			localBuffer()
+			localBufferV2()
 
 		tic.toc()
 	

@@ -76,7 +76,7 @@ class TCP_server(object):
         while True:
             try:
                 # set the timeout
-                __socket.settimeout(2)
+                __socket.settimeout(5)
                 # queue one request
                 __socket.listen(1)    
                 # establish a connection
@@ -129,11 +129,13 @@ class TCP_server(object):
     def unlock(self):
         self.unlocked = True
 
-    def allow(self, client_id):
-        self.allowed.add(client_id)
+    def allow(self, client_ids):
+        for client_id in client_ids:
+            self.allowed.add(client_id)
 
-    def unallow(self, client_id):
-        self.allowed.discard(client_id)
+    def unallow(self, client_ids):
+        for client_id in client_ids:
+            self.allowed.discard(client_id)
 
     def getNew(self):
         if self.__stop:
@@ -183,7 +185,8 @@ class Peer(object):
         self.age = 0
         self.trials = 0
         self.timeout = 0
-        
+        self.timeoutStamp = 0
+
     def resetAge(self):
         """ This method resets the timestamp of the robot meeting """ 
         self.tStamp = time.time()
@@ -191,6 +194,12 @@ class Peer(object):
     def kill(self):
         """ This method sets a flag which identifies aged out peers """
         self.isDead = True
+
+    def setTimeout(self, timeout = 10):
+        """ This method resets the timestamp of the robot timing out """ 
+        self.trials = 0
+        self.timeout = timeout
+        self.timeoutStamp = time.time()
 
 class PeerBuffer(object):
     """ Establish the Peer class 
@@ -205,6 +214,22 @@ class PeerBuffer(object):
         self.ageLimit = ageLimit
         self.__stop = True
 
+    def aging(self):
+        """ This method runs in the background until program is closed 
+        self.age is the time elapsed since the robots meeting.
+        """            
+        # while True:
+        # Age each peer in the buffer
+        for peer in self.buffer:
+            peer.age = time.time() - peer.tStamp
+
+            if peer.age > self.ageLimit:
+                peer.kill()
+
+            if peer.timeout != 0:
+                if (peer.timeout - (time.time() - peer.timeoutStamp)) <= 0:
+                    peer.timeout = 0      
+
     def __aging(self):
         """ This method runs in the background until program is closed 
         self.age is the time elapsed since the robots meeting.
@@ -218,22 +243,24 @@ class PeerBuffer(object):
                     peer.kill()
 
                 if peer.timeout != 0:
-                    peer.timeout -= 0.05
+                    if (peer.timeout - (time.time() - peer.timeoutStamp)) <= 0:
+                        peer.timeout = 0      
 
             if self.__stop:
                 break
             else:
                 time.sleep(0.05);   
 
-    def addPeer(self, newId):
+    def addPeer(self, newIds):
         """ This method is called to add a peer Id
             newPeer is the new peer object
         """   
-        if newId not in self.getIds():
-            newPeer = Peer(newId)  
-            self.buffer.append(newPeer)
-        else:
-            self.getPeerById(newId).resetAge()
+        for newId in newIds:
+            if newId not in self.getIds():
+                newPeer = Peer(newId)  
+                self.buffer.append(newPeer)
+            else:
+                self.getPeerById(newId).resetAge()
 
     def removePeer(self, oldId):
         """ This method is called to remove a peer Id

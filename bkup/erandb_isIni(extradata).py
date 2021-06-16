@@ -35,7 +35,7 @@ def __write_data(addr, data):
 			trials+=1
 			logger.debug('RaB I2C failed. Trials=%i', trials)
 			time.sleep(0.1)
-			# e_randb_set_range(self.dist)
+			# e_randb_set_range(200)
 			if(trials == 25):
 				logger.error('RaB I2C write error occured')
 				return
@@ -49,7 +49,7 @@ def __read_data(addr):
 			trials+=1
 			logger.debug('RaB I2C failed. Trials=%i', trials)
 			time.sleep(0.1)
-			# e_randb_set_range(self.dist)
+			# e_randb_set_range(200)
 			if(trials == 25):
 				logger.error('RaB I2C read error occured')
 				return
@@ -63,6 +63,7 @@ def e_init_randb():
 	while True:
 		try:
 			bus = smbus.SMBus(I2C_CHANNEL)
+			__nop_delay(10000)
 			return
 		except:
 			trials+=1
@@ -200,13 +201,14 @@ class ERANDB(object):
         self.tFreq = tFreq
          # This robot ID
         self.id = open("/boot/pi-puck_id", "r").read().strip()
-        self.newIds = set()
+        # self.newIds = set()
+        self.new = dict()
 
     def __listening(self):
         """ This method runs in the background until program is closed """
         tTime = 0
         # /* Init E-RANDB board */
-        e_init_randb() 
+        e_init_randb()
         # /* Range is tunable by software. 0 -> Full Range; 255 --> No Range
         e_randb_set_range(self.dist)
         #  * Do the calculations on the erandb board*/
@@ -219,9 +221,15 @@ class ERANDB(object):
         while True:
             if e_randb_get_if_received() != 0:
                 # /* Get a new peer ID */
-                newId = str(e_randb_get_data())
-                if newId != self.id: 
-                    self.newIds.add(newId)
+                newMsg = str(e_randb_get_data())
+                logger.critical('Message Received %s', newMsg)
+                if len(newMsg) != 4:
+                	pass
+                else:
+	                newId = newMsg[0:3]
+	                if newId != self.id: 
+	                    # self.newIds.add(newId)
+	                    self.new[newId] = newMsg[3]
 
             time.sleep(0.01)
 
@@ -243,9 +251,10 @@ class ERANDB(object):
         if self.__stop:
             logger.warning('getNew: E-RANDB is OFF')
 
-        temp = self.newIds
-        self.newIds = set()
+        temp = self.new
+        self.new = dict()
         return temp
+
 
     def start(self):
         """ This method is called to start __listening to E-Randb messages """

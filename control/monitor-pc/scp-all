@@ -55,6 +55,14 @@ if [ $1 == "erandb" ]; then
 	wait
 fi
 
+if [ $1 == "aux" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/aux.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+	done
+	wait
+fi
+
 if [ $1 == "console" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"

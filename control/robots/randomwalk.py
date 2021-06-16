@@ -118,7 +118,7 @@ class RandomWalk(object):
 			self.ir = [0] * 8
 			for i in range(8):
 				self.ir[i] = self.__read_data(IR0_REFLECTED + i)
-				if self.ir[i]>50000:
+				if not self.ir[i] or self.ir[i]>50000:
 					self.ir[i] = 0
 					
 			# Find Wheel Speed for Obstacle Avoidance
