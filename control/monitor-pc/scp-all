@@ -30,6 +30,7 @@ if [ $1 == "scs" ]; then
 	wait
 fi
 
+
 if [ $1 == "abi" ]; then 
 	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/control/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
@@ -125,7 +126,8 @@ fi
 if [ $1 == "custom" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/geth-linux-arm6-1.10.3-991384a7.tar.gz "$IP:$MAIN_DIR_ROBOTS"  &
+		scp -r $MAIN_DIR/control/robots/randb "$IP:$MAIN_DIR_ROBOTS/control/"  &
 	done
 	wait
 fi
+
