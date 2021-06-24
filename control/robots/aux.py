@@ -7,9 +7,16 @@ import subprocess
 import os
 import logging
 
-logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
-logger = logging.getLogger(__name__)
+# The logs that go to console
+logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 
+# # The logs that go to a file (include debugging logs)
+# fh = logging.FileHandler('logs/main.log','w')
+# fh.setFormatter(logging.Formatter(logsFormat))
+# fh.setLevel(10)
+# logging.getLogger('').addHandler(fh)
+
+logger = logging.getLogger(__name__)
 
 class TicToc(object):
     """ Pendulum Class to Synchronize Output Timess
@@ -59,6 +66,8 @@ class TCP_server(object):
         self.unlocked = unlocked
         self.count = 0 # For debugging
         self.allowedCount = 0 # For debugging
+
+        logger.info('TCP-Server OK')
 
     def __hosting(self):
         """ This method runs in the background until program is closed """ 
@@ -340,7 +349,6 @@ class Logger(object):
     def close(self):
         self.file.close()
 
-
 def readEnode(enode, output = 'id'):
     # Read IP or ID from an enode
     ip_ = enode.split('@',2)[1].split(':',2)[0]
@@ -349,7 +357,7 @@ def readEnode(enode, output = 'id'):
         return ip_
     elif output == 'id':
         return ip_.split('.')[-1] 
-    
+
 def getCPUPercent():
     return str(round(float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline()),2))
 
@@ -364,29 +372,3 @@ def getFolderSize(folder):
             total_size += getFolderSize(itempath)
     return total_size
 
-
-# pb = PeerBuffer(5000)
-# me = '212'
-# he = '200'
-# pb.addPeer(me)
-# pb.addPeer(he)
-# pb.start()
-
-# time.sleep(1)
-
-
-# print(pb.buffer[0].age, pb.buffer[1].age)
-
-# # pb.addPeer(me)
-# # pb.addPeer(he)
-
-# time.sleep(0.2)
-
-# if pb.buffer:
-#     print('theres peers')
-
-# print(pb.buffer[0].age, pb.buffer[1].age)
-
-# for peer in pb.buffer:
-#     if peer.isDead:
-#         pb.buffer.pop(pb.getIds().index(peer.id))

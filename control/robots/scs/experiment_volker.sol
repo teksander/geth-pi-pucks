@@ -107,7 +107,7 @@ contract Estimation {
     uint myValueUBI = 20;
 
     for (uint i = 0; i < myBlocksUBI.length; i++) {
-      if (block.number-startBlock < myBlocksUBI[i]) {
+      if (block.number < myBlocksUBI[i]) {
  payoutUBI = (i - robot[msg.sender].lastUBI) * myValueUBI;
  robot[msg.sender].lastUBI = i;
  break;
@@ -116,10 +116,12 @@ contract Estimation {
 
     // Transfer the UBI
     if (payoutUBI > 0) {
-payable(msg.sender).transfer(payoutUBI * 1 ether);
+      payable(msg.sender).transfer(payoutUBI * 1 ether);
     }
     return payoutUBI;
   }
+
+
 
   function askForPayout() public returns (uint) {
     if (!robot[msg.sender].isRegistered) {

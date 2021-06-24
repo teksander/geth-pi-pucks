@@ -34,13 +34,15 @@ fi
 geth --datadir ${MAIN_DIR} \
 --syncmode "full" \
 --port 30311 \
---rpc --rpcaddr "localhost" \
---rpcport 8501 \
---rpcapi "personal,eth,net,web3,txpool,miner" \
+--ws \
+--ws.addr "0.0.0.0" \
+--ws.port 3335 \
+--ws.origins 172.17.0.0 \
+--ws.api "personal,eth,net,web3,txpool,miner,admin" \
 --networkid 1515 \
 --allow-insecure-unlock \
 --lightkdf \
---verbosity 0 \
+--verbosity 3 \
 --nodiscover \
 --miner.gasprice "0x1" \
 --miner.gastarget "0x1" \

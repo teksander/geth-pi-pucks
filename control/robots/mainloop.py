@@ -21,22 +21,23 @@ from rgbleds import RGBLEDs
 from aux import *
 import logging
 
-
 global startFlag
 global isbyz
 global gasLimit
 global gasprice
+global gas
 gasLimit = 0x9000000
-gasprice = 0x1
+gasprice = 0x900000
+gas = 0x90000
 startFlag = 0
 isbyz = 0
 
 # /* Experiment Parameters */
 #######################################################################
-LOGLEVEL = 10
+loglevel = 40
 tcpPort = 40421 
 erbDist = 200
-erbtFreq = 0.25
+erbtFreq = 10
 gsFreq = 20
 rwSpeed = 500
 pcID = '100'
@@ -62,7 +63,7 @@ header = ['ESTIMATE','W','B','S1','S2','S3']
 estimatelog = Logger('logs/estimate.csv', header)
 
 header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-bufferlog = Logger('logs/buffer.csv', header, 2)
+bufferlog = Logger('logs/buffer.csv', header, 1)
 
 header = ['VOTE']
 votelog = Logger('logs/vote.csv', header)
@@ -79,8 +80,12 @@ synclog = Logger('logs/sync.csv', header)
 header = ['CHAINDATASIZE', '%CPU']
 extralog = Logger('logs/extra.csv', header)
 
-# Console logs (Select level: DEBUG, INFO, WARNING, ERROR, CRITICAL)
-logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+# Console logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
+logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
+# File logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
+# fh.setLevel(fileloglevel)
+
+# Sublogs
 mainlogger = logging.getLogger('main')
 estimatelogger = logging.getLogger('estimate')
 bufferlogger = logging.getLogger('buffer')
@@ -91,17 +96,17 @@ votelogger = logging.getLogger('voting')
 logmodules = [bufferlog, estimatelog, votelog, sclog, mainlog, blocklog, synclog, extralog]
 
 # List of logmodules --> specify submodule loglevel if desired
-logging.getLogger('main').setLevel(LOGLEVEL)
-logging.getLogger('estimate').setLevel(LOGLEVEL)
-logging.getLogger('buffer').setLevel(LOGLEVEL)
-logging.getLogger('events').setLevel(LOGLEVEL)
-logging.getLogger('voting').setLevel(logging.DEBUG)
-logging.getLogger('console').setLevel(LOGLEVEL)
+logging.getLogger('main').setLevel(loglevel)
+logging.getLogger('estimate').setLevel(loglevel)
+logging.getLogger('buffer').setLevel(50)
+logging.getLogger('events').setLevel(loglevel)
+logging.getLogger('voting').setLevel(10)
+logging.getLogger('console').setLevel(loglevel)
 logging.getLogger('erandb').setLevel(10)
-logging.getLogger('randomwalk').setLevel(LOGLEVEL)
-logging.getLogger('groundsensor').setLevel(LOGLEVEL)
-logging.getLogger('aux').setLevel(LOGLEVEL)
-logging.getLogger('rgbleds').setLevel(LOGLEVEL)
+logging.getLogger('randomwalk').setLevel(loglevel)
+logging.getLogger('groundsensor').setLevel(loglevel)
+logging.getLogger('aux').setLevel(loglevel)
+logging.getLogger('rgbleds').setLevel(loglevel)
 
 # /* Initialize Sub-modules */
 #######################################################################
@@ -129,7 +134,7 @@ tcp = TCP_server(me.enode, me.ip, tcpPort)
 
 # /* Init E-RANDB __listening process and transmit function
 mainlogger.info('Initialising RandB board...')
-erb = ERANDB(erbDist, me.id, erbtFreq)
+erb = ERANDB(erbDist, erbtFreq)
 
 # /* Init Ground-Sensors, __mapping process and vote function */
 mainlogger.info('Initialising ground-sensors...')
@@ -216,120 +221,120 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 		peerFile.close()
 
+	# def localBufferbkup():
+	# 	# Collect new peer IDs from E-RANDB to the buffer
+	# 	for newId in erb.getNew():
+	# 		tcp.allow(newId)
+	# 		pb.addPeer(newId)
+
+	# 	# If there are no peers in buffer; turn off LEDs
+	# 	if not pb.buffer:
+	# 		rw.setLEDs(0b00000000)
+	# 		pass
+
+	# 	# If there are peers in buffer; perform buffering tasks for each peer
+	# 	else:
+	# 		for peer in pb.buffer:
+
+	# 			# If the peer has aged out: Remove from buffer and continue to next peer
+	# 			if peer.isDead:
+	# 				if peer.enode:
+	# 					w3.provider.make_request("admin_removePeer",[peer.enode])
+	# 				tcp.unallow(peer.id)
+	# 				pb.removePeer(peer.id)
+	# 				mainlog.log(['Killed peer {} @ age {:.1f}'.format(peer.id, peer.age)])
+	# 				bufferlogger.debug('Killed peer %s @ age %.2f', peer.id, peer.age)
+	# 				continue
+
+	# 			# If the enode is unknown: Query enode and add to Geth. If fail, continue
+	# 			elif not peer.enode and peer.timeout<=0:
+
+	# 				if peer.id in enodesDict:
+	# 					peer.enode = enodesDict[peer.id]
+	# 					bufferlogger.debug('Got enode from dict')
+	# 				else:
+	# 					try:
+	# 						peer.enode = tcp.request(peer.ip, tcp.port)
+	# 						peer.trials = 0
+	# 						enodesDict[peer.id] = peer.enode
+	# 						bufferlogger.debug('Requested enode')   		 
+	# 					except:
+	# 						peer.trials += 1
+	# 						if peer.trials == 5: 
+	# 							peer.setTimeout()
+	# 							mainlog.log(['Timing out peer {}'.format(peer.id)])
+	# 							bufferlogger.debug('Timing out peer %s', peer.id)
+	# 						continue
+
+	# 				if int(me.id) > int(peer.id):
+	# 					w3.geth.admin.addPeer(peer.enode)  
+	# 					bufferlogger.debug('I am adding peer %s', peer.id)
+	# 				else:
+	# 					bufferlogger.debug('I am being added by peer %s', peer.id)
+	# 					rw.setLEDs(0b11111111)
 	def localBuffer():
-		# Collect new peer IDs from E-RANDB to the buffer
-		for newId in erb.getNew():
-			tcp.allow(newId)
-			pb.addPeer(newId)
-
-		# If there are no peers in buffer; turn off LEDs
-		if not pb.buffer:
-			rw.setLEDs(0b00000000)
-			pass
-
-		# If there are peers in buffer; perform buffering tasks for each peer
-		else:
-			for peer in pb.buffer:
-
-				# If the peer has aged out: Remove from buffer and continue to next peer
-				if peer.isDead:
-					if peer.enode:
-						w3.provider.make_request("admin_removePeer",[peer.enode])
-					tcp.unallow(peer.id)
-					pb.removePeer(peer.id)
-					mainlog.log(['Killed peer {} @ age {:.1f}'.format(peer.id, peer.age)])
-					bufferlogger.debug('Killed peer %s @ age %.2f', peer.id, peer.age)
-					continue
-
-				# If the enode is unknown: Query enode and add to Geth. If fail, continue
-				elif not peer.enode and peer.timeout<=0:
-
-					if peer.id in enodesDict:
-						peer.enode = enodesDict[peer.id]
-						bufferlogger.debug('Got enode from dict')
-					else:
-						try:
-							peer.enode = tcp.request(peer.ip, tcp.port)
-							peer.trials = 0
-							enodesDict[peer.id] = peer.enode
-							bufferlogger.debug('Requested enode')   		 
-						except:
-							peer.trials += 1
-							if peer.trials == 5: 
-								peer.setTimeout()
-								mainlog.log(['Timing out peer {}'.format(peer.id)])
-								bufferlogger.debug('Timing out peer %s', peer.id)
-							continue
-
-					if int(me.id) > int(peer.id):
-						w3.geth.admin.addPeer(peer.enode)  
-						bufferlogger.debug('I am adding peer %s', peer.id)
-					else:
-						bufferlogger.debug('I am being added by peer %s', peer.id)
-						rw.setLEDs(0b11111111)
-	def localBufferV2():
 		pb.aging()
-		erbIds = erb.getNew()
-		gethIds = getIds()
+		gethEnodes = getEnodes()
+		gethIds = getIds(gethEnodes)
 
 		# If there are peers in buffer; perform buffering tasks for each peer
 		for peer in pb.buffer:
-			if int(me.id) < int(peer.id) and peer.id not in gethIds:
-				bufferlogger.debug('I am being added by', peer.id)
+			if peer.isDead:
+				tcp.unallow(peer.id)
+				pb.removePeer(peer.id)
+				bufferlogger.debug('Killed peer %s @ age %.2f', peer.id, peer.age)
+				if peer.id in gethIds:
+					getEnodeById(peer.id, gethEnodes)
+					w3.provider.make_request("admin_removePeer",[peer.enode])
+					gethIds.remove(peer.id)
+					bufferlogger.debug('Removed peer %s @ age %.2f', peer.id, peer.age)
+				continue
 
-			else:
-				if peer.isDead:
-					if peer.enode:
-						w3.provider.make_request("admin_removePeer",[peer.enode])
-					tcp.unallow(peer.id)
-					pb.removePeer(peer.id)
-					mainlog.log(['Killed peer {} @ age {:.1f}'.format(peer.id, peer.age)])
-					bufferlogger.debug('Killed peer %s @ age %.2f', peer.id, peer.age)
-					continue
+			elif int(me.id) > int(peer.id):
+				# IWf the enode is unknown: Query enode and add to Geth. If fail, continue
+				if not peer.enode and peer.timeout<=0:
+					try:
+						peer.enode = tcp.request(peer.ip, tcp.port)
+						bufferlogger.debug('Requested enode')   		 
+					except:
+						peer.trials += 1
+						if peer.trials == 5: 
+							peer.setTimeout()
+							bufferlogger.debug('Timing out peer %s', peer.id)
+						continue
 
-				# If the enode is unknown: Query enode and add to Geth. If fail, continue
-				elif not peer.enode and peer.timeout<=0:
-
-					if peer.id in enodesDict:
-						peer.enode = enodesDict[peer.id]
-						bufferlogger.debug('Got enode from database')
-					else:
-						try:
-							peer.enode = tcp.request(peer.ip, tcp.port)
-							peer.trials = 0
-							enodesDict[peer.id] = peer.enode
-							bufferlogger.debug('Requested enode')   		 
-						except:
-							peer.trials += 1
-							if peer.trials == 5: 
-								peer.timeout = 10
-								peer.trials = 0
-								bufferlogger.debug('Timing out peer %s', peer.id)
-							continue
-
-					w3.geth.admin.addPeer(peer.enode)  
-					bufferlogger.debug('Added peer %s @ age %.2f', peer.id, peer.age)
-
-		# Collect new peer IDs from E-RANDB to the buffer
-		pb.addPeer(erbIds)
-		tcp.allow(erbIds)			
+					if peer.id not in gethIds:
+						w3.geth.admin.addPeer(peer.enode)  
+						bufferlogger.debug('Added peer %s @ age %.2f', peer.id, peer.age)
 
 		# Turn on LEDs accordingly
 		nPeers = len(gethIds)
-		if nPeers > 2:
+		if nPeers >= 2:
 			rw.setLEDs(0b11111111)
 		elif nPeers == 1:
 			rw.setLEDs(0b01010101)
 		elif nPeers == 0:
 			rw.setLEDs(0b00000000)
 
+		# Collect new peer IDs from E-RANDB to the buffer
+		erbIds = erb.getNew()
+		pb.addPeer(erbIds)
+		tcp.allow(erbIds)	
+
+		if len([pb.getIds]) > 6:
+			bufferlogger.critical('Woooaaahh too many peers. Killing all for safety')
+			for peer in pb.buffer:
+				peer.kill()
+				
 
 		if bufferlog.isReady():
-			gethIds = getIds()
-			bufferIds = pb.getIds()
-			bufferlog.log([len(gethIds), len(bufferIds), len(tcp.allowed), ';'.join(bufferIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
+			# for enode in gethEnodes
+			# 	if not in pb.getEnodes():
+			# 		w3.provider.make_request("admin_removePeer",[peer.enode])
+			# 		bufferlogger.debug('Killed peer %s @ age %.2f', peer.id, peer.age)
+			bufferlog.log([len(gethIds), len(erbIds), len(tcp.allowed), ';'.join(erbIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
+		
 
-	enodesDict = dict()
 	while True:
 		if not startFlag:
 			mainlogger.info('Stopped Buffering')
@@ -341,7 +346,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 			globalBuffer()
 			break
 		else:
-			localBufferV2()
+			localBuffer()
 
 		tic.toc()
 	
@@ -360,30 +365,42 @@ def Vote(rate = voteRate):
 
 
 		while True:
-			try:
-				vote = int(estimate*1e7)
-				voteHash = sc.functions.sendVote(vote).transact({'from': me.key,'value': w3.toWei(ticketPrice,'ether'), 'gas':gasLimit, 'gasPrice':gasprice})
-				voteReceipt = w3.eth.waitForTransactionReceipt(voteHash)
+			balance = getBalance()
 
-				mainlog.log(['Voted: {}; Status: {}'.format(estimate, voteReceipt.status)])
-				votelog.log([vote])
+			if balance < 40.05:
 				myVoteCounter += 1
-				myOkVoteCounter += 1
-				votelogger.debug('Voted successfully: %.2f (%i/%i)', estimate, myOkVoteCounter, myVoteCounter)
-				rgb.flashGreen()
-				break
-
-			except ValueError:
-				myVoteCounter += 1
-				mainlog.log(['Failed Vote (No Balance). Balance: {}'.format(getBalance())])
+				mainlog.log(['Cannot Vote (No Balance). Balance: {}'.format(balance)])
 				votelog.log([None])
-				votelogger.debug('Failed to vote: (%i/%i) (No balance)', myOkVoteCounter, myVoteCounter)
+				votelogger.debug('Cannot vote: (%i/%i) (No balance)', myOkVoteCounter, myVoteCounter)
 				rgb.flashRed()
 				break
+			else:
+				try:
+					vote = int(estimate*1e7)
+					voteHash = sc.functions.sendVote(vote).transact({'from': me.key,'value': w3.toWei(ticketPrice,'ether'), 'gas':gasLimit, 'gasPrice':gasprice})
+					voteReceipt = w3.eth.waitForTransactionReceipt(voteHash, timeout=120)
 
-			except:
-				mainlog.log(['Failed Vote (Unexpected). Trying again. Balance: {}'.format(getBalance())])
-				votelogger.error('Failed to vote: (Unexpected)')
+					mainlog.log(['Voted: {}; Status: {}'.format(estimate, voteReceipt.status)])
+					votelog.log([vote])
+					myVoteCounter += 1
+					myOkVoteCounter += 1
+					votelogger.debug('Voted successfully: %.2f (%i/%i)', estimate, myOkVoteCounter, myVoteCounter)
+					rgb.flashGreen()
+					break
+
+					if voteReceipt.status == 0:
+						print(voteReceipt)
+
+				except ValueError:
+					mainlog.log(['Failed Vote (ValueError). Balance: {}'.format(balance)])
+					votelog.log([None])
+					votelogger.debug('Failed to vote: (%i/%i) (No balance)', myOkVoteCounter, myVoteCounter)
+					rgb.flashRed()
+					break
+
+				except:
+					mainlog.log(['Failed Vote (Unexpected). Trying again. Balance: {}'.format(balance)])
+					votelogger.error('Failed to vote: (Unexpected)')
 
 		# Low frequency logging of chaindata size and cpu usage
 		chainSize = getFolderSize('/home/pi/geth-pi-pucks/geth')
@@ -406,8 +423,8 @@ def Event(rate = eventRate):
 
 		# 2) Log relevant smart contract details
 		balance = getBalance()
-		ubi = sc.functions.askForUBI().call()
-		payout = sc.functions.askForPayout().call()
+		payout = sc.functions.askForPayout().call({'gas':gasLimit})
+		ubi = sc.functions.askForUBI().call({'gas':gasLimit})
 		robotCount = sc.functions.getRobotCount().call()
 		mean = sc.functions.getMean().call()
 		voteCount = sc.functions.getVoteCount().call()
@@ -425,7 +442,7 @@ def Event(rate = eventRate):
 
 	while True:
 		if not startFlag:
-			logger.info('Stopped Events')
+			mainlogger.info('Stopped Events')
 			break
 
 		tic = TicToc(rate, 'Event')
@@ -518,7 +535,7 @@ def signal_handler(sig, frame):
 			mainlogger.info('This Robot was BYZANTINE')
 
 	if not startFlag:
-		logger.info('Experiment has not started. Exiting')
+		mainlogger.info('Experiment has not started. Exiting')
 		sys.exit()
 	elif startFlag:
 		STOP()
@@ -538,8 +555,19 @@ def getDiff():
 def getEnodes():
     return [peer.enode for peer in w3.geth.admin.peers()]
 
-def getIds():
-    return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
+def getEnodeById(__id, gethEnodes = None):
+    if not gethEnodes:
+        gethEnodes = getEnodes() 
+    for enode in gethEnodes:
+        if readEnode(enode, output = 'id') == __id:
+            return enode
+
+
+def getIds(__enodes = None):
+    if __enodes:
+        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
+    else:
+        return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in getEnodes()]
 
 def getIps():
     return [enode.split('@',2)[1].split(':',2)[0] for enode in getEnodes()]

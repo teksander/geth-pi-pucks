@@ -9,7 +9,7 @@ import sys
 import traceback
 import logging
 
-logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
 I2C_CHANNEL = 4
@@ -30,12 +30,12 @@ def __write_data(addr, data):
 	while True:
 		try:
 			bus.write_byte_data(RANDB_I2C_ADDR, addr, data)
+			__nop_delay(10000)
 			return
 		except:
 			trials+=1
 			logger.debug('RaB I2C failed. Trials=%i', trials)
 			time.sleep(0.1)
-			# e_randb_set_range(self.dist)
 			if(trials == 25):
 				logger.error('RaB I2C write error occured')
 				return
@@ -45,11 +45,11 @@ def __read_data(addr):
 	while True:
 		try:
 			return bus.read_byte_data(RANDB_I2C_ADDR, addr)
+			__nop_delay(10000)
 		except:
 			trials+=1
-			logger.debug('RaB I2C failed. Trials=%i', trials)
+			logger.debug('RaB I2C failed. Trials=%i', trials)		
 			time.sleep(0.1)
-			# e_randb_set_range(self.dist)
 			if(trials == 25):
 				logger.error('RaB I2C read error occured')
 				return
@@ -187,24 +187,21 @@ class ERANDB(object):
     The __listen() method will be started and it will run in the background
     until the application exits.
     """
-    def __init__(self, dist, tData = None, tFreq = 0):
+    def __init__(self, dist, tFreq = 0):
         """ Constructor
         :type dist: int
         :param dist: E-randb communication range (0=1meter; 255=0m)
         :type freq: int
-        :param freq: E-randb transmit frequency (tip: 0 = no transmission)
+        :param freq: E-randb transmit frequency (tip: 0 = no transmission; 4 = 4 per second)
         """
         self.dist = dist
         self.__stop = True
-        self.tData = tData
         self.tFreq = tFreq
          # This robot ID
         self.id = open("/boot/pi-puck_id", "r").read().strip()
         self.newIds = set()
+        self.tData = self.id
 
-    def __listening(self):
-        """ This method runs in the background until program is closed """
-        tTime = 0
         # /* Init E-RANDB board */
         e_init_randb() 
         # /* Range is tunable by software. 0 -> Full Range; 255 --> No Range
@@ -216,6 +213,9 @@ class ERANDB(object):
 
         logger.info('E-RANDB OK')
 
+    def __listening(self):
+        """ This method runs in the background until program is closed """
+        tTime = 0
         while True:
             if e_randb_get_if_received() != 0:
                 # /* Get a new peer ID */
@@ -226,7 +226,7 @@ class ERANDB(object):
             time.sleep(0.01)
 
             if (self.tData != None) and (self.tFreq != 0):
-                if time.time()-tTime > self.tFreq:
+                if time.time()-tTime > (1/self.tFreq):
                     e_randb_send_all_data(int(self.tData))
                     tTime = time.time()
 
@@ -266,3 +266,13 @@ class ERANDB(object):
         self.thread.join()
         bus.close()
         logger.info('E-RANDB OFF') 
+
+
+if __name__ == "__main__":
+
+    erb = ERANDB(200, 4)
+    erb.start()
+
+    while True:
+    	print(erb.getNew())
+    	time.sleep(0.1)

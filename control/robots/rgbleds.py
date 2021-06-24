@@ -3,7 +3,7 @@ import time
 import smbus
 import logging
 
-logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
 class RGBLEDs(object):

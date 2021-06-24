@@ -9,7 +9,7 @@ from aux import TCP_server, Peer
 import time
 import logging
 
-logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
 def init_web3():

@@ -5,7 +5,7 @@ import time
 import threading
 import logging
 
-logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
 class GroundSensor(object):
@@ -27,6 +27,8 @@ class GroundSensor(object):
 		self.__I2C_CHANNEL = 4
 		self.__GROUNDSENSOR_ADDRESS = 0x60  # Device address
 		self.__bus = None
+
+		logger.info('Ground-Sensor OK')
 
 	def __read_reg(self, reg, count):
 		data = bytearray([0] * 6)

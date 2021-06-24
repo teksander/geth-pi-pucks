@@ -7,7 +7,7 @@ import math
 import numpy as np
 import logging
 
-logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
 class RandomWalk(object):
@@ -24,6 +24,8 @@ class RandomWalk(object):
 		self.MAX_SPEED = MAX_SPEED                          
 		self.__stop = 1
 		self.__walk = True
+
+		logger.info('Random-Walk OK')
 
 	def __write_data(self, register, data):
 		trials = 0
@@ -87,7 +89,7 @@ class RandomWalk(object):
 		# Turn IR sensors on
 		self.__write_data(IR_CONTROL, 1)
 		self.__write_data(OUTER_LEDS, self.__LEDState)
-		
+
 		while True:
 			if self.__stop:
 				# Stop IR and Motor

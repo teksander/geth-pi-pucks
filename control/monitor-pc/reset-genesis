@@ -20,9 +20,7 @@ echo "2" >> genesis.conf  # Clique - proof-of-authority
 echo "15" >> genesis.conf # 15 seconds block time
 
 # List of sealers
-# DONT FORGET TO REMOVE THE PC FROM SEALERS!!!!!!!!!!!!!!!!!!!!!!!!
-# SHOULD BE 1 $NUM_NODES
-for INDEX in $(seq 0 $NUM_NODES);
+for INDEX in $(seq 1 $NUM_NODES);
 do
     KEY=$(cat "keystore-all/$INDEX")
     echo ${KEY:12:40} >> genesis.conf 
@@ -70,7 +68,7 @@ sed -i "s|BINDATA|$BINDATA|g" ${GENESIS_FILE}
 sed -i "s|0x47b760|0x9000000000|g" ${GENESIS_FILE}
 
 # Change the value of the pre-funded accounts
-sed -i "s|\"0x200000000000000000000000000000000000000000000000000000000000000\"|\"0x1236efcbcbb3400000\"|g" ${GENESIS_FILE}
+sed -i "s|\"0x200000000000000000000000000000000000000000000000000000000000000\"|\"0x1236efcbcbb340000\"|g" ${GENESIS_FILE}
 # 0x1236efcbcbb3400000 = 336 ether
 # 0x1236efcbcbb340000 = 21 ether
 # 0xde0b6b3a7640000 = 1 ether
