@@ -4,11 +4,10 @@ source ../../globalconfig
 
 
 # Experiment Parameters
-EXPERIMENT_NAME=$1
-NUM_ROB=$2
-NUM_BYZ=$3
+NUM_ROB=$1
+NUM_BYZ=$2
 
-echo "Starting experiment $EXPERIMENT_NAME with $NUM_ROB robots ($NUM_BYZ byzantines)"
+echo "Starting experiment with $NUM_ROB robots ($NUM_BYZ byzantines)"
 echo "----//----"
 
 # Update Responding Pi-Pucks
@@ -23,26 +22,15 @@ if ((NUM_ROB != NUM_RESP)); then
 	exit 1         
 fi
 
+./i2cdetect-all
+
 # Reset GETH 
 echo "Reseting Geth..."
 ./reset-geth
 wait
 echo "----//----"
 
-if [ "$4" == "--fast" ]; then 
-	pass
-else
-	# Verify I2C on all robots
-	echo "Checking I2C devices..."
-	./i2cdetect-all >> temp2.txt
-	if cat temp2.txt | grep -q "failed"; then
-		cat temp2.txt | grep "failed"
-		printf '%s\n' "I2C-check failed. STOP" >&2 
-		rm temp2.txt  
-		exit 1  
-	fi  
-	wait
-	echo "----//----"
+if [[ "$3" == "--rebuild" ]]; then 
 
 	# Reset the Genesis File
 	echo "Reseting Genesis Block..."
@@ -57,8 +45,8 @@ else
 	echo "----//----"
 fi
 
-# Open console for time server
-gnome-terminal --tab -- python3 -i console-pc.py
+# # Open console for time server
+# gnome-terminal --tab -- python3 -i console-pc.py
 
 # Open two TMUX sessions 
 tmux kill-session -t GETH >/dev/null 2>&1
@@ -82,37 +70,39 @@ for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz"
 		let BYZ_COUNT++
 	else
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --nowalk"
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
 	fi
 done
 tmux set-option -w -t MAINLOOP synchronize-panes on
-sleep 3
-tmux send-keys -t MAINLOOP:0.0 Enter
+# sleep 3
+# tmux send-keys -t MAINLOOP:0.0 Enter
 
-read -p "Press Enter when experiment is concluded"
+python3 -i console-pc.py
 
-# Stop the Experiment
-tmux send-keys -t MAINLOOP:0.0 C-c
-sleep 0.5
-tmux send-keys -t MAINLOOP:0.0 C-d
-sleep 1
-tmux send-keys -t GETH:0.0 C-c
-sleep 1
-tmux kill-session -t GETH
+# read -p "Press Enter when experiment is concluded"
 
-# Record log files
-while true; do
+# # Stop the Experiment
+# tmux send-keys -t MAINLOOP:0.0 C-c
+# sleep 0.5
+# tmux send-keys -t MAINLOOP:0.0 C-d
+# sleep 1
+# tmux send-keys -t GETH:0.0 C-c
+# sleep 1
+# tmux kill-session -t GETH
 
-	echo "What is the experiment repetition number?"
-	read REP_NUMBER
+# # Record log files
+# while true; do
 
-	LOG_FOLDER=experiment_$EXPERIMENT_NAME/${NUM_ROB}rob-${NUM_BYZ}byz-$REP_NUMBER
+# 	echo "What is the experiment repetition number?"
+# 	read REP_NUMBER
 
-	echo "RECORD THE ROBOT LOGS TO: $LOG_FOLDER ? [Y/N]"
-	read CONF
-	if [ $CONF = "Y" -o $CONF = "y" ]; then
-		break
-	fi
-done
+# 	LOG_FOLDER=experiment_$EXPERIMENT_NAME/${NUM_ROB}rob-${NUM_BYZ}byz-$REP_NUMBER
 
-./collect-logs $LOG_FOLDER
+# 	echo "RECORD THE ROBOT LOGS TO: $LOG_FOLDER ? [Y/N]"
+# 	read CONF
+# 	if [ $CONF = "Y" -o $CONF = "y" ]; then
+# 		break
+# 	fi
+# done
+
+# ./collect-logs $LOG_FOLDER

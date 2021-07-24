@@ -7,15 +7,7 @@ import subprocess
 import os
 import logging
 
-# The logs that go to console
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
-
-# # The logs that go to a file (include debugging logs)
-# fh = logging.FileHandler('logs/main.log','w')
-# fh.setFormatter(logging.Formatter(logsFormat))
-# fh.setLevel(10)
-# logging.getLogger('').addHandler(fh)
-
 logger = logging.getLogger(__name__)
 
 class TicToc(object):
@@ -138,13 +130,11 @@ class TCP_server(object):
     def unlock(self):
         self.unlocked = True
 
-    def allow(self, client_ids):
-        for client_id in client_ids:
-            self.allowed.add(client_id)
+    def allow(self, client_id):
+        self.allowed.add(client_id)
 
-    def unallow(self, client_ids):
-        for client_id in client_ids:
-            self.allowed.discard(client_id)
+    def unallow(self, client_id):
+        self.allowed.discard(client_id)
 
     def getNew(self):
         if self.__stop:
@@ -204,7 +194,7 @@ class Peer(object):
         """ This method sets a flag which identifies aged out peers """
         self.isDead = True
 
-    def setTimeout(self, timeout = 10):
+    def setTimeout(self, timeout = 4):
         """ This method resets the timestamp of the robot timing out """ 
         self.trials = 0
         self.timeout = timeout
@@ -223,12 +213,39 @@ class PeerBuffer(object):
         self.ageLimit = ageLimit
         self.__stop = True
 
-    def aging(self):
+    def start(self,):
+        """ This method is called to start calculating peer ages"""
+        if self.__stop:  
+            self.__stop = False
+
+            # Initialize background daemon thread
+            self.thread = threading.Thread(target=self.__aging, args=())
+            self.thread.daemon = True   
+            # Start the execution                         
+            self.thread.start()   
+
+    def stop(self):
+        """ This method is called before a clean exit """   
+        self.__stop = True
+        self.thread.join()
+        logger.info('Peer aging stopped') 
+
+    def __aging(self):
         """ This method runs in the background until program is closed 
         self.age is the time elapsed since the robots meeting.
         """            
-        # while True:
-        # Age each peer in the buffer
+        while True:
+
+            self.step()
+
+            if self.__stop:
+                break
+            else:
+                time.sleep(0.05);   
+
+    def step(self):
+        """ This method performs a single sequence of operations """          
+
         for peer in self.buffer:
             peer.age = time.time() - peer.tStamp
 
@@ -239,26 +256,6 @@ class PeerBuffer(object):
                 if (peer.timeout - (time.time() - peer.timeoutStamp)) <= 0:
                     peer.timeout = 0      
 
-    def __aging(self):
-        """ This method runs in the background until program is closed 
-        self.age is the time elapsed since the robots meeting.
-        """            
-        while True:
-            # Age each peer in the buffer
-            for peer in self.buffer:
-                peer.age = time.time() - peer.tStamp
-
-                if peer.age > self.ageLimit:
-                    peer.kill()
-
-                if peer.timeout != 0:
-                    if (peer.timeout - (time.time() - peer.timeoutStamp)) <= 0:
-                        peer.timeout = 0      
-
-            if self.__stop:
-                break
-            else:
-                time.sleep(0.05);   
 
     def addPeer(self, newIds):
         """ This method is called to add a peer Id
@@ -294,29 +291,14 @@ class PeerBuffer(object):
     def getPeerByEnode(self, enode):
         return self.buffer[self.getEnodes().index(enode)]
 
-    def start(self,):
-        """ This method is called to start calculating peer ages"""
-        if self.__stop:  
-            self.__stop = False
 
-            # Initialize background daemon thread
-            self.thread = threading.Thread(target=self.__aging, args=())
-            self.thread.daemon = True   
-            # Start the execution                         
-            self.thread.start()   
-
-    def stop(self):
-        """ This method is called before a clean exit """   
-        self.__stop = True
-        self.thread.join()
-        logger.info('Peer aging stopped') 
 
 class Logger(object):
     """ Logging Class to Record Data to a File
     """
-    def __init__(self, logfile, header, rate = 0):
+    def __init__(self, logfile, header, rate = 0, buffering = 1):
 
-        self.file = open(logfile, 'w+')
+        self.file = open(logfile, 'w+', buffering = buffering)
         self.rate = rate
         self.tStamp = 0
         self.tStart = 0

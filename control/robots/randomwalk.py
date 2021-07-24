@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
+import random, math
 import time
 import smbus
 import threading
-import random
-import math
-import numpy as np
 import logging
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -68,7 +66,7 @@ class RandomWalk(object):
 		# IR Sensors register addresses
 		IR_CONTROL = 6
 		IR0_REFLECTED = 7
-		self.irDist = 250
+		self.irDist = 200
 		# LEDs
 		OUTER_LEDS = 0
 		self.__LEDState = 0b00000000
@@ -98,10 +96,10 @@ class RandomWalk(object):
 			# Random Walk
 			if (remaining_walk_time == 0):
 				if actual_direction == "straight":
-					actual_direction = np.random.choice(possible_directions[1:2])
-					remaining_walk_time = math.floor(np.random.uniform(0, 1) * turn)
+					actual_direction = random.choice(possible_directions)
+					remaining_walk_time = math.floor(random.uniform(0, 1) * turn)
 				else:
-					remaining_walk_time = math.ceil(np.random.exponential(my_lambda) * 4)
+					remaining_walk_time = math.ceil(random.expovariate(1/(my_lambda * 4)))
 					actual_direction = "straight"
 			else:
 				remaining_walk_time -= 1
@@ -195,6 +193,14 @@ class RandomWalk(object):
 	def setWalk(self, state):
 		""" This method is called set the random-walk to on without disabling I2C"""
 		self.__walk = state
+
+	def setWheels(self, left, right):
+		""" This method is called set set each wheel speed """
+		# Set wheel speeds
+		self.__write_data(2, int(left))
+		time.sleep(0.01)
+		self.__write_data(3, int(right))
+		time.sleep(0.01)
 
 	def setLEDs(self, state):
 		""" This method is called set the outer LEDs to an 8-bit state """

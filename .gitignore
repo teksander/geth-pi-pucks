@@ -1,6 +1,8 @@
 batctl/
 geth/
 results/plots/
+results/data/
+results/videos/
 backup/
 
 *.ipc

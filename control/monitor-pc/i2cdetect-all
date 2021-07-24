@@ -17,8 +17,28 @@ i2cdetect_ALL() {
 	fi
 
 }
+
+battery_check_ALL() {
+	local ID=$1
+	IP="${PREFIX}${ID}"
+	ssh "$IP" "python ${MAIN_DIR_ROBOTS}/control/robots/pi-puck-battery.py"
+	
+	# if ((I2CCOUNT < 3)); then
+	# 	echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
+	# else
+	# 	echo "$SUBNET.$ID I2C success (${I2CCOUNT} devices)"    
+	# fi
+
+}
+
 # Check I2C on each robot
 for ID in $(cat "$IDS_FILE"); do
 	i2cdetect_ALL "$ID" &
+done
+wait
+
+# Check Battery on each robot
+for ID in $(cat "$IDS_FILE"); do
+	battery_check_ALL "$ID" &
 done
 wait

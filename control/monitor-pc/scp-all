@@ -48,10 +48,26 @@ if [ $1 == "mainloop" ]; then
 	wait
 fi
 
-if [ $1 == "erandb" ]; then 
+if [ $1 == "gs" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/groundsensor.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+	done
+	wait
+fi
+
+if [ $1 == "erb" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		scp -r $MAIN_DIR/control/robots/erandb.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+	done
+	wait
+fi
+
+if [ $1 == "rgb" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/rgbleds.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
 	done
 	wait
 fi
@@ -68,6 +84,14 @@ if [ $1 == "console" ]; then
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		scp -r $MAIN_DIR/control/robots/console.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+	done
+	wait
+fi
+
+if [ $1 == "testwhite" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/testWhite.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
 	done
 	wait
 fi
@@ -123,11 +147,36 @@ if [ $1 == "pb" ]; then
 	wait
 fi
 
-if [ $1 == "custom" ]; then 
+
+if [ $1 == "sshkeys" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/randb "$IP:$MAIN_DIR_ROBOTS/control/"  &
+		ssh-copy-id -i ~/.ssh/id_rsa.pub $IP
 	done
 	wait
 fi
 
+if [ $1 == "battery" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/pi-puck-battery.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+	done
+	wait
+fi
+
+if [ $1 == "custom1" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r /home/eksander/Pi-pucks/pi-puck/utilities "$IP:$MAIN_DIR_ROBOTS/control/"  &
+		scp -r /home/eksander/Pi-pucks/RPi.GPIO-0.7.0.tar.gz "$IP:$MAIN_DIR_ROBOTS/control/"  &
+	done
+	wait
+fi
+
+if [ $1 == "custom" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/control/robots/scikit-image-0.18.2.tar.gz "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+	done
+	wait
+fi

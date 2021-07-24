@@ -20,7 +20,7 @@ contract Estimation {
   uint public robotCount = 0;
   uint public lastUpdate = 0;
   bool public newRound = false;
-  uint[10] blocksUBI = [0,2,4,8,16,32,64,128,256,512];
+  uint[9] blocksUBI = [2,4,8,16,32,64,128,256,512];
   int256 W_n;
   address [] public robotsToPay;
 
@@ -40,6 +40,8 @@ contract Estimation {
       bool isRegistered;
       uint payout;
       uint lastUBI;
+      uint myVoteCounter;
+      uint myVoteOkCounter;
     }
    
   mapping(address => robotInfo) public robot;
@@ -84,7 +86,7 @@ contract Estimation {
   function registerRobot() public {
 
     publicLength = blocksUBI.length;  
-    mean = 5000000;
+    //mean = 5000000;
     ticketPrice = 40;
 
     if (!robot[msg.sender].isRegistered) {
@@ -96,11 +98,9 @@ contract Estimation {
   }  
 
   function askForUBI() public returns (uint) {
-    if (!robot[msg.sender].isRegistered) {
-       return 0;
-    }
+    require(robot[msg.sender].isRegistered, "Robot must register first");
 
-    uint16[10] memory myBlocksUBI = [0,2,4,8,16,32,64,128,256,512];
+    uint16[9] memory myBlocksUBI = [2,4,8,16,32,64,128,256,512];
 
     // Update the UBI due
     uint payoutUBI;
@@ -124,9 +124,11 @@ contract Estimation {
 
 
   function askForPayout() public returns (uint) {
-    if (!robot[msg.sender].isRegistered) {
-       return 0;
-    }
+    require(robot[msg.sender].isRegistered, "Robot must register first");
+
+    // if (!robot[msg.sender].isRegistered) {
+    //    return 0;
+    // }
 
     // Update the payout due
     uint payout = robot[msg.sender].payout;
@@ -139,36 +141,53 @@ contract Estimation {
  
   function sendVote(int estimate) public payable {
 
-  uint myTicketPrice = 40;  
+  // uint myTicketPrice = 39;  
 
-    if (!robot[msg.sender].isRegistered || msg.value < myTicketPrice * 1 ether) {
-       revert();
-    }
-   
-    voteCount += 1;
+  //require(robot[msg.sender].isRegistered, "Robot must register first");
 
-    round[roundCount].push(voteInfo(msg.sender, estimate));
+  require(msg.value >= 39 ether, "Robot must pay the ticket price");
+  require(!consensusReached, "Consensus is reached!");
+  
+  // uint myTicketPrice = 40;  
+  //   if (!robot[msg.sender].isRegistered || msg.value < myTicketPrice * 1 ether) {
+  //      revert();
+  //   }
    
-    if (round[roundCount].length == robotCount) {
-      roundCount += 1;
-      newRound = true;
+  //  if (msg.value > myTicketPrice * 1 ether) {
+       
+      voteCount += 1;
+
+      round[roundCount].push(voteInfo(msg.sender, estimate));
+   
+      if (round[roundCount].length == robotCount && robotCount > 4) {
+        roundCount += 1;
+        newRound = true;
     }
+
+    robot[msg.sender].myVoteCounter += 1;
+  //}
+    
   }
    
   function updateMean() public {  
-    if (!robot[msg.sender].isRegistered || lastUpdate >= roundCount) {
-       revert();
-    }
+
+    require(robot[msg.sender].isRegistered, "Robot must register first");
+
+    require(lastUpdate < roundCount, "Mean has been updated already");
+
+    // if (!robot[msg.sender].isRegistered || lastUpdate >= roundCount) {
+    //    revert();
+    // }
 
     int oldMean = mean;  
     uint r = lastUpdate;
-    int myThreshold = 2000000;
+    int myThreshold = 1000000;
 
     // Check for OK Votes
     for (uint i = 0; i < round[r].length ; i++) {
 
       int256 delta = round[r][i].vote - mean;
- 
+
       if (r == 0 || abs(delta) < myThreshold) {
         voteOkCount += 1;
 
@@ -179,18 +198,19 @@ contract Estimation {
 
         // Record robots that will be refunded
         robotsToPay.push(round[r][i].robotAddress);
+        robot[round[r][i].robotAddress].myVoteOkCounter += 1;
       }
     }
 
     // Compute payouts
     for (uint b = 0; b < robotsToPay.length; b++) {
-    robot[robotsToPay[b]].payout += ticketPrice * (round[r].length / robotsToPay.length);
+    robot[robotsToPay[b]].payout += ticketPrice * round[r].length / robotsToPay.length;
     }
 
     // Determine consensus
     int myTau = 20000;
 
-    if ((abs(oldMean - mean) < myTau) && voteOkCount > 2 * robotCount) {
+    if ((abs(oldMean - mean) < myTau) && voteCount > 2 * robotCount) {
       consensusReached = true;
     }
 

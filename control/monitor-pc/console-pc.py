@@ -118,6 +118,7 @@ def clock():
     while True:
         myTIME = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         tcpTIME.data = myTIME
+        time.sleep(0.5)
 
 
 # Initialize background daemon thread

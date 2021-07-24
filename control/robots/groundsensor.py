@@ -1,12 +1,66 @@
 #!/usr/bin/env python3
-from smbus import SMBus
-import sys
+import smbus
 import time
 import threading
 import logging
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
+
+I2C_CHANNEL = 4
+GS_I2C_ADDR = 0x60
+
+NOP_TIME = 0.000001
+
+bus = None
+
+def __nop_delay(t):
+	time.sleep(t * NOP_TIME)
+
+def e_init_gs():
+	global bus
+	while True:
+		try:
+			bus = smbus.SMBus(I2C_CHANNEL)
+			return
+		except:
+			trials+=1
+			if(trials == 25):
+				logger.critical('Error initializing GS')
+
+def __read_reg(reg, count):
+	data = bytearray([0] * 6)
+	trials=0
+	while True:
+		try:			
+			data = bus.read_i2c_block_data(GS_I2C_ADDR, reg, count)
+			__nop_delay(10000)
+			return data
+		except:
+			trials+=1
+			logger.warning('GS I2C failed. Trials=%i', trials)	
+			__nop_delay(10000)
+			if trials == 25:
+				logger.error('GS I2C read error')
+				return None
+
+def get_readings():
+	rawValues = [None for x in range(3)]
+	
+	# Retrieve ground data
+	groundData = __read_reg(0, 6)
+
+	# Process data
+	if groundData != None:
+		rawValues[0] = (groundData[1] + (groundData[0]<<8))
+		rawValues[1] = (groundData[3] + (groundData[2]<<8))
+		rawValues[2] = (groundData[5] + (groundData[4]<<8))
+
+	for i in range(3):
+		if rawValues[i] > 1500:
+			rawValues[i] = 0
+			
+	return rawValues
 
 class GroundSensor(object):
 	""" Set up a ground-sensor data acquisition loop on a background thread
@@ -20,59 +74,40 @@ class GroundSensor(object):
 		"""
 		self.__stop = 1	
 		self.freq = freq
-		self.groundValue = [0 for x in range(3)]
+		self.groundValues = [0 for x in range(3)]
 		self.groundCumsum = [0 for x in range(3)]
 		self.count = 0
-		self.failed = 0
-		self.__I2C_CHANNEL = 4
-		self.__GROUNDSENSOR_ADDRESS = 0x60  # Device address
-		self.__bus = None
 
+		# Parameters obtained from calibration
+		self.whiteCalib = 3* [1000]
+		self.blackCalib = 3* [0]
+		self.calibFactor= 3* [1]
+
+		e_init_gs()
 		logger.info('Ground-Sensor OK')
 
-	def __read_reg(self, reg, count):
-		data = bytearray([0] * 6)
-		trials=0
-		while True:
-			try:			
-				data = self.__bus.read_i2c_block_data(self.__GROUNDSENSOR_ADDRESS, reg, count)
-				self.failed = 0
-				return data
-			except:
-				trials+=1
-				time.sleep(0.1)
-				if trials == 5:
-					logger.warning('GS I2C read error')
-					self.failed = 1	
-					return None
+
+	def step(self):
+		# Collect new values
+		self.rawValues = get_readings()
+
+		# Perform calibrated correction (not implemented in this manner)
+		self.groundValues = self.rawValues
+
+		# Compute cumulative sum
+		self.groundCumsum[0] += self.groundValues[0] 
+		self.groundCumsum[1] += self.groundValues[1]
+		self.groundCumsum[2] += self.groundValues[2]
+		self.count += 1
 
 	def __sensing(self):
 		""" This method runs in the background until program is closed 
 		"""  
-		try:
-			self.__bus = SMBus(self.__I2C_CHANNEL )
-		except:
-			logger.critical("Ground Sensor Error")
 
 		while True:
-			# Initialize variables
 			stTime = time.time()
-			self.groundValue = [None for x in range(3)]
-			
-			# Retrieve ground data
-			groundData = self.__read_reg(0, 6)
 
-			# Process data
-			if groundData != None:
-				self.groundValue[0] = (groundData[1] + (groundData[0]<<8))
-				self.groundValue[1] = (groundData[3] + (groundData[2]<<8))
-				self.groundValue[2] = (groundData[5] + (groundData[4]<<8))
-
-				# Compute cumulative sum
-				self.groundCumsum[0] += self.groundValue[0] 
-				self.groundCumsum[1] += self.groundValue[1]
-				self.groundCumsum[2] += self.groundValue[2]
-				self.count += 1
+			self.step()
 
 			if self.__stop:
 				break 
@@ -85,32 +120,29 @@ class GroundSensor(object):
 	def getAvg(self):
 		""" This method returns the average ground value since last call """
 
-		# Compute average
-		try:
-			groundAverage =  [round(x/self.count) for x in self.groundCumsum]
-		except:
-			groundAverage = None
-
 		if self.__stop:
 			logger.warning('getAvg: Ground Sensor is OFF')
 			return None
+
 		else:
-			self.count = 0
-			self.groundCumsum = [0 for x in range(3)]
+			try:
+				groundAverage =  [round(x/self.count) for x in self.groundCumsum]
+			except:
+				groundAverage = None
+			else:
+				self.count = 0
+				self.groundCumsum = 3* [0]
 			return groundAverage
 
 	def getNew(self):
 		""" This method returns the instant ground value """
+
 		if self.__stop:
 			logger.warning('getNew: Ground Sensor is OFF')
 			return None
+
 		else:
-			return self.groundValue;
-
-
-	def hasFailed(self):
-		""" This method returns wether the module failed """
-		return self.failed
+			return self.groundValues;
 
 	def start(self):
 		""" This method is called to start __sensing """
@@ -129,5 +161,23 @@ class GroundSensor(object):
 		""" This method is called before a clean exit """
 		self.__stop = 1
 		self.thread.join()
-		self.__bus.close()
+
+		bus.close()
 		logger.info('Ground-Sensor OFF') 
+
+	def calibration(self, rawValues):
+		correctedValues = 3* [None]
+
+		for i, rawValue in enumerate(rawValues):
+			correctedValues[i] = round((rawValue - self.blackCalib[i]) * self.calibFactor[i])
+
+		return correctedValues
+
+if __name__ == "__main__":
+
+	gs = GroundSensor()
+	gs.start()
+
+	while True:
+		print(gs.getAvg())
+		time.sleep(0.2)

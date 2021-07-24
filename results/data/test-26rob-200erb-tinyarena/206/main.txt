@@ -1,9 +1,0 @@
-ID TIME EVENT DESCRIPTION
-206 1623095904.132 SETUP: Synced Time
-206 0.111 STARTED EXPERIMENT
-206 14.276 Added Geth peer 216
-206 19.301 Killed peer 216 @ age 4.92
-206 24.338 Failed to add peer 115
-206 166.142 Failed Vote (Unexpected). Trying again. Balance: 21.00
-206 286.866 Failed Vote (Unexpected). Trying again. Balance: 21.00
-206 403.63 STOPPED EXPERIMENT

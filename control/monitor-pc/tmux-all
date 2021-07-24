@@ -54,7 +54,7 @@ elif [[ $# -eq 1 ]]; then
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
 		tmux rename-session MAINLOOP
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --nowalk"
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
 
 	else 
 		tmux_ALL
@@ -67,6 +67,6 @@ elif [[ $# -eq 1 ]]; then
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
 		tmux rename-session MAINLOOP
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --nowalk"
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
 	fi
 fi
