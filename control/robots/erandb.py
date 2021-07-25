@@ -19,7 +19,7 @@ ON_BOARD = 0
 ON_ROBOT = 1
 __data_length = 16
 
-
+# Version modified for self-diagnosis. Temporary fix to GCTRonics problems
 def __write_data(addr, data):
 	trials = 0
 	while True:
@@ -29,8 +29,8 @@ def __write_data(addr, data):
 			return
 		except:
 			trials+=1
-			logger.warning('RaB I2C failed. Trials=%i', trials)
-			__nop_delay(10000)
+			logger.error('RaB I2C failed. Trials=%i', trials)
+			return
 			if(trials == 25):
 				logger.error('RaB I2C write error occured')
 				return
@@ -44,11 +44,41 @@ def __read_data(addr):
 			return data
 		except:
 			trials+=1
-			logger.warning('RaB I2C failed. Trials=%i', trials)		
-			__nop_delay(10000)
+			logger.error('RaB I2C failed. Trials=%i', trials)		
+			return
 			if(trials == 25):
 				logger.error('RaB I2C read error occured')
 				return
+
+# def __write_data(addr, data):
+# 	trials = 0
+# 	while True:
+# 		try:
+# 			bus.write_byte_data(RB_I2C_ADDR, addr, data)
+# 			__nop_delay(10000)
+# 			return
+# 		except:
+# 			trials+=1
+# 			logger.warning('RaB I2C failed. Trials=%i', trials)
+# 			__nop_delay(10000)
+# 			if(trials == 25):
+# 				logger.error('RaB I2C write error occured')
+# 				return
+
+# def __read_data(addr):
+# 	trials = 0
+# 	while True:
+# 		try:
+# 			data = bus.read_byte_data(RB_I2C_ADDR, addr)
+# 			__nop_delay(10000)
+# 			return data
+# 		except:
+# 			trials+=1
+# 			logger.warning('RaB I2C failed. Trials=%i', trials)		
+# 			__nop_delay(10000)
+# 			if(trials == 25):
+# 				logger.error('RaB I2C read error occured')
+# 				return
 
 def __nop_delay(t):
 	time.sleep(t * NOP_TIME)

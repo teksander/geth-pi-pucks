@@ -39,7 +39,7 @@ gasLimit = 0x9000000
 gasprice = 0x900000
 gas = 0x90000
 
-global txList
+global txList, startTime
 txList = []
 
 # /* Import Packages */
@@ -174,6 +174,9 @@ def Estimate(rate = estimateRate):
 
 	while True:
 
+		if time.time()-startTime > 1800:
+			STOP()
+
 		if not startFlag:
 			mainlogger.info('Stopped Estimating')
 			break
@@ -275,14 +278,29 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 			bufferlogger.warning('Removed ilegittimate peer: %s',peerId)
 
 		# Collect new peer IDs from E-RANDB to the buffer
-		erbIds = erb.getNew()
+		# erbIds = erb.getNew()
+		
+		# Temporary fix to gctronics bug
+		if erbTimeout == 0:
+			try:
+				erbIds = erb.getNew()
+			except:
+				erb.stop()
+				erbTimeout = 10
+				timeoutStamp = time.time()
+				erbIds = set()
+		else:
+			if (erbTimeout - (time.time() - timeoutStamp)) <= 0:
+     			erbTimeout = 0
+				erb = ERANDB(erbDist, erbtFreq)
+				erb.start()
+
+
 		pb.addPeer(erbIds)
 		for erbId in erbIds:
 			tcp.allow(erbId)	
 
-		# Warnings & logs
-		if len(pb.getIds()) > 10:
-			bufferlogger.warning('Woooaaahh too many peers. Not Killing all for safety')		
+		# Logs	
 		if bufferlog.isReady():
 			# Low frequency logging of chaindata size and cpu usage
 			chainSize = getFolderSize('/home/pi/geth-pi-pucks/geth')
@@ -469,7 +487,9 @@ mainmodules = [estimateTh, bufferTh, eventTh]
 
 def START(modules = submodules + mainmodules, logs = logmodules):
 	mainlogger.info('Starting Experiment')
-	global startFlag
+	global startFlag, startTime
+	startTime = time.time()
+
 	for log in logs:
 		try:
 			log.start()
@@ -651,22 +671,23 @@ elif len(sys.argv) == 2:
 		mainlogger.info('Type Ctrl+C to stop experiment')
 		mainlogger.info('Robot ID: %s', me.id)
 
-	# Alternative start executions
-	elif sys.argv[1] == '--sandbox':
-		print('---//--- SANDBOX-MODE ---//---')		
-		startFlag = 1	
 
-	elif sys.argv[1] == '--synctime':
-		print('---//--- SYNC-TIME ---//---')
-		# /* Wait for Time Synchronization */ 
-		waitForTS()
-		startFlag = 1
+	# # Alternative start executions
+	# elif sys.argv[1] == '--sandbox':
+	# 	print('---//--- SANDBOX-MODE ---//---')		
+	# 	startFlag = 1	
 
-	elif sys.argv[1] == '--peer2pc':
-		print('---//--- PEER-PC ---//---')
-		# /* Wait for PC Enode */
-		waitForPC()
-		startFlag = 1	
+	# elif sys.argv[1] == '--synctime':
+	# 	print('---//--- SYNC-TIME ---//---')
+	# 	# /* Wait for Time Synchronization */ 
+	# 	waitForTS()
+	# 	startFlag = 1
+
+	# elif sys.argv[1] == '--peer2pc':
+	# 	print('---//--- PEER-PC ---//---')
+	# 	# /* Wait for PC Enode */
+	# 	waitForPC()
+	# 	startFlag = 1	
 
 
 
