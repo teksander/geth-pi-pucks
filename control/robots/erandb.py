@@ -4,6 +4,8 @@ import sys
 import time
 import threading
 import logging
+import sys
+import traceback
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
@@ -21,34 +23,25 @@ __data_length = 16
 
 # Version modified for self-diagnosis. Temporary fix to GCTRonics problems
 def __write_data(addr, data):
-	trials = 0
-	while True:
-		try:
-			bus.write_byte_data(RB_I2C_ADDR, addr, data)
-			__nop_delay(10000)
-			return
-		except:
-			trials+=1
-			logger.error('RaB I2C failed. Trials=%i', trials)
-			return
-			if(trials == 25):
-				logger.error('RaB I2C write error occured')
-				return
+	# try:
+	bus.write_byte_data(RB_I2C_ADDR, addr, data)
+	__nop_delay(10000)
+	# except:
+	# 	logger.error('RaB I2C write error occured')
+	# 	raise
+	# return
 
 def __read_data(addr):
-	trials = 0
-	while True:
-		try:
-			data = bus.read_byte_data(RB_I2C_ADDR, addr)
-			__nop_delay(10000)
-			return data
-		except:
-			trials+=1
-			logger.error('RaB I2C failed. Trials=%i', trials)		
-			return
-			if(trials == 25):
-				logger.error('RaB I2C read error occured')
-				return
+	data = None
+	# try:
+	data = bus.read_byte_data(RB_I2C_ADDR, addr)
+	__nop_delay(10000)
+	# except:
+	# 	logger.error('RaB I2C write error occured')
+	# 	raise
+
+	return data
+
 
 # def __write_data(addr, data):
 # 	trials = 0
@@ -123,7 +116,10 @@ def e_randb_get_data():
 	if __data_length >= 16:
 		aux3 = __read_data(1)
 	aux4 = __read_data(2)
-	data = (aux1 << 24) + (aux2 << 16) + (aux3 << 8) + aux4
+	try:
+		data = (aux1 << 24) + (aux2 << 16) + (aux3 << 8) + aux4
+	except:
+		data = None
 	return data
 
 def e_randb_get_range():
@@ -222,6 +218,8 @@ class ERANDB(object):
 		self.dist = dist
 		self.__stop = True
 		self.tFreq = tFreq
+		self.failed = False
+
 		 # This robot ID
 		self.id = open("/boot/pi-puck_id", "r").read().strip()
 		self.newIds = set()
@@ -237,6 +235,38 @@ class ERANDB(object):
 		e_randb_store_light_conditions()
 
 		logger.info('E-RANDB OK')
+
+	def step(self):
+		""" This method performs a single sequence of operations """
+		if e_randb_get_if_received() != 0:
+			# Get a new peer ID 
+			data = e_randb_get_data()
+			if data:
+				newId = str(data)
+				if newId != self.id: 
+					self.newIds.add(newId)
+
+		time.sleep(0.01)
+
+		if (self.tData != None) and (self.tFreq != 0):
+			if time.time()-self.__tTime > (1/self.tFreq):
+				e_randb_send_all_data(int(self.tData))
+				self.__tTime = time.time()
+
+	def __listening(self):
+		""" This method runs in the background until program is closed """
+		self.__tTime = 0
+
+		while True:
+
+			try:
+				self.step()
+			except Exception as e:
+				logger.warning(e)
+				self.failed = True
+
+			if self.__stop or self.failed:
+				break 
 
 	def start(self):
 		""" This method is called to start __listening to E-Randb messages """
@@ -258,30 +288,6 @@ class ERANDB(object):
 		bus.close()
 		logger.info('E-RANDB OFF') 
 
-	def __listening(self):
-		""" This method runs in the background until program is closed """
-		self.__tTime = 0
-
-		while True:
-			self.step()
-			if self.__stop:
-				break 
-
-	def step(self):
-		""" This method performs a single sequence of operations """
-		if e_randb_get_if_received() != 0:
-			# Get a new peer ID 
-			newId = str(e_randb_get_data())
-			if newId != self.id: 
-				self.newIds.add(newId)
-
-		time.sleep(0.01)
-
-		if (self.tData != None) and (self.tFreq != 0):
-			if time.time()-self.__tTime > (1/self.tFreq):
-				e_randb_send_all_data(int(self.tData))
-				self.__tTime = time.time()
-
 	def setData(self, tData):
 		self.tData = int(tData)
 
@@ -292,6 +298,9 @@ class ERANDB(object):
 		temp = self.newIds
 		self.newIds = set()
 		return temp
+
+	def hasFailed(self):
+		return self.failed
 
 
 if __name__ == "__main__":

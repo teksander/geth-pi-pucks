@@ -12,6 +12,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import glob
 
+global tstart
+
 datadir = '/home/eksander/geth-pi-pucks/results/data'
 
 def create_df_old(experiment, datafile):
@@ -76,3 +78,10 @@ def create_df(experiment, datafile):
             
     full_df = pd.concat(data_list, ignore_index=True)
     return full_df
+
+def tic():
+    global tstart
+    tstart = time.time()
+    
+def toc():
+    print(time.time()-tstart)

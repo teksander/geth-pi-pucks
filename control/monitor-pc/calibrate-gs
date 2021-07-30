@@ -24,5 +24,5 @@ source ../../globalconfig
 # wait
 
 for ID in $(cat "$IDS_FILE"); do
-	scp -r $MAIN_DIR/control/monitor-pc/calibration/$ID-threshes.txt pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/calibration/gsThreshes.txt &
+	scp -r $MAIN_DIR/control/monitor-pc/calibration/$ID-threshes.txt pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/calibration/gsThreshes.txt
 done

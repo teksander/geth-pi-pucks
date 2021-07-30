@@ -28,6 +28,8 @@ eventRate = 1
 globalPeers = 0
 ageLimit = 2
 
+timeLimit = 1800
+
 # /* Global Variables */
 #######################################################################
 global startFlag, isByz
@@ -52,6 +54,7 @@ else:
 	logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 import time
 import sys
+import os
 import signal
 import threading
 import subprocess
@@ -174,8 +177,10 @@ def Estimate(rate = estimateRate):
 
 	while True:
 
-		if time.time()-startTime > 1800:
+		if time.time()-startTime > timeLimit:
 			STOP()
+			time.sleep(10)
+			os.system('sudo reboot now')
 
 		if not startFlag:
 			mainlogger.info('Stopped Estimating')
@@ -200,7 +205,9 @@ def Estimate(rate = estimateRate):
 
 def Buffer(rate = bufferRate, ageLimit = ageLimit):
 	""" Control routine for robot-to-robot dynamic peering """
-	
+	global erbTimeout, timeoutStamp
+	erbTimeout = 0
+	timeoutStamp = 0
 	def globalBuffer():
 		tcp.unlock()
 		with open('pi-pucks.txt', 'r') as peerFile:
@@ -222,6 +229,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 		pb.step()
 		gethEnodes = getEnodes()
 		gethIds = getIds(gethEnodes)
+		global erb, erbTimeout, timeoutStamp
 
 		# Perform buffering tasks for each peer currently in buffer
 		for peer in pb.buffer:
@@ -279,19 +287,21 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 		# Collect new peer IDs from E-RANDB to the buffer
 		# erbIds = erb.getNew()
-		
+		erbIds = set()
 		# Temporary fix to gctronics bug
 		if erbTimeout == 0:
-			try:
+			if not erb.hasFailed():
 				erbIds = erb.getNew()
-			except:
+			else:
+				bufferlogger.warning('Timing out ERB due to I2C error')
 				erb.stop()
-				erbTimeout = 10
+				erbTimeout = 2
 				timeoutStamp = time.time()
-				erbIds = set()
+				
 		else:
+			print('Timed out')
 			if (erbTimeout - (time.time() - timeoutStamp)) <= 0:
-     			erbTimeout = 0
+				erbTimeout = 0
 				erb = ERANDB(erbDist, erbtFreq)
 				erb.start()
 
@@ -506,7 +516,7 @@ def START(modules = submodules + mainmodules, logs = logmodules):
 
 
 def STOP(modules = submodules, logs = logmodules):
-	mainlogger.info('Ctrl+C pressed. Stopping...')
+	mainlogger.info('Stopping Experiment')
 	global startFlag
 
 	mainlogger.info('--/-- Stopping Main-modules --/--')
