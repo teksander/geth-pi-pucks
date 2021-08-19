@@ -49,7 +49,7 @@ echo "$MAIN_DIR/genesis" >> genesis.conf
 
 ########## Generate Genesis Block ############
 echo "Generating Genesis Block..."
-cat "genesis.conf" | nohup puppeth --network=pipucks >/dev/null 2>&1
+cat "genesis.conf" | nohup puppeth --network=pipucks
 rm $MAIN_DIR/genesis/pipucks-harmony.json
 rm genesis.conf
 

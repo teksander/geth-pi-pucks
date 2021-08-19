@@ -14,7 +14,7 @@ from skimage.filters import threshold_otsu
 from matplotlib import pyplot as plt
 # from scipy.signal import find_peaks as peaks
 
-rootdir = '/home/eksander/geth-pi-pucks/control/monitor-pc/calibration/'
+rootdir = '/home/volker/geth-pi-pucks/control/monitor-pc/calibration/'
 
 for file in os.listdir(rootdir):
 	if file.endswith(".csv"):
