@@ -69,9 +69,10 @@ from aux import *
 # Global parameters
 # subprocess.call("source ../../globalconfig")
 
-# Calibrated parameters
-with open('calibration/gsThreshes.txt') as calibFile:
-	gsThresh = list(map(int, calibFile.readline().split()))
+# # Calibrated parameters
+# with open('calibration/gsThreshes.txt') as calibFile:
+# 	gsThresh = list(map(int, calibFile.readline().split()))
+gsThresh = [700,700,700]
 
 # /* Initialize Logging Files and Console Logging*/
 #######################################################################
@@ -681,17 +682,32 @@ elif len(sys.argv) == 2:
 		mainlogger.info('Type Ctrl+C to stop experiment')
 		mainlogger.info('Robot ID: %s', me.id)
 
+	elif sys.argv[1] == '--debug-erb':
+
+		# /* Wait for Time Synchronization */ 
+		mainlogger.info('Waiting for Time Sync...')
+		waitForTS()
+
+		# /* Register robot to the Smart Contract*/
+		registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
+		txList.append(registerHash)
+
+		input("Press Enter to start experiment")
+		rw.setWalk(False)
+		START()
+		mainlogger.info('Type Ctrl+C to stop experiment')
+		mainlogger.info('Robot ID: %s', me.id)
 
 	# # Alternative start executions
 	# elif sys.argv[1] == '--sandbox':
 	# 	print('---//--- SANDBOX-MODE ---//---')		
 	# 	startFlag = 1	
 
-	# elif sys.argv[1] == '--synctime':
-	# 	print('---//--- SYNC-TIME ---//---')
-	# 	# /* Wait for Time Synchronization */ 
-	# 	waitForTS()
-	# 	startFlag = 1
+	elif sys.argv[1] == '--synctime':
+		print('---//--- SYNC-TIME ---//---')
+		# /* Wait for Time Synchronization */ 
+		waitForTS()
+		startFlag = 1
 
 	# elif sys.argv[1] == '--peer2pc':
 	# 	print('---//--- PEER-PC ---//---')

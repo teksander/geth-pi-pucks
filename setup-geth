@@ -42,7 +42,7 @@ geth --datadir ${MAIN_DIR} \
 --networkid 1515 \
 --allow-insecure-unlock \
 --lightkdf \
---verbosity 0 \
+--verbosity 5 \
 --vmdebug \
 --nodiscover \
 --miner.gasprice "0x1" \

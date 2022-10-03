@@ -118,12 +118,12 @@ class RandomWalk(object):
 			self.ir = [0] * 8
 			for i in range(8):
 				self.ir[i] = self.__read_data(IR0_REFLECTED + i)
-				if not self.ir[i] or self.ir[i]>50000:
+				if not self.ir[i] or self.ir[i] > 50000:
 					self.ir[i] = 0
 					
 			# Find Wheel Speed for Obstacle Avoidance
 			for i, reading in enumerate(self.ir):
-				if(reading > self.irDist ):
+				if ( reading > self.irDist ):
 					left  = self.MAX_SPEED/2 + weights_left[i] * reading
 					right = self.MAX_SPEED/2 + weights_right[i] * reading
 
@@ -146,9 +146,9 @@ class RandomWalk(object):
 				time.sleep(0.01)
 			else:
 				# Set wheel speeds
-				self.__write_data(LEFT_MOTOR_SPEED, 0)
+				self.__write_data(LEFT_MOTOR_SPEED, int(self.MAX_SPEED/2))
 				time.sleep(0.01)
-				self.__write_data(RIGHT_MOTOR_SPEED, 0)
+				self.__write_data(RIGHT_MOTOR_SPEED, int(-self.MAX_SPEED/2))
 				time.sleep(0.01)
 
 			# Set the LED ring
