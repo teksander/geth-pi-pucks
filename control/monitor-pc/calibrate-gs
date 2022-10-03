@@ -6,22 +6,24 @@
 
 source ../../globalconfig
 
-# ./tmux-all
-# tmux kill-session -t CALIBRATE >/dev/null 2>&1
-# tmux rename-session CALIBRATE
-# tmux send-keys -t CALIBRATE "cd $MAIN_DIR_ROBOTS/control/robots/calibration" Enter "python3 -i calibrate-gs.py" Enter
 
-# read -p "Press Enter when robots finish collecting data"
+./tmux-all
+tmux kill-session -t CALIBRATE >/dev/null 2>&1
+tmux rename-session CALIBRATE
+tmux send-keys -t CALIBRATE "cd $MAIN_DIR_ROBOTS/control/robots/calibration" Enter "python3 -i calibrate-gs.py"
 
-# for ID in $(cat "$IDS_FILE"); do
-# 	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/calibration/$ID.csv $MAIN_DIR/control/monitor-pc/calibration
-# done
+read -p "Press Enter when robots finish collecting data"
 
-# wait
 
-# python3 calibration/histogram.py -v
+for ID in $(cat "$IDS_FILE"); do
+	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/calibration/$ID.csv $MAIN_DIR/control/monitor-pc/calibration
+done
 
-# wait
+wait
+
+python3 calibration/histogram.py
+
+wait
 
 for ID in $(cat "$IDS_FILE"); do
 	scp -r $MAIN_DIR/control/monitor-pc/calibration/$ID-threshes.txt pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/calibration/gsThreshes.txt

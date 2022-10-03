@@ -9,8 +9,8 @@ sys.path.append('..')
 from randomwalk import RandomWalk
 from groundsensor import GroundSensor
 
-gsFreq = 20
-rwSpeed = 600
+gsFreq = 0
+rwSpeed = 0
 robotID = open("/boot/pi-puck_id", "r").read().strip()
 
 gs = GroundSensor(gsFreq)
@@ -18,12 +18,6 @@ rw = RandomWalk(rwSpeed)
 
 rw.start()
 gs.start()
-
-calibFreq = 5
-calibData = open(robotID+'.csv','w+')
-calibData.write("S1 S2 S3"+"\n")
-counter = 0
-max_samples = 1000
 
 def STOP():
 	gs.stop()
@@ -35,24 +29,6 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)	
 
-while True:
-	stTime = time.time()
-
-	newValues = gs.getNew()
-
-	calibData.write(' '.join([str(x) for x in newValues])+'\n')
-	counter += 1
-
-	if counter in [250,750,1000,1250,1500,1750]:
-		print(counter)
-		
-	if counter == max_samples:
-		break
-	else:
-		# Read frequency @ 20 Hz.
-		dfTime = time.time() - stTime
-		if dfTime < (1/calibFreq):
-			time.sleep((1/calibFreq) - dfTime)
 
 STOP()
 
