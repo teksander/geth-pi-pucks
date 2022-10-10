@@ -3,4 +3,4 @@
 cd ~
 git clone https://github.com/ArduCAM/RaspberryPi
 cd RaspberryPi
-git checkout 8bd9c9fd9e089f6daf949ddefa66b4a5a3d46036
+git checkout 1a76f04c5dfba8da43d74f66829a059b78611df4
