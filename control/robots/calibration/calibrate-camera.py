@@ -30,17 +30,17 @@ cv2.imwrite('test_capture.jpg', image)
 
 
 ground_truth_red = [0,0,255] #b,g,r
-ground_truth_green = [255,0,0]
+ground_truth_blue = [255,0,0]
 
 while True:
     feature = cam.get_rgb_feature(cam_sample_lgh,cam_sample_interval)
     distance_to_red = []
-    distance_to_green = []
+    distance_to_blue = []
     for local_feature in feature:
         distance_to_red.append(cross_entropy(ground_truth_red, local_feature))
-        distance_to_green.append(cross_entropy(ground_truth_green, local_feature))
+        distance_to_blue.append(cross_entropy(ground_truth_blue, local_feature))
     print("distance to red along y axis: ", distance_to_red)
-    print("distance to green along y axis: ", distance_to_green)
+    print("distance to blue along y axis: ", distance_to_blue)
 
 
 
