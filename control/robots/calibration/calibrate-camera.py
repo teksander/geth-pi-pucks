@@ -20,7 +20,7 @@ max_samples = 1000
 
 def cross_entropy(dist_x, dist_y):
     loss = -np.sum(dist_x*np.log(dist_y))
-    return loss/float(dist_y.shape[0])
+    return loss/float(np.array(dist_y).shape[0])
 
 cam = UpCamera(cam_int_reg_h, cam_rot)
 rot = Rotation(rotSpeed)
