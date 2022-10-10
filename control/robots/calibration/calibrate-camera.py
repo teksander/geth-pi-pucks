@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
+
 import cv2 #sudo apt-get install python-opencv
 import numpy as py
 import os
 import time
+import sys
+sys.path.append('..')
 from rotation import Rotation
 from upcamera import UpCamera
 
