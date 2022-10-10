@@ -123,7 +123,7 @@ class RandomWalk(object):
 					
 			# Find Wheel Speed for Obstacle Avoidance
 			for i, reading in enumerate(self.ir):
-				if(reading > self.irDist ):
+				if(reading > self.irDist):
 					left  = self.MAX_SPEED/2 + weights_left[i] * reading
 					right = self.MAX_SPEED/2 + weights_right[i] * reading
 
