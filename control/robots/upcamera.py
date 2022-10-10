@@ -97,3 +97,13 @@ class UpCamera(object):
         cy = centre[0]/2- self.interesting_region_h/2 + self.interesting_region_o
         corp_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
         return corp_img
+
+    def get_rgb_feature(self, length=10, interval=10):
+        image=self.get_reading()
+        image_sz = image.shape
+        feature = []
+        idx = int(length / 2)
+        while idx + int(length / 2) < image_sz[1]:
+            feature.append(image[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0))
+            idx += interval
+        return feature
