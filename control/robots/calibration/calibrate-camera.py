@@ -19,7 +19,7 @@ max_samples = 1000
 
 
 def cross_entropy(dist_x, dist_y):
-    loss = -np.sum(dist_x*np.log(dist_y))
+    loss = -np.sum(np.array(dist_x)*np.log(dist_y))
     return loss/float(np.array(dist_y).shape[0])
 
 cam = UpCamera(cam_int_reg_h, cam_rot)
@@ -37,8 +37,8 @@ while True:
     distance_to_red = []
     distance_to_green = []
     for local_feature in feature:
-        distance_to_red.append(cross_entropy(local_feature, ground_truth_red))
-        distance_to_green.append(cross_entropy(local_feature, ground_truth_green))
+        distance_to_red.append(cross_entropy(ground_truth_red, local_feature))
+        distance_to_green.append(cross_entropy(ground_truth_green, local_feature))
     print("distance to red along y axis: ", distance_to_red)
     print("distance to green along y axis: ", distance_to_green)
 
