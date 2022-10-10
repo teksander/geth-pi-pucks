@@ -31,7 +31,7 @@ def calculation(camera):
 class UpCamera(object):
     """ set up an camera object for the R0176 Arducam camera.
     """
-    def __init__(self, interesting_reg_h = 100, rot = True):
+    def __init__(self, interesting_reg_h = 100, interesting_reg_offset = 50, rot = True):
         """ Constructor
         :type freq: str
         :param freq: frequency of measurements in Hz (tip: 20Hz)
@@ -41,6 +41,7 @@ class UpCamera(object):
         # set camera resolution to 640x480(Small resolution for faster speeds.)
         self.camera.resolution = (640, 480)
         self.interesting_region_h = interesting_reg_h
+        self.interesting_region_o = interesting_reg_offset
         self.rotate = rot
         #find best focal distance
         self.focal_calibration()
@@ -93,6 +94,6 @@ class UpCamera(object):
         #corp image according to the interesting region definition
         centre = image.shape
         cx = centre[1]/2 - 480/2
-        cy = centre[0]/2- self.interesting_region_h/2
+        cy = centre[0]/2- self.interesting_region_h/2 + self.interesting_region_o
         corp_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
         return corp_img
