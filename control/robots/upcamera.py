@@ -42,9 +42,6 @@ class UpCamera(object):
         self.camera.resolution = (640, 480)
         self.interesting_region_h = interesting_reg_h
         self.rotate = rot
-        camera = picamera.PiCamera()
-        # set camera resolution to 640x480(Small resolution for faster speeds.)
-        camera.resolution = (640, 480)
         #find best focal distance
         self.focal_calibration()
         logger.info('Up-Camera OK')
