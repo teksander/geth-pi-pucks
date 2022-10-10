@@ -82,6 +82,7 @@ class UpCamera(object):
 
         # Adjust focus to the best
         focusing(max_index)
+        print("Set focal distance to: ", max_index)
     def get_reading(self):
         rawCapture = PiRGBArray(self.camera)
         self.camera.capture(rawCapture, format="bgr", use_video_port=True)

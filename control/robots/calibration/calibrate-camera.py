@@ -12,7 +12,11 @@ from upcamera import UpCamera
 cam_int_reg_h = 100
 cam_rot = True
 rotSpeed = 300
+max_samples = 1000
+
 
 cam = UpCamera(cam_int_reg_h, cam_rot)
 rot = Rotation(rotSpeed)
 
+image = cam.get_reading()
+cv2.imwrite('test_capture.jpg', image)
