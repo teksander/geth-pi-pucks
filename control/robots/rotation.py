@@ -34,7 +34,7 @@ class Rotation(object):
                 return
             except:
                 trials += 1
-                time.sleep(0.1)self.dir
+                time.sleep(0.1)
                 if (trials == 5):
                     logger.error('RW I2C write error')
                     return
