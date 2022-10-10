@@ -13,7 +13,7 @@ class Rotation(object):
     """ Set up a Random-Walk loop on a background thread
     The __walking() method will be started and it will run in the background
     until the application exits.
-    """self.dir
+    """
 
     def __init__(self, MAX_SPEED):
         """ Constructor
