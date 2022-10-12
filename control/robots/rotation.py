@@ -189,6 +189,8 @@ class Rotation(object):
     def setPattern(self, pattern, duration):
         self.__pattern=pattern
         self.duration=duration
+        if self.__walk == False:
+            self.__walk = True
 
     def setWheels(self, left, right):
         """ This method is called set set each wheel speed """
