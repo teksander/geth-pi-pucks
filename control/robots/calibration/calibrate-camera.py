@@ -60,8 +60,8 @@ cam = UpCamera(cam_int_reg_h, cam_rot)
 image = cam.get_reading()
 cv2.imwrite('test_capture.jpg', image)
 
-colors = ["red", "blue", "green", "purple"]
-ground_truth_bgr = [[0,0,255], [255,0,0], [255,0,0], [226, 43, 138]] #bgr
+colors = ["red", "blue", "purple"]
+ground_truth_bgr = [[0,0,255], [255,0,0], [226, 43, 138]] #bgr
 
 
 if ask_yesno("calibrate color ground truth?"):
@@ -73,7 +73,6 @@ if ask_yesno("calibrate color ground truth?"):
 color_gt = open(robotID+'.csv','w+')
 for idx, name in enumerate(colors):
     print("Present " + name + " color")
-    ground_truth_bgr[idx] = set_color()
     color_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
 color_gt.close()
 
