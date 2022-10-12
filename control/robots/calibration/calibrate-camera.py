@@ -23,8 +23,6 @@ def cross_entropy(dist_x, dist_y):
     return loss/float(np.array(dist_y).shape[0])
 
 
-
-
 def ask_yesno(question):
     """
     Helper to get yes / no answer from user.

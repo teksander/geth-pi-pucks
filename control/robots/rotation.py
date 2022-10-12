@@ -204,6 +204,8 @@ class Rotation(object):
 if __name__ == "__main__":
     rot = Rotation(300,"cw")
     rot.start()
+    input("any key to stop")
+    rot.stop()
 
 
 
