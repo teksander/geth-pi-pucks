@@ -9,6 +9,7 @@ from os.path import exists
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
+robotID = open("/boot/pi-puck_id", "r").read().strip()
 
 class WalktoColor(object):
     def __init__(self, MAX_SPEED):
