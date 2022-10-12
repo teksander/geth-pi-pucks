@@ -24,6 +24,7 @@ class Rotation(object):
         self.__stop = 1
         self.__walk = True
         self.__pattern = "s"
+        self.duration = 1 #if duration == -1: run forever
 
         logger.info('Random-Walk OK')
 
@@ -75,7 +76,6 @@ class Rotation(object):
         self.__isLEDset = True  # Remove when Pi-puck2s are upgraded
 
         # rotation parameters
-        walking_start = False
         self.__pattern = direction
 
         # Obstacle Avoidance parameters
@@ -90,10 +90,11 @@ class Rotation(object):
             if self.__stop:
                 # Stop IR and Motor
                 break
+            if self.duration>0 and self.duration!=-1:
+                self.duration-=1
+            elif self.duration==0:
+                self.__walk=False
 
-            # Random Walk
-            if (walking_start == False):
-                walking_start=True
 
             # Find Wheel Speed for Random-Walk
             if (self.__pattern == "cw"):
@@ -185,8 +186,9 @@ class Rotation(object):
     def setWalk(self, state):
         """ This method is called set the random-walk to on without disabling I2C"""
         self.__walk = state
-    def setPattern(self, pattern):
+    def setPattern(self, pattern, duration):
         self.__pattern=pattern
+        self.duration=duration
 
     def setWheels(self, left, right):
         """ This method is called set set each wheel speed """
@@ -211,7 +213,7 @@ if __name__ == "__main__":
     rot = Rotation(300)
     rot.start("cw")
     input("any key to straight")
-    rot.setPattern("s")
+    rot.setPattern("s",10)
     input("any key to stop")
     rot.setWalk(False)
     input("any key to disconnect")
