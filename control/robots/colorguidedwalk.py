@@ -38,7 +38,7 @@ def get_rgb_feature_center(image, length=30):
     return hist_img/np.sum(hist_img)
 
 def cross_entropy(dist_x, dist_y):
-    loss = -np.sum(np.array(dist_x)*np.log(dist_y))
+    loss = -np.sum(np.array(dist_x)*np.log(dist_y+0.001))
     return loss/float(np.array(dist_y).shape[0])
 
 
@@ -97,16 +97,17 @@ class WalktoColor(object):
                     distance_to_target = []
                     for local_feature in cur_feature:
                         distance_to_target.append(cross_entropy(this_color_feature, local_feature))
-                        print("cur distance to target: ", distance_to_target)
                         dir = angle_to_target(distance_to_target, color_ce_threshold)
                         if dir <= -1:
                             #object not found, random walk
                             walk_dir = random.choice(["s", "cw", "ccw"])
                             self.rot.setPattern(walk_dir, 5)
                         elif dir > 0:
+                            print("cur angle: ", dir)
                             walk_time = np.ceil(3+dir*10)
                             self.rot.setPattern("cw", walk_time)
                         elif dir < 0:
+                            print("cur angle: ", dir)
                             walk_time = np.ceil(3-(dir*10))
                             self.rot.setPattern("ccw", walk_time)
 
