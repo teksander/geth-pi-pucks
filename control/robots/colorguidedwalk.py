@@ -46,7 +46,7 @@ def angle_to_target(distance_to_target, color_threshold):
     middle_idx = len(distance_to_target)/2
     all_idx = len(distance_to_target) / 2
     min_idx = np.argmin(distance_to_target)
-    if min_idx > color_threshold:
+    if min(distance_to_target) > color_threshold:
         return -10 #not found
     else:
         return (min_idx-middle_idx)/all_idx #range -1 to +1
