@@ -31,4 +31,4 @@ class WalktoColor(object):
             self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 138]]  # bgr
         logger.info('Color walk OK')
 
-wc = WalktoColor()
+wc = WalktoColor(300)
