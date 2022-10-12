@@ -61,7 +61,7 @@ class WalktoColor(object):
         self.ground_truth_bgr = []  # bgr
         self.cam = UpCamera(cam_int_reg_h, cam_rot)
         self.rot = Rotation(MAX_SPEED)
-        self.rot.start("s")
+        self.rot.start()
         if exists('calibration/'+robotID+'.csv'):
             with open('calibration/'+robotID+'.csv','r') as color_gt:
                 for line in color_gt:

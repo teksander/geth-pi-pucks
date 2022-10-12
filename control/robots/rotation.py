@@ -53,7 +53,7 @@ class Rotation(object):
                     logger.error('RW I2C read error')
                     return
 
-    def __walking(self, direction):
+    def __walking(self):
         """ This method runs in the background until program is closed """
 
         # Initialize I2C bus
@@ -76,7 +76,7 @@ class Rotation(object):
         self.__isLEDset = True  # Remove when Pi-puck2s are upgraded
 
         # rotation parameters
-        self.__pattern = direction
+        #self.__pattern
 
         # Obstacle Avoidance parameters
         weights_left = [-10, -10, -5, 0, 0, 5, 10, 10]
@@ -154,13 +154,13 @@ class Rotation(object):
             else:
                 time.sleep(0.1)
 
-    def start(self, direction="cw"):
+    def start(self):
         """ This method is called to start __walki            if (actual_direction == "straight"):
                 left = right = self.MAX_SPEED / 2ng """
         if self.__stop:
             self.__stop = False
             # Initialize background daemon thread
-            self.thread = threading.Thread(target=self.__walking, args=(direction,))
+            self.thread = threading.Thread(target=self.__walking)
             self.thread.daemon = True
 
             # Start the execution
