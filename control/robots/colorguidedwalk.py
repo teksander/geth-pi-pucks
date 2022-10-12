@@ -42,6 +42,15 @@ def cross_entropy(dist_x, dist_y):
     return loss/float(np.array(dist_y).shape[0])
 
 
+def angle_to_target(distance_to_target, color_threshold):
+    middle_idx = len(distance_to_target)/2
+    all_idx = len(distance_to_target) / 2
+    min_idx = np.argmin(distance_to_target)
+    if min_idx > color_threshold:
+        return -10 #not found
+    else:
+        return (min_idx-middle_idx)/all_idx #range -1 to +1
+
 class WalktoColor(object):
     def __init__(self, MAX_SPEED):
         """ Constructor
@@ -51,7 +60,8 @@ class WalktoColor(object):
         self.colors = []
         self.ground_truth_bgr = []  # bgr
         self.cam = UpCamera(cam_int_reg_h, cam_rot)
-
+        self.rot = Rotation(MAX_SPEED)
+        self.rot.start("s")
         if exists('calibration/'+robotID+'.csv'):
             with open('calibration/'+robotID+'.csv','r') as color_gt:
                 for line in color_gt:
@@ -64,7 +74,7 @@ class WalktoColor(object):
             self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 138]]  # bgr
         logger.info('Color walk OK')
 
-    def walktocolor(self,color_name):
+    def start(self,color_name):
         if color_name not in self.colors:
             print("unknown color")
             return 0
@@ -75,10 +85,30 @@ class WalktoColor(object):
             while not arrived:
                 image = self.cam.get_reading()
                 center_rgb_feature = get_rgb_feature_center(image, length=40)
+                if cross_entropy(this_color_feature, center_rgb_feature)<color_ce_threshold:
+                    print("center distance: ", cross_entropy(this_color_feature, center_rgb_feature))
+                    isTracking = True
+                    self.rot.setPattern("s", 5)
+                else:
+                    print("center distance: ", cross_entropy(this_color_feature, center_rgb_feature))
+                    isTracking = False
                 if not isTracking:
                     cur_feature = get_rgb_feature(image, cam_sample_lgh,cam_sample_interval)
+                    distance_to_target = []
+                    for local_feature in cur_feature:
+                        distance_to_target.append((local_feature, cross_entropy(this_color_feature, local_feature)))
+                        print("cur distance to target: ", distance_to_target)
+                        dir = angle_to_target(distance_to_target, color_ce_threshold)
+                        if dir <= -1:
+                            #object not found, random walk
+                            walk_dir = random.choice(["s", "cw", "ccw"])
+                            self.rot.setPattern(walk_dir, 5)
+                        elif dir > 0:
+                            walk_time = np.ceil(3+dir*10)
+                            self.rot.setPattern("cw", walk_time)
+                        elif dir < 0:
+                            walk_time = np.ceil(3-(dir*10))
+                            self.rot.setPattern("ccw", walk_time)
 
 
-
-
-wc = WalktoColor(300)
+wc = WalktoColor(500)

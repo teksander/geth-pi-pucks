@@ -212,7 +212,7 @@ class Rotation(object):
 
 
 if __name__ == "__main__":
-    rot = Rotation(300)
+    rot = Rotation(500)
     rot.start("cw")
     input("any key to straight")
     rot.setPattern("s",10)
