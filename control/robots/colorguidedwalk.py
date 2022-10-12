@@ -96,7 +96,7 @@ class WalktoColor(object):
                     cur_feature = get_rgb_feature(image, cam_sample_lgh,cam_sample_interval)
                     distance_to_target = []
                     for local_feature in cur_feature:
-                        distance_to_target.append((local_feature, cross_entropy(this_color_feature, local_feature)))
+                        distance_to_target.append(cross_entropy(this_color_feature, local_feature))
                         print("cur distance to target: ", distance_to_target)
                         dir = angle_to_target(distance_to_target, color_ce_threshold)
                         if dir <= -1:
