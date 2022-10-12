@@ -97,20 +97,20 @@ class WalktoColor(object):
                     distance_to_target = []
                     for local_feature in cur_feature:
                         distance_to_target.append(cross_entropy(this_color_feature, local_feature))
-                        dir = angle_to_target(distance_to_target, color_ce_threshold)
-                        print("angular direction: ", dir)
-                        if dir <= -1:
-                            #object not found, random walk
-                            walk_dir = random.choice(["s", "cw", "ccw"])
-                            self.rot.setPattern(walk_dir, 5)
-                        elif dir > 0:
-                            print("cur angle: ", dir)
-                            walk_time = np.ceil(3+dir*10)
-                            self.rot.setPattern("cw", walk_time)
-                        elif dir < 0:
-                            print("cur angle: ", dir)
-                            walk_time = np.ceil(3-(dir*10))
-                            self.rot.setPattern("ccw", walk_time)
+                    dir = angle_to_target(distance_to_target, color_ce_threshold)
+                    print("angular direction: ", dir)
+                    if dir <= -1:
+                        #object not found, random walk
+                        walk_dir = random.choice(["s", "cw", "ccw"])
+                        self.rot.setPattern(walk_dir, 5)
+                    elif dir > 0:
+                        print("cur angle: ", dir)
+                        walk_time = np.ceil(3+dir*10)
+                        self.rot.setPattern("cw", walk_time)
+                    elif dir < 0:
+                        print("cur angle: ", dir)
+                        walk_time = np.ceil(3-(dir*10))
+                        self.rot.setPattern("ccw", walk_time)
 
 
 wc = WalktoColor(500)
