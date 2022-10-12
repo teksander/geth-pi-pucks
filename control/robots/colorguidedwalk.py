@@ -98,6 +98,7 @@ class WalktoColor(object):
                     for local_feature in cur_feature:
                         distance_to_target.append(cross_entropy(this_color_feature, local_feature))
                         dir = angle_to_target(distance_to_target, color_ce_threshold)
+                        print("angular direction: ", dir)
                         if dir <= -1:
                             #object not found, random walk
                             walk_dir = random.choice(["s", "cw", "ccw"])
