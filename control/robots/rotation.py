@@ -155,7 +155,7 @@ class Rotation(object):
         if self.__stop:
             self.__stop = False
             # Initialize background daemon thread
-            self.thread = threading.Thread(target=self.__walking, args=direction)
+            self.thread = threading.Thread(target=self.__walking, args=(direction,))
             self.thread.daemon = True
 
             # Start the execution
