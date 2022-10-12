@@ -19,6 +19,7 @@ def __nop_delay(t):
 
 def e_init_gs():
 	global bus
+	trials=0
 	while True:
 		try:
 			bus = smbus.SMBus(I2C_CHANNEL)

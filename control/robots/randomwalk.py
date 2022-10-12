@@ -79,7 +79,7 @@ class RandomWalk(object):
 		possible_directions = ["straight", "cw", "ccw"]
 		actual_direction = "straight"
 		
-		
+
 		# Obstacle Avoidance parameters
 		weights_left  = [-10, -10, -5, 0, 0, 5, 10, 10]
 		weights_right = [-1 * x for x in weights_left]
@@ -214,7 +214,6 @@ class RandomWalk(object):
 
 
 if __name__ == "__main__":
-
     rw = RandomWalk(500)
     rw.start()
 

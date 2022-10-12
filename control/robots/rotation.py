@@ -23,6 +23,7 @@ class Rotation(object):
         self.MAX_SPEED = MAX_SPEED
         self.__stop = 1
         self.__walk = True
+        self.__pattern = "s"
 
         logger.info('Random-Walk OK')
 
@@ -75,7 +76,7 @@ class Rotation(object):
 
         # rotation parameters
         walking_start = False
-        actual_direction = direction
+        self.__pattern = direction
 
         # Obstacle Avoidance parameters
         weights_left = [-10, -10, -5, 0, 0, 5, 10, 10]
@@ -95,11 +96,14 @@ class Rotation(object):
                 walking_start=True
 
             # Find Wheel Speed for Random-Walk
-            if (actual_direction == "cw"):
+            if (self.__pattern == "cw"):
                 left = self.MAX_SPEED / 2
                 right = -self.MAX_SPEED / 2
-            elif (actual_direction == "ccw"):
+            elif (self.__pattern == "ccw"):
                 left = -self.MAX_SPEED / 2
+                right = self.MAX_SPEED / 2
+            elif (self.__pattern == "s"):
+                left = self.MAX_SPEED / 2
                 right = self.MAX_SPEED / 2
 
             # Obstacle avoidance
@@ -181,6 +185,8 @@ class Rotation(object):
     def setWalk(self, state):
         """ This method is called set the random-walk to on without disabling I2C"""
         self.__walk = state
+    def setPattern(self, pattern):
+        self.__pattern=pattern
 
     def setWheels(self, left, right):
         """ This method is called set set each wheel speed """
@@ -204,9 +210,12 @@ class Rotation(object):
 if __name__ == "__main__":
     rot = Rotation(300)
     rot.start("cw")
+    input("any key to straight")
+    rot.setPattern("s")
     input("any key to stop")
+    rot.setWalk(False)
+    input("any key to disconnect")
     rot.stop()
-
 
 
 

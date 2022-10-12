@@ -1,4 +1,4 @@
-#!/bin/bash
+sudo#!/bin/bash
 # Define variables used frequently
 
 export BASE_FOLDER="geth-pi-pucks"
