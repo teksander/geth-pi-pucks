@@ -16,31 +16,69 @@ rotSpeed = 300
 cam_sample_lgh = 20
 cam_sample_interval = 20
 max_samples = 1000
-
+robotID = open("/boot/pi-puck_id", "r").read().strip()
 
 def cross_entropy(dist_x, dist_y):
     loss = -np.sum(np.array(dist_x)*np.log(dist_y))
     return loss/float(np.array(dist_y).shape[0])
 
+
+
+
+def ask_yesno(question):
+    """
+    Helper to get yes / no answer from user.
+    """
+    yes = {'yes', 'y'}
+    no = {'no', 'n'}  # pylint: disable=invalid-name
+
+    done = False
+    print(question)
+    while not done:
+        choice = input().lower()
+        if choice in yes:
+            return True
+        elif choice in no:
+            return False
+        else:
+            print("Please respond by yes or no.")
+
+
+def get_rgb_center(image, length=30):
+    image_sz = image.shape
+    idx = int(image_sz[1] / 2)
+    hist_img= image[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0).astype(int)
+    return hist_img
+
+def set_color():
+    input("Press Enter to continue...")
+    image = cam.get_reading()
+    print("color ground truth  set to: ", get_rgb_center(image,30))
+    return get_rgb_center(image,30)
 cam = UpCamera(cam_int_reg_h, cam_rot)
-rot = Rotation(rotSpeed)
 
 image = cam.get_reading()
 cv2.imwrite('test_capture.jpg', image)
 
+colors = ["red", "blue", "green", "purple"]
+ground_truth_bgr = [[0,0,255], [255,0,0], [255,0,0], [226, 43, 138]] #bgr
 
-ground_truth_red = [0,0,255] #b,g,r
-ground_truth_blue = [255,0,0]
 
-while True:
-    feature = cam.get_rgb_feature(cam_sample_lgh,cam_sample_interval)
-    distance_to_red = []
-    distance_to_blue = []
-    for local_feature in feature:
-        distance_to_red.append(cross_entropy(ground_truth_red, local_feature))
-        distance_to_blue.append(cross_entropy(ground_truth_blue, local_feature))
-    print("distance to red along y axis: ", distance_to_red)
-    print("distance to blue along y axis: ", distance_to_blue)
+if ask_yesno("calibrate color ground truth?"):
+    for idx, name in enumerate(colors):
+        print("Present " + name +" color")
+        ground_truth_bgr[idx] = set_color()
+        
+#write color ground truth result
+color_gt = open(robotID+'.csv','w+')
+for idx, name in enumerate(colors):
+    print("Present " + name + " color")
+    ground_truth_bgr[idx] = set_color()
+    color_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
+color_gt.close()
+
+
+
 
 
 

@@ -142,7 +142,7 @@ class GroundSensor(object):
 			return None
 
 		else:
-			return self.groundValues;
+			return self.groundValues
 
 	def start(self):
 		""" This method is called to start __sensing """
