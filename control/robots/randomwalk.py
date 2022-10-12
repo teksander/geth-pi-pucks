@@ -54,7 +54,7 @@ class RandomWalk(object):
 		""" This method runs in the background until program is closed """
 
 		# Initialize I2C bus
-		I2C_CHANNEL = 4
+		I2C_CHANNEL = 13
 		EPUCK_I2C_ADDR = 0x1f
 		self.__bus = smbus.SMBus(I2C_CHANNEL)
 		self.__i2c_address = EPUCK_I2C_ADDR
