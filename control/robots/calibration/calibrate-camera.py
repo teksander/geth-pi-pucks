@@ -72,7 +72,6 @@ if ask_yesno("calibrate color ground truth?"):
 #write color ground truth result
 color_gt = open(robotID+'.csv','w+')
 for idx, name in enumerate(colors):
-    print("Present " + name + " color")
     color_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
 color_gt.close()
 
