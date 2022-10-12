@@ -79,7 +79,7 @@ class WalktoColor(object):
             print("unknown color")
             return 0
         else:
-            this_color_feature = self.ground_truth_bgr[self.colors.index(color_name)]
+            this_color_feature = np.array(self.ground_truth_bgr[self.colors.index(color_name)])/np.sum(self.ground_truth_bgr[self.colors.index(color_name)])
             isTracking = False #color object is at center
             arrived = False
             while not arrived:
