@@ -108,6 +108,7 @@ class WalktoColor(object):
                 image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
                 #center_rgb_feature = get_rgb_feature_center(image, length=10)
                 center_hsv_feature = get_hsv_feature_center(image_hsv, length=10)
+                print("center feature: ", center_hsv_feature)
                 if hue_distance(this_color_feature, center_hsv_feature)<color_ce_threshold:
                     print("center distance: ", hue_distance(this_color_feature, center_hsv_feature))
 

@@ -44,7 +44,7 @@ class UpCamera(object):
         self.interesting_region_o = interesting_reg_offset
         self.rotate = rot
         #find best focal distance
-        self.focal_calibration()
+        #self.focal_calibration()
         logger.info('Up-Camera OK')
 
 
