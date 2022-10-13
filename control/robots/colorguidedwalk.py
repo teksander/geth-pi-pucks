@@ -159,6 +159,7 @@ class WalktoColor(object):
             arrived = False
             while not arrived:
                 newValues = self.gs.getAvg()
+                print(np.mean(newValues), newValues)
                 if newValues:
                     if np.mean(newValues) > 700:
                         arrived = True
