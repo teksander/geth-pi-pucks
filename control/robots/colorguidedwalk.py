@@ -74,6 +74,28 @@ def get_contours(image_hsv, ground_truth_hsv, color_hsv_threshold):
     low_bound = np.minimum(np.maximum(np.array(ground_truth_hsv)-np.array(color_hsv_threshold),[0,0,0]), [180,255, 255])
     high_bound = np.minimum(np.maximum(np.array(ground_truth_hsv)+np.array(color_hsv_threshold),[0,0,0]), [180,255, 255])
     target_mask = cv2.inRange(image_hsv, low_bound, high_bound)
+    if ground_truth_hsv[0] + color_hsv_threshold[0] > 180:
+        additional_threshold_up = ground_truth_hsv[0] + color_hsv_threshold[0] - 180
+        add_bound = np.minimum(np.maximum(np.array([additional_threshold_up, ground_truth_hsv[1],ground_truth_hsv[2]]) - np.array(color_hsv_threshold), [0, 0, 0]),
+                               [180, 255, 255])
+        add_bound_low = np.minimum(np.maximum(
+            np.array([0, ground_truth_hsv[1], ground_truth_hsv[2]]) - np.array(
+                color_hsv_threshold), [0, 0, 0]),
+                               [180, 255, 255])
+        add_target_mask = cv2.inRange(image_hsv, add_bound_low, add_bound)
+        target_mask += add_target_mask
+    elif ground_truth_hsv[0] - color_hsv_threshold[0] <0:
+        additional_threshold_low = 180 + ground_truth_hsv[0] - color_hsv_threshold[0]
+        add_bound = np.minimum(np.maximum(
+            np.array([additional_threshold_low, ground_truth_hsv[1], ground_truth_hsv[2]]) - np.array(
+                color_hsv_threshold), [0, 0, 0]),
+                               [180, 255, 255])
+        add_bound_high = np.minimum(np.maximum(
+            np.array([180, ground_truth_hsv[1], ground_truth_hsv[2]]) + np.array(
+                color_hsv_threshold), [0, 0, 0]),
+            [180, 255, 255])
+        add_target_mask = cv2.inRange(image_hsv, add_bound, add_bound_high)
+        target_mask += add_target_mask
     kernel = np.ones((6,6), np.uint8)
     target_mask = cv2.erode(target_mask, kernel)
     kernel_d = np.ones((3, 3), np.uint8)
