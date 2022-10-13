@@ -51,7 +51,7 @@ def get_hsv_center(image, length=30):
     image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     image_sz = image_hsv.shape
     idx = int(image_sz[1] / 2)
-    hist_img= image_hsv[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0)
+    hist_img= image_hsv[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0).astype(int)
     return hist_img
 
 def set_color():
