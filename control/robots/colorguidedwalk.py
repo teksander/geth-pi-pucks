@@ -159,7 +159,14 @@ class WalktoColor(object):
                 if cen!=-1:
                     dir_ang=(cen-240)/480
                 print("angular direction: ", dir_ang)
-                if dir_ang <= -1:
+                if abs(dir_ang) < 0.1:
+                    isTracking = True
+                else:
+                    isTracking = False
+
+                if isTracking:
+                    self.rot.setPattern("s", 5)
+                elif dir_ang <= -1:
                     #object not found, random walk
                     walk_dir = random.choice(["s", "cw", "ccw"])
                     #self.rot.setPattern(walk_dir, 5)
@@ -171,6 +178,7 @@ class WalktoColor(object):
                     print("cur angle: ", dir_ang)
                     walk_time = np.ceil(3-(dir_ang*10))
                     self.rot.setPattern("ccw", walk_time)
+
 
 
 wc = WalktoColor(500)
