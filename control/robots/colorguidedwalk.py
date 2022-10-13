@@ -78,7 +78,7 @@ def get_contours(image_hsv, ground_truth_hsv, color_hsv_threshold):
     target_mask = cv2.erode(target_mask, kernel)
     kernel_d = np.ones((3, 3), np.uint8)
     mask = cv2.dilate(target_mask, kernel_d)
-    contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if len(contours)!=0:
         c = max(contours, key=cv2.contourArea)
         M = cv2.moments(c)
