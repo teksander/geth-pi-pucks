@@ -19,7 +19,7 @@ cam_int_reg_h = 100
 cam_rot = True
 cam_sample_lgh = 20
 cam_sample_interval = 20
-color_ce_threshold =  0.2 #cross entropy threshold, if a color is present
+color_ce_threshold =  20 #cross entropy threshold, if a color is present
 
 def get_rgb_feature(image, length=20, interval=20):
     image_sz = image.shape
@@ -30,6 +30,23 @@ def get_rgb_feature(image, length=20, interval=20):
         feature.append(hist_img/np.sum(hist_img))
         idx += interval
     return feature
+
+def get_hsv_feature(image, length=20, interval=20):
+    image_sz = image.shape
+    feature = []
+    idx = int(length / 2)
+    while idx + int(length / 2) < image_sz[1]:
+        hist_img= image[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0)
+        feature.append(hist_img[0])
+        idx += interval
+    return feature
+def get_hsv_feature_center(image, length=30):
+    #get averaged bgr feature of the center of current view, with bit larger interval
+    image_sz = image.shape
+    idx = int(image_sz[1] / 2)
+    hist_img= image[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0)
+    return hist_img[0]
+
 def get_rgb_feature_center(image, length=30):
     #get averaged bgr feature of the center of current view, with bit larger interval
     image_sz = image.shape
@@ -41,6 +58,8 @@ def cross_entropy(dist_x, dist_y):
     loss = -np.sum(np.array(dist_x)*np.log(dist_y+0.001))
     return loss/float(np.array(dist_y).shape[0])
 
+def hue_distance(h0,h1):
+    return min(abs(h1-h0), 360-abs(h1-h0)) / 180.0
 
 def angle_to_target(distance_to_target, color_threshold):
     middle_idx = len(distance_to_target)/2
@@ -50,6 +69,7 @@ def angle_to_target(distance_to_target, color_threshold):
         return -10 #not found
     else:
         return (min_idx-middle_idx)/all_idx #range -1 to +1
+
 
 class WalktoColor(object):
     def __init__(self, MAX_SPEED):
@@ -79,24 +99,27 @@ class WalktoColor(object):
             print("unknown color")
             return 0
         else:
-            this_color_feature = np.array(self.ground_truth_bgr[self.colors.index(color_name)])/np.sum(self.ground_truth_bgr[self.colors.index(color_name)])
+            #this_color_feature = np.array(self.ground_truth_bgr[self.colors.index(color_name)])/np.sum(self.ground_truth_bgr[self.colors.index(color_name)])
+            this_color_feature = 0
             isTracking = False #color object is at center
             arrived = False
             while not arrived:
                 image = self.cam.get_reading()
-                center_rgb_feature = get_rgb_feature_center(image, length=5)
-                if cross_entropy(this_color_feature, center_rgb_feature)<color_ce_threshold:
-                    print("center distance: ", cross_entropy(this_color_feature, center_rgb_feature))
+                image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+                #center_rgb_feature = get_rgb_feature_center(image, length=10)
+                center_hsv_feature = get_hsv_feature_center(image_hsv, length=10)
+                if hue_distance(this_color_feature, center_hsv_feature)<color_ce_threshold:
+                    print("center distance: ", hue_distance(this_color_feature, center_hsv_feature))
 
                     self.rot.setPattern("s", 5)
                 else:
-                    print("center distance: ", cross_entropy(this_color_feature, center_rgb_feature))
+                    print("center distance: ", hue_distance(this_color_feature, center_hsv_feature))
                     isTracking = False
                 if not isTracking:
-                    cur_feature = get_rgb_feature(image, cam_sample_lgh,cam_sample_interval)
+                    cur_feature = get_hsv_feature(image, cam_sample_lgh,cam_sample_interval)
                     distance_to_target = []
                     for local_feature in cur_feature:
-                        distance_to_target.append(cross_entropy(this_color_feature, local_feature))
+                        distance_to_target.append(hue_distance(this_color_feature, local_feature))
                     print(distance_to_target)
                     dir = angle_to_target(distance_to_target, color_ce_threshold)
                     print("angular direction: ", dir)
