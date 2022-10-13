@@ -5,6 +5,7 @@ import numpy as np
 import os
 import time
 import sys
+import matplotlib.pyplot as plt
 #from matplotlib import pyplot as plt
 sys.path.append('..')
 
@@ -60,7 +61,29 @@ def get_rgb_feature(length=20, interval=20):
     return feature
 
 
-from boxdetect.pipelines import get_boxes
+def get_contours(image_hsv, ground_truth_hsv, color_hsv_threshold):
+    low_bound = np.minimum(np.maximum(np.array(ground_truth_hsv)-np.array(color_hsv_threshold),[0,0,0]), [180,255, 255])
+    high_bound = np.minimum(np.maximum(np.array(ground_truth_hsv)+np.array(color_hsv_threshold),[0,0,0]), [180,255, 255])
+    target_mask = cv2.inRange(image_hsv, low_bound, high_bound)
+    kernel = np.ones((6,6), np.uint8)
+    target_mask = cv2.erode(target_mask, kernel)
+    kernel_d = np.ones((3, 3), np.uint8)
+    mask = cv2.dilate(target_mask, kernel_d)
+    contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    if len(contours)!=0:
+        c = max(contours, key=cv2.contourArea)
+        M = cv2.moments(c)
+        cX = int(M["m10"] / M["m00"]) #horizontal center of contour
+        return c, cX
+    else:
+        return 0, 0
+
 file_name = "/home/ubuntu/test.jpg"
-rects, grouping_rects, image, output_image = get_boxes(
-    file_name, cfg=cfg, plot=False)
+image = cv2.imread("/home/ubuntu/test.jpg")
+image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+this_ground_truth_hsv = [175, 255, 240]
+color_hsv_threshold = np.array([20, 60, 100])
+cnt, cen = get_contours(image_hsv, this_ground_truth_hsv, color_hsv_threshold)
+cv2.drawContours(image, [cnt], 0, (0, 0, 0), 5)
+plt.imshow(image)
+plt.show()
