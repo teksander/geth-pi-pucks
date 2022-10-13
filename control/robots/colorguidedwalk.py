@@ -19,7 +19,7 @@ cam_int_reg_h = 100
 cam_rot = True
 cam_sample_lgh = 50
 cam_sample_interval = 40
-color_ce_threshold =  0.1 #cross entropy threshold, if a color is present
+color_ce_threshold =  0.15 #cross entropy threshold, if a color is present
 
 def get_rgb_feature(image, length=20, interval=20):
     image_sz = image.shape
