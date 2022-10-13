@@ -20,7 +20,7 @@ cam_rot = True
 cam_sample_lgh = 50
 cam_sample_interval = 40
 color_ce_threshold =  0.15 #cross entropy threshold, if a color is present
-color_hsv_threshold = np.array([20, 60, 100]) #threshold for each dimension of the HSV
+color_hsv_threshold = np.array([30, 60, 100]) #threshold for each dimension of the HSV
 def get_rgb_feature(image, length=20, interval=20):
     image_sz = image.shape
     feature = []
