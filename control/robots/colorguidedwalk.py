@@ -128,6 +128,7 @@ class WalktoColor(object):
         self.rot = Rotation(MAX_SPEED)
         self.rot.start()
         self.gs=GroundSensor(gsFreq)
+        self.gs.start()
         if exists('calibration/'+robotID+'.csv'):
             with open('calibration/'+robotID+'.csv','r') as color_gt:
                 for line in color_gt:
@@ -163,6 +164,7 @@ class WalktoColor(object):
                 if newValues:
                     if np.mean(newValues) > 700:
                         arrived = True
+                        self.rot.setWalk(False)
                     else:
                         arrived = False
                 image = self.cam.get_reading()
