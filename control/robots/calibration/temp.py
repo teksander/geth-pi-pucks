@@ -8,6 +8,29 @@ import sys
 #from matplotlib import pyplot as plt
 sys.path.append('..')
 
+from boxdetect import config
+
+
+cfg = config.PipelinesConfig()
+
+# important to adjust these values to match the size of boxes on your image
+cfg.width_range = (30,480)
+cfg.height_range = (30,640)
+
+# the more scaling factors the more accurate the results but also it takes more time to processing
+# too small scaling factor may cause false positives
+# too big scaling factor will take a lot of processing time
+cfg.scaling_factors = [0.3]
+
+# w/h ratio range for boxes/rectangles filtering
+cfg.wh_ratio_range = (0.5, 1.7)
+
+# group_size_range starting from 2 will skip all the groups
+# with a single box detected inside (like checkboxes)
+cfg.group_size_range = (2, 100)
+
+# num of iterations when running dilation tranformation (to engance the image)
+cfg.dilation_iterations = 0
 
 
 def cross_entropy(dist_x, dist_y):
@@ -36,12 +59,8 @@ def get_rgb_feature(length=20, interval=20):
         idx += interval
     return feature
 
-image = cv2.imread("/home/ubuntu/test.jpg")
-feature = get_rgb_feature()
-distance_to_red = []
-distance_to_blue = []
-for local_feature in feature:
-    distance_to_red.append((local_feature, cross_entropy(ground_truth_red, local_feature)))
-    distance_to_blue.append((local_feature, cross_entropy(ground_truth_blue, local_feature)))
-print("distance to red along y axis: ", distance_to_red)
-print("distance to blue along y axis: ", distance_to_blue)
+
+from boxdetect.pipelines import get_boxes
+file_name = "/home/ubuntu/test.jpg"
+rects, grouping_rects, image, output_image = get_boxes(
+    file_name, cfg=cfg, plot=False)
