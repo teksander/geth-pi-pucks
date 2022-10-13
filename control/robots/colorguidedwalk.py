@@ -9,6 +9,7 @@ import logging
 from os.path import exists
 from upcamera import UpCamera
 from rotation import Rotation
+from groundsensor import GroundSensor
 from PID import PID
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -21,6 +22,7 @@ cam_sample_lgh = 50
 cam_sample_interval = 40
 color_ce_threshold =  0.15 #cross entropy threshold, if a color is present
 color_hsv_threshold = np.array([20, 60, 100]) #threshold for each dimension of the HSV
+gsFreq=20
 def get_rgb_feature(image, length=20, interval=20):
     image_sz = image.shape
     feature = []
@@ -125,6 +127,7 @@ class WalktoColor(object):
         self.cam = UpCamera(cam_int_reg_h, cam_rot)
         self.rot = Rotation(MAX_SPEED)
         self.rot.start()
+        self.gs=GroundSensor(gsFreq)
         if exists('calibration/'+robotID+'.csv'):
             with open('calibration/'+robotID+'.csv','r') as color_gt:
                 for line in color_gt:
@@ -155,6 +158,12 @@ class WalktoColor(object):
             isTracking = False #color object is at center
             arrived = False
             while not arrived:
+                newValues = self.gs.getAvg()
+                if newValues:
+                    if np.mean(newValues) > 700:
+                        arrived = True
+                    else:
+                        arrived = False
                 image = self.cam.get_reading()
                 image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
                 cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)

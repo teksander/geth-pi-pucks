@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
-I2C_CHANNEL = 4
+I2C_CHANNEL = 13
 GS_I2C_ADDR = 0x60
 
 NOP_TIME = 0.000001
