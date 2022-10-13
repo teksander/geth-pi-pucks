@@ -193,7 +193,7 @@ class Rotation(object):
             self.__walk = True
 
     def setWheels(self, left, right):
-        """ This method is called set set each wheel speed """
+        """ This method is called set each wheel speed """
         # Set wheel speeds
         self.__write_data(2, int(left))
         time.sleep(0.01)
@@ -213,9 +213,13 @@ class Rotation(object):
 
 if __name__ == "__main__":
     rot = Rotation(500)
-    rot.start("cw")
+    rot.start()
     input("any key to straight")
     rot.setPattern("s",10)
+    input("any key to turn")
+    rot.setPattern("cw", 10)
+    input("any key to stop")
+    rot.setPattern("ccw", 10)
     input("any key to stop")
     rot.setWalk(False)
     input("any key to disconnect")

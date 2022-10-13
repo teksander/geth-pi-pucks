@@ -58,6 +58,7 @@ cam = UpCamera(cam_int_reg_h, cam_rot)
 image = cam.get_reading()
 cv2.imwrite('test_capture.jpg', image)
 
+
 colors = ["red", "blue", "purple"]
 ground_truth_bgr = [[0,0,255], [255,0,0], [226, 43, 138]] #bgr
 

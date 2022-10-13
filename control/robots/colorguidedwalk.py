@@ -87,7 +87,7 @@ class WalktoColor(object):
                 center_rgb_feature = get_rgb_feature_center(image, length=5)
                 if cross_entropy(this_color_feature, center_rgb_feature)<color_ce_threshold:
                     print("center distance: ", cross_entropy(this_color_feature, center_rgb_feature))
-                    isTracking = True
+
                     self.rot.setPattern("s", 5)
                 else:
                     print("center distance: ", cross_entropy(this_color_feature, center_rgb_feature))
