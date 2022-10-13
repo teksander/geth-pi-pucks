@@ -172,11 +172,11 @@ class WalktoColor(object):
                     #self.rot.setPattern(walk_dir, 5)
                 elif dir_ang > 0:
                     print("cur angle: ", dir_ang)
-                    walk_time = np.ceil(3+dir_ang*10)
+                    walk_time = np.ceil(1+int(dir_ang))
                     self.rot.setPattern("ccw", walk_time)
                 elif dir_ang < 0:
                     print("cur angle: ", dir_ang)
-                    walk_time = np.ceil(3-(dir_ang*10))
+                    walk_time = np.ceil(1-int(abs(dir_ang)))
                     self.rot.setPattern("cw", walk_time)
 
 
