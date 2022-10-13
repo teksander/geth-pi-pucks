@@ -59,7 +59,7 @@ def cross_entropy(dist_x, dist_y):
     return loss/float(np.array(dist_y).shape[0])
 
 def hue_distance(h0,h1):
-    return min(abs(h1-h0), 360-abs(h1-h0)) / 180.0
+    return min(abs(h1-h0), 180-abs(h1-h0)) / 90.0
 
 def angle_to_target(distance_to_target, color_threshold):
     middle_idx = len(distance_to_target)/2
