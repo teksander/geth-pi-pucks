@@ -74,7 +74,7 @@ def get_contours(image_hsv, ground_truth_hsv, color_hsv_threshold):
     low_bound = np.minimum(np.maximum(np.array(ground_truth_hsv)-np.array(color_hsv_threshold),[0,0,0]), [180,255, 255])
     high_bound = np.minimum(np.maximum(np.array(ground_truth_hsv)+np.array(color_hsv_threshold),[0,0,0]), [180,255, 255])
     target_mask = cv2.inRange(image_hsv, low_bound, high_bound)
-    print(low_bound, high_bound)
+    #print(low_bound, high_bound)
     #cv2.imwrite('target_mask.jpg', target_mask)
     if ground_truth_hsv[0] + color_hsv_threshold[0] > 180:
         additional_threshold_up = ground_truth_hsv[0] + color_hsv_threshold[0] - 180
@@ -162,7 +162,7 @@ class WalktoColor(object):
                 if cen!=-1:
                     dir_ang=(cen-240)/480
                 print("angular direction: ", dir_ang)
-                if abs(dir_ang) < 0.1:
+                if abs(dir_ang) < 0.2:
                     isTracking = True
                 else:
                     isTracking = False
