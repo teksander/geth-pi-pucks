@@ -156,43 +156,44 @@ class WalktoColor(object):
             return 0
         else:
             this_color_hsv = np.array(self.ground_truth_hsv[self.colors.index(color_name)])
-            isTracking = False #color object is at center
-            arrived = False
-            while not arrived:
-                newValues = self.gs.getAvg()
-                if newValues:
-                    print(np.mean(newValues), newValues)
-                    if np.mean(newValues) > 700:
-                        arrived = True
-                        self.rot.setWalk(False)
+            while True:
+                isTracking = False  # color object is at center
+                arrived = False
+                while not arrived:
+                    newValues = self.gs.getAvg()
+                    if newValues:
+                        print(np.mean(newValues), newValues)
+                        if np.mean(newValues) > 700:
+                            arrived = True
+                            self.rot.setWalk(False)
+                        else:
+                            arrived = False
+                    image = self.cam.get_reading()
+                    image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+                    cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
+                    dir_ang=-1
+                    if cen!=-1:
+                        dir_ang=(cen-240)/480
+                    print("angular direction: ", dir_ang)
+                    if abs(dir_ang) < 0.2:
+                        isTracking = True
                     else:
-                        arrived = False
-                image = self.cam.get_reading()
-                image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-                cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
-                dir_ang=-1
-                if cen!=-1:
-                    dir_ang=(cen-240)/480
-                print("angular direction: ", dir_ang)
-                if abs(dir_ang) < 0.2:
-                    isTracking = True
-                else:
-                    isTracking = False
+                        isTracking = False
 
-                if isTracking:
-                    self.rot.setPattern("s", 5)
-                elif dir_ang <= -1:
-                    #object not found, random walk
-                    walk_dir = random.choice(["s", "cw", "ccw"])
-                    #self.rot.setPattern(walk_dir, 5)
-                elif dir_ang > 0:
-                    print("cur angle: ", dir_ang)
-                    walk_time = np.ceil(1+int(dir_ang))
-                    self.rot.setPattern("cw", walk_time)
-                elif dir_ang < 0:
-                    print("cur angle: ", dir_ang)
-                    walk_time = np.ceil(1-int(abs(dir_ang)))
-                    self.rot.setPattern("ccw", walk_time)
+                    if isTracking:
+                        self.rot.setPattern("s", 5)
+                    elif dir_ang <= -1:
+                        #object not found, random walk
+                        walk_dir = random.choice(["s", "cw", "ccw"])
+                        #self.rot.setPattern(walk_dir, 5)
+                    elif dir_ang > 0:
+                        print("cur angle: ", dir_ang)
+                        walk_time = np.ceil(1+int(dir_ang))
+                        self.rot.setPattern("cw", walk_time)
+                    elif dir_ang < 0:
+                        print("cur angle: ", dir_ang)
+                        walk_time = np.ceil(1-int(abs(dir_ang)))
+                        self.rot.setPattern("ccw", walk_time)
 
 
 
