@@ -136,7 +136,7 @@ class WalktoColor(object):
             self.colors = ["red", "blue", "purple"]
             self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 138]]  # bgr
         if exists('calibration/'+robotID+'_hsv.csv'):
-            with open('calibration/'+robotID+'.csv','r') as color_gt:
+            with open('calibration/'+robotID+'_hsv.csv','r') as color_gt:
                 for line in color_gt:
                     elements = line.strip().split(' ')
                     self.ground_truth_hsv.append([int(x) for x in elements[1:]])
