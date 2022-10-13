@@ -185,4 +185,4 @@ class WalktoColor(object):
 
 
 wc = WalktoColor(500)
-wc.start("red")
+wc.start("purple")
