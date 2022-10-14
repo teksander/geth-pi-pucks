@@ -3,7 +3,6 @@ import random, math
 import time
 import smbus
 import threading
-from pupil_apriltags import Detector
 import cv2
 import numpy as np
 import logging
@@ -12,6 +11,11 @@ from upcamera import UpCamera
 from rotation import Rotation
 from groundsensor import GroundSensor
 from PID import PID
+
+import sys
+sys.path.append('/home/pi/apriltag/python')
+import apriltag
+
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
@@ -130,7 +134,7 @@ class WalktoColor(object):
         self.rot.start()
         self.gs=GroundSensor(gsFreq)
         self.gs.start()
-        self.april = Detector()
+        self.april = apriltag.Detector()
         if exists('calibration/'+robotID+'.csv'):
             with open('calibration/'+robotID+'.csv','r') as color_gt:
                 for line in color_gt:
