@@ -198,6 +198,7 @@ class WalktoColor(object):
                     print("cur angle: ", dir_ang)
                     walk_time = np.ceil(1-int(abs(dir_ang)))
                     self.rot.setPattern("ccw", walk_time)
+            self.rot.setWalk(False)
             return True
     def check_apriltag(self):
         image = self.cam.get_reading_raw()
