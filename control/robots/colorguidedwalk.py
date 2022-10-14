@@ -189,7 +189,7 @@ class WalktoColor(object):
                 elif dir_ang <= -1:
                     #object not found, random walk
                     walk_dir = random.choice(["s", "cw", "ccw"])
-                    self.rot.setPattern(walk_dir, 5)
+                    self.rot.setPattern(walk_dir, 3)
                 elif dir_ang > 0:
                     print("cur angle: ", dir_ang)
                     walk_time = np.ceil(1+int(dir_ang))
