@@ -97,6 +97,14 @@ class UpCamera(object):
         cy = centre[0]/2- self.interesting_region_h/2 + self.interesting_region_o
         corp_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
         return corp_img
+    def get_reading_raw(self):
+        rawCapture = PiRGBArray(self.camera)
+        self.camera.capture(rawCapture, format="bgr", use_video_port=True)
+        image = rawCapture.array
+        rawCapture.truncate(0)
+        if self.rotate:
+            image = cv2.rotate(image, cv2.ROTATE_180)
+        return image
 
     def get_rgb_feature(self, length=10, interval=10):
         image=self.get_reading()
