@@ -108,7 +108,7 @@ class Rotation(object):
                 right = self.MAX_SPEED / 2
 
             # Obstacle avoidance
-            '''
+
             self.ir = [0] * 8
             for i in range(8):
                 self.ir[i] = self.__read_data(IR0_REFLECTED + i)
@@ -131,7 +131,7 @@ class Rotation(object):
                 right = self.MAX_SPEED
             elif right < -self.MAX_SPEED:
                 right = -self.MAX_SPEED
-            '''
+
             if self.__walk:
                 # Set wheel speeds
                 self.__write_data(LEFT_MOTOR_SPEED, int(left))
