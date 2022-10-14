@@ -189,7 +189,7 @@ class WalktoColor(object):
                 elif dir_ang <= -1:
                     #object not found, random walk
                     walk_dir = random.choice(["s", "cw", "ccw"])
-                    #self.rot.setPattern(walk_dir, 5)
+                    self.rot.setPattern(walk_dir, 5)
                 elif dir_ang > 0:
                     print("cur angle: ", dir_ang)
                     walk_time = np.ceil(1+int(dir_ang))
@@ -210,10 +210,23 @@ class WalktoColor(object):
             print("Apriltag not found")
         return this_id
 
+    def check_all_color(self):
+        #for all hard coded colors
+        for color_idx, color_name in enumerate(self.colors):
+            this_color_hsv = np.array(self.ground_truth_hsv[color_idx])
+            image = self.cam.get_reading()
+            image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+            cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
+            if cen!=-1:
+                return color_idx
+        return 0
+
 
 
 
 wc = WalktoColor(500)
 wc.drive_to_color("purple")
-while True:
-    print(wc.check_apriltag())
+tag_id = wc.check_apriltag()
+while tag_id == -1:
+    tag_id = wc.check_apriltag()
+    print(tag_id)
