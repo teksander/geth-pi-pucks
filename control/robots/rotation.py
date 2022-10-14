@@ -79,7 +79,7 @@ class Rotation(object):
         #self.__pattern
 
         # Obstacle Avoidance parameters
-        weights_left = [-10, -10, -5, 0, 0, 5, 10, 10]
+        weights_left = [-8, -8, -3, 0, 0, 3, 8, 8]
         weights_right = [-1 * x for x in weights_left]
 
         # Turn IR sensors on

@@ -156,50 +156,58 @@ class WalktoColor(object):
             self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [157, 157, 144]]  # bgr
         logger.info('Color walk OK')
 
+    def drive_to_hsv(self, this_color_hsv):
+        arrived_count = 0
+        detect_color = False
+        while arrived_count < 5:
+            newValues = self.gs.getAvg()
+            if newValues:
+                print(np.mean(newValues), newValues)
+                if np.mean(newValues) > 700 and detect_color:  # see color and white board at once
+                    self.rot.setWalk(False)
+                    arrived_count += 1
+                else:
+                    arrived_count = 0
+            image = self.cam.get_reading()
+            image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+            cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
+            dir_ang = -1
+            if cen != -1:
+                detect_color = True
+                dir_ang = (cen - 240) / 480
+            else:
+                detect_color = False
+            print("angular direction: ", dir_ang)
+            if abs(dir_ang) < 0.1:
+                isTracking = True
+            else:
+                isTracking = False
+
+            if isTracking:
+                self.rot.setPattern("s", 5)
+            elif dir_ang <= -1:
+                # object not found, random walk
+                walk_dir = random.choice(["s", "cw", "ccw"])
+                self.rot.setPattern(walk_dir, 3)
+            elif dir_ang > 0:
+                print("cur angle: ", dir_ang)
+                walk_time = np.ceil(1 + int(dir_ang))
+                self.rot.setPattern("cw", walk_time)
+            elif dir_ang < 0:
+                print("cur angle: ", dir_ang)
+                walk_time = np.ceil(1 - int(abs(dir_ang)))
+                self.rot.setPattern("ccw", walk_time)
+        self.rot.setWalk(False)
+        return True
+
     def drive_to_color(self,color_name):
         if color_name not in self.colors:
             print("unknown color")
             return 0
         else:
             this_color_hsv = np.array(self.ground_truth_hsv[self.colors.index(color_name)])
-            arrived_count = 0
-            while arrived_count<10:
-                newValues = self.gs.getAvg()
-                if newValues:
-                    print(np.mean(newValues), newValues)
-                    if np.mean(newValues) > 700:
-                        self.rot.setWalk(False)
-                        arrived_count+=1
-                    else:
-                        arrived_count = 0
-                image = self.cam.get_reading()
-                image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-                cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
-                dir_ang=-1
-                if cen!=-1:
-                    dir_ang=(cen-240)/480
-                print("angular direction: ", dir_ang)
-                if abs(dir_ang) < 0.2:
-                    isTracking = True
-                else:
-                    isTracking = False
+            self.drive_to_hsv(this_color_hsv)
 
-                if isTracking:
-                    self.rot.setPattern("s", 5)
-                elif dir_ang <= -1:
-                    #object not found, random walk
-                    walk_dir = random.choice(["s", "cw", "ccw"])
-                    self.rot.setPattern(walk_dir, 3)
-                elif dir_ang > 0:
-                    print("cur angle: ", dir_ang)
-                    walk_time = np.ceil(1+int(dir_ang))
-                    self.rot.setPattern("cw", walk_time)
-                elif dir_ang < 0:
-                    print("cur angle: ", dir_ang)
-                    walk_time = np.ceil(1-int(abs(dir_ang)))
-                    self.rot.setPattern("ccw", walk_time)
-            self.rot.setWalk(False)
-            return True
     def check_apriltag(self):
         image = self.cam.get_reading_raw()
         image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -223,7 +231,19 @@ class WalktoColor(object):
         return 0
 
 
-
+    def check_rgb_color(self, bgr_feature):
+        #check specific bgr array
+        this_color_hsv=cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+        image = self.cam.get_reading()
+        image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
+        if cen != -1:
+            return 1
+        else:
+            return 0
+    def drive_to_rgb(self, bgr_feature):
+        this_color_hsv=cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+        self.drive_to_hsv(this_color_hsv)
 
 wc = WalktoColor(500)
 wc.drive_to_color("purple")
