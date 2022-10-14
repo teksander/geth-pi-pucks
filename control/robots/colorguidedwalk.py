@@ -120,7 +120,7 @@ def get_contours(image_hsv, ground_truth_hsv, color_hsv_threshold):
         return 0, -1
 
 
-class WalktoColor(object):
+class ColorWalkEngine(object):
     def __init__(self, MAX_SPEED):
         """ Constructor
         :type range: int
@@ -178,7 +178,7 @@ class WalktoColor(object):
             else:
                 detect_color = False
             print("angular direction: ", dir_ang)
-            if abs(dir_ang) < 0.1:
+            if abs(dir_ang) < 0.15:
                 isTracking = True
             else:
                 isTracking = False
@@ -245,10 +245,10 @@ class WalktoColor(object):
         this_color_hsv=cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
         self.drive_to_hsv(this_color_hsv)
 
-wc = WalktoColor(500)
-wc.drive_to_color("purple")
-tag_id = wc.check_apriltag()
+cwe = ColorWalkEngine(500)
+cwe.drive_to_color("purple")
+tag_id = cwe.check_apriltag()
 print(tag_id)
 while tag_id == -1:
-    tag_id = wc.check_apriltag()
+    tag_id = cwe.check_apriltag()
     print(tag_id)
