@@ -3,7 +3,7 @@ import random, math
 import time
 import smbus
 import threading
-import apriltag
+from pupil_apriltags import Detector
 import cv2
 import numpy as np
 import logging
@@ -130,7 +130,7 @@ class WalktoColor(object):
         self.rot.start()
         self.gs=GroundSensor(gsFreq)
         self.gs.start()
-        self.april = apriltag.Detector()
+        self.april = Detector()
         if exists('calibration/'+robotID+'.csv'):
             with open('calibration/'+robotID+'.csv','r') as color_gt:
                 for line in color_gt:
