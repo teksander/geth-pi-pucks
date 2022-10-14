@@ -228,6 +228,7 @@ class WalktoColor(object):
 wc = WalktoColor(500)
 wc.drive_to_color("purple")
 tag_id = wc.check_apriltag()
+print(tag_id)
 while tag_id == -1:
     tag_id = wc.check_apriltag()
     print(tag_id)
