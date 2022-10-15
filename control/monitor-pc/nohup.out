@@ -1404,3 +1404,94 @@ What would you like to do? (default = stats)
  3. Track new remote server
  4. Deploy network components
 > [35mCRIT [0m[08-19|20:54:54.761] Failed to read user input                [35merr[0m=EOF
++-----------------------------------------------------------+
+| Welcome to puppeth, your Ethereum private network manager |
+|                                                           |
+| This tool lets you create a new Ethereum network down to  |
+| the genesis block, bootnodes, miners and ethstats servers |
+| without the hassle that it would normally entail.         |
+|                                                           |
+| Puppeth uses SSH to dial in to remote servers, and builds |
+| its network components out of Docker containers using the |
+| docker-compose toolset.                                   |
++-----------------------------------------------------------+
+
+[32mINFO [0m[10-03|19:49:57.003] Administering Ethereum network           [32mname[0m=pipucks
+[32mINFO [0m[10-03|19:49:57.005] No remote machines to gather stats from 
+
+What would you like to do? (default = stats)
+ 1. Show network stats
+ 2. Manage existing genesis
+ 3. Track new remote server
+ 4. Deploy network components
+> 
+
+ 1. Modify existing configurations
+ 2. Export genesis configurations
+ 3. Remove genesis configuration
+> 
+[32mINFO [0m[10-03|19:49:57.005] Genesis block destroyed 
+
+What would you like to do? (default = stats)
+ 1. Show network stats
+ 2. Configure new genesis
+ 3. Track new remote server
+ 4. Deploy network components
+> 
+
+What would you like to do? (default = create)
+ 1. Create new genesis from scratch
+ 2. Import already existing genesis
+> 
+
+Which consensus engine to use? (default = clique)
+ 1. Ethash - proof-of-work
+ 2. Clique - proof-of-authority
+> 
+
+How many seconds should blocks take? (default = 15)
+> 
+
+Which accounts are allowed to seal? (mandatory at least one)
+> 0x
+> 0x
+> 0x
+
+Which accounts should be pre-funded? (advisable at least one)
+> 0x
+> 0x
+> 0x
+> 0x
+> 0x
+
+Should the precompile-addresses (0x1 .. 0xff) be pre-funded with 1 wei? (advisable yes)
+> 
+
+Specify your chain/network ID if you want an explicit one (default = random)
+> 
+[32mINFO [0m[10-03|19:49:57.005] Configured new genesis block 
+
+What would you like to do? (default = stats)
+ 1. Show network stats
+ 2. Manage existing genesis
+ 3. Track new remote server
+ 4. Deploy network components
+> 
+
+ 1. Modify existing configurations
+ 2. Export genesis configurations
+ 3. Remove genesis configuration
+> 
+
+Which folder to save the genesis spec into? (default = current)
+  Will create pipucks.json
+> 
+[32mINFO [0m[10-03|19:49:57.007] Saved native genesis chain spec          [32mpath[0m=/home/eksander/geth-pi-pucks/genesis/pipucks.json
+
+What would you like to do? (default = stats)
+ 1. Show network stats
+ 2. Manage existing genesis
+ 3. Track new remote server
+ 4. Deploy network components
+> 
+[35mCRIT [0m[10-03|19:49:57.007] Failed to read user input                [35merr[0m=EOF

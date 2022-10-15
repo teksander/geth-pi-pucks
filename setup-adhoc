@@ -18,7 +18,7 @@ else
 	# Monitor-PC ID and network IF
 	ID="100"
 	# IF=wlx801f025a9a7f
-	IF=wlx801f025aa0c8
+	IF=wlx801f025a9aa1
 	echo "Joining Ad-hoc network with ID $ID"
 fi
 

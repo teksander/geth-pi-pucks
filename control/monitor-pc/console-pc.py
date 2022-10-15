@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-sys.path.insert(1, '/home/volker/geth-pi-pucks/control/robots')
+sys.path.insert(1, '/home/eksander/geth-pi-pucks/control/robots')
 from console import *
 from aux import TCP_server
 import json
