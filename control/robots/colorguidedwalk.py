@@ -155,11 +155,24 @@ class ColorWalkEngine(object):
             self.colors = ["red", "blue", "purple"]
             self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [157, 157, 144]]  # bgr
         logger.info('Color walk OK')
-
-    def drive_to_hsv(self, this_color_hsv):
+    def discover_color(self, duration=10):
+        startTime = time.time()
+        while time.time() - startTime < duration:
+            if self.rot.isWalking() == False:
+                walk_dir = random.choice(["s", "cw", "ccw"])
+                self.rot.setPattern(walk_dir, 5)
+            else:
+                color_idx, color_name, color_rgb = self.check_all_color()
+                if color_idx !=-1:
+                    self.rot.setWalk(False)
+                    return color_idx, color_name, color_rgb
+        return -1, -1, -1
+    def drive_to_hsv(self, this_color_hsv, duration = 30):
         arrived_count = 0
         detect_color = False
-        while arrived_count < 5:
+        arrived= False
+        startTime = time.time()
+        while arrived_count < 5 and time.time() - startTime < duration:
             newValues = self.gs.getAvg()
             if newValues:
                 print(np.mean(newValues), newValues)
@@ -198,15 +211,18 @@ class ColorWalkEngine(object):
                 walk_time = np.ceil(1 - int(abs(dir_ang)))
                 self.rot.setPattern("ccw", walk_time)
         self.rot.setWalk(False)
-        return True
+        if arrived_count == 5:
+            return True
+        else:
+            return False
 
-    def drive_to_color(self,color_name):
+    def drive_to_color(self,color_name, duration = 30):
         if color_name not in self.colors:
             print("unknown color")
-            return 0
+            return False
         else:
             this_color_hsv = np.array(self.ground_truth_hsv[self.colors.index(color_name)])
-            self.drive_to_hsv(this_color_hsv)
+            return self.drive_to_hsv(this_color_hsv, duration)
 
     def check_apriltag(self):
         image = self.cam.get_reading_raw()
@@ -226,10 +242,12 @@ class ColorWalkEngine(object):
             image = self.cam.get_reading()
             image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
+            avg_color_mask = np.zeros(image.shape, np.uint8)
+            cv2.drawContours(avg_color_mask, cnt, -1, 255, -1)
+            mean_color_rgb = cv2.mean(image, mask=avg_color_mask)
             if cen!=-1:
-                return color_idx
-        return 0
-
+                return color_idx, color_name, mean_color_rgb
+        return -1, -1, -1
 
     def check_rgb_color(self, bgr_feature):
         #check specific bgr array
@@ -241,9 +259,14 @@ class ColorWalkEngine(object):
             return 1
         else:
             return 0
-    def drive_to_rgb(self, bgr_feature):
+    def drive_to_rgb(self, bgr_feature, duration = 30):
         this_color_hsv=cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
-        self.drive_to_hsv(this_color_hsv)
+        return self.drive_to_hsv(this_color_hsv, duration)
+    def get_color_list(self):
+        return self.colors
+
+    def set_leds(self,state):
+        self.rot.setLEDs(state)
 
 cwe = ColorWalkEngine(500)
 cwe.drive_to_color("purple")

@@ -187,6 +187,8 @@ class Rotation(object):
     def setWalk(self, state):
         """ This method is called set the random-walk to on without disabling I2C"""
         self.__walk = state
+    def isWalking(self):
+        return self.__walk
     def setPattern(self, pattern, duration):
         self.__pattern=pattern
         self.duration=duration
