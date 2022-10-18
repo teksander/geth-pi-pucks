@@ -243,8 +243,8 @@ class ColorWalkEngine(object):
             image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
             if cen!=-1:
-                avg_color_mask = np.zeros(image.shape, np.uint8)
-                cv2.drawContours(avg_color_mask, cnt, -1, 255, -1)
+                avg_color_mask = np.zeros(image.shape[:2], np.uint8)
+                cv2.drawContours(avg_color_mask, [cnt], -1, 255, -1)
                 mean_color_rgb = cv2.mean(image, mask=avg_color_mask)
                 return color_idx, color_name, mean_color_rgb
         return -1, -1, -1
