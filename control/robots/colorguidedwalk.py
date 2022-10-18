@@ -262,8 +262,7 @@ class ColorWalkEngine(object):
             image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
 
-            if cen != -1:
-                if cv2.contourArea(cnt) > max_area:
+            if cen != -1 and cv2.contourArea(cnt) > max_area:
                     max_area = cv2.contourArea(cnt)
                     max_color = color_name
                     max_contour = cnt
