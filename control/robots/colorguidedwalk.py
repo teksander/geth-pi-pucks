@@ -170,7 +170,6 @@ class ColorWalkEngine(object):
     def drive_to_hsv(self, this_color_hsv, duration = 30):
         arrived_count = 0
         detect_color = False
-        arrived= False
         startTime = time.time()
         while arrived_count < 5 and time.time() - startTime < duration:
             newValues = self.gs.getAvg()
@@ -198,7 +197,7 @@ class ColorWalkEngine(object):
 
             if isTracking:
                 self.rot.setPattern("s", 5)
-            elif dir_ang <= -1:
+            elif dir_ang <= -1 and self.rot.isWalking() == False:
                 # object not found, random walk
                 walk_dir = random.choice(["s", "cw", "ccw"])
                 self.rot.setPattern(walk_dir, 3)
