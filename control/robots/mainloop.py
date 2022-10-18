@@ -328,16 +328,9 @@ def Event(rate = eventRate):
 	
 	global fsm, voteHashes, voteHash, color_to_verify
 	blockFilter = w3.eth.filter('latest')
-	myVoteCounter = 0
-	myOkVoteCounter = 0
 	voteHashes = []
 	voteHash = None
-	ticketPrice = 40
 	amRegistered = False
-
-
-
-
 
 	def blockHandle():
 		""" Tasks when a new block is added to the chain """
@@ -358,23 +351,19 @@ def Event(rate = eventRate):
 		balance = getBalance()
 
 
-		sclog.log([blockNr, balance, ubi, payout, myVoteCounter,newRound])
+		sclog.log([blockNr, balance, ubi, payout,newRound])
 
 		rgb.flashWhite(0.2)
-
 	while True:
 		if not startFlag:
 			mainlogger.info('Stopped Events')
 			break
-
 		tic = TicToc(rate, 'Event')
-
 		newBlocks = blockFilter.get_new_entries()
 		if newBlocks:
 			synclog.log([len(newBlocks)])
 			for blockHex in newBlocks:
 				blockHandle()
-
 			if not amRegistered:
 				amRegistered = sc.functions.robot(me.key).call()[0]
 				if amRegistered:
@@ -425,11 +414,14 @@ def Event(rate = eventRate):
 								fsm.setState(Scout.PrepReport, message="Prepare proposal")
 					elif fsm.query(Scout.PrepReport):
 						vote_support = getBalance()/DEPOSITFACTOR
+						tag_id = cwe.check_apriltag()
 						if not voteHash and verified_colors[color_idx] ==0:
 							voteHash = sc.functions.reportNewPt(int(found_color_bgr[0] * DECIMAL_FACTOR),
 																	int(found_color_bgr[1] * DECIMAL_FACTOR),
 																	int(found_color_bgr[2] * DECIMAL_FACTOR),
-																	w3.toWei(vote_support, 'ether')).transact(
+																	int(tag_id),
+																	w3.toWei(vote_support, 'ether'),
+																	int(tag_id)).transact(
 								{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 								 'gasPrice': gasprice})
 						fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
@@ -437,13 +429,14 @@ def Event(rate = eventRate):
 						arrived = cwe.drive_to_rgb(color_to_verify, duration=60)
 						if arrived:
 							tag_id = cwe.check_apriltag()
-							source_list = w3.sc.functions.getSourceList().call()
 							vote_support = getBalance() / DEPOSITFACTOR
-							if ticketPrice > 0:
-								transactHash = w3.sc.functions.reportNewPt(int(color_to_verify[0] * DECIMAL_FACTOR),
+							if vote_support > 0:
+								voteHash = w3.sc.functions.reportNewPt(int(color_to_verify[0] * DECIMAL_FACTOR),
 																		   int(color_to_verify[1] * DECIMAL_FACTOR),
 																		   int(color_to_verify[2] * DECIMAL_FACTOR),
-																		   w3.toWei(ticketPrice, 'ether')).transact(
+																		   int(tag_id),
+																		   w3.toWei(vote_support, 'ether'),
+																	   	int(tag_id)).transact(
 									{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 									 'gasPrice': gasprice})
 						fsm.setState(Scout.Query, message="Resume scout")
