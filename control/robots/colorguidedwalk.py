@@ -270,7 +270,9 @@ class ColorWalkEngine(object):
             avg_color_mask = np.zeros(image.shape[:2], np.uint8)
             cv2.drawContours(avg_color_mask, [max_contour], -1, 255, -1)
             mean_color_rgb = cv2.mean(image, mask=avg_color_mask)
+            self.rot.setWalk(False)
             return max_color_idx, max_color, mean_color_rgb
+        self.rot.setWalk(False)
         return -1, -1, -1
 
     def check_rgb_color(self, bgr_feature):
