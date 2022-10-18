@@ -261,13 +261,11 @@ class ColorWalkEngine(object):
             image = self.cam.get_reading()
             image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
-
-            if cen != -1:
-                print(cnt, cv2.contourArea(cnt))
-                if cv2.contourArea(cnt) > max_area:
-                    max_area = cv2.contourArea(cnt)
-                    max_color = color_name
-                    max_contour = cnt
+            if cen != -1 and cv2.contourArea(cnt) > max_area:
+                max_area = cv2.contourArea(cnt)
+                max_color = color_name
+                max_contour = cnt
+                max_color_idx = color_idx
         if max_color_idx != -1:
             avg_color_mask = np.zeros(image.shape[:2], np.uint8)
             cv2.drawContours(avg_color_mask, [max_contour], -1, 255, -1)
