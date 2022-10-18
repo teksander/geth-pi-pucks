@@ -236,16 +236,25 @@ class ColorWalkEngine(object):
 
     def check_all_color(self):
         #for all hard coded colors
+        max_contour = []
+        max_color = ''
+        max_color_idx = -1
+        max_area = 0
         for color_idx, color_name in enumerate(self.colors):
             this_color_hsv = np.array(self.ground_truth_hsv[color_idx])
             image = self.cam.get_reading()
             image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
-            if cen!=-1:
-                avg_color_mask = np.zeros(image.shape[:2], np.uint8)
-                cv2.drawContours(avg_color_mask, [cnt], -1, 255, -1)
-                mean_color_rgb = cv2.mean(image, mask=avg_color_mask)
-                return color_idx, color_name, mean_color_rgb
+            this_area = cv2.contourArea(cnt)
+            if cen!=-1 and this_area>max_area:
+                max_area = this_area
+                max_color = color_name
+                max_contour = cnt
+        if max_color_idx != -1:
+            avg_color_mask = np.zeros(image.shape[:2], np.uint8)
+            cv2.drawContours(avg_color_mask, [max_contour], -1, 255, -1)
+            mean_color_rgb = cv2.mean(image, mask=avg_color_mask)
+            return max_color_idx, max_color, mean_color_rgb
         return -1, -1, -1
 
     def check_rgb_color(self, bgr_feature):
@@ -269,9 +278,9 @@ class ColorWalkEngine(object):
 
 cwe = ColorWalkEngine(500)
 print(cwe.discover_color(60)[1])
-print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
-tag_id = cwe.check_apriltag()
-print(tag_id)
+#print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
+#tag_id = cwe.check_apriltag()
+#print(tag_id)
 #while tag_id == -1:
 #    tag_id = cwe.check_apriltag()
 #    print(tag_id)
