@@ -268,10 +268,10 @@ class ColorWalkEngine(object):
         self.rot.setLEDs(state)
 
 cwe = ColorWalkEngine(500)
-print(cwe.discover_color(60))
-cwe.drive_to_color("red")
+print(cwe.discover_color(60)[1])
+print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
 tag_id = cwe.check_apriltag()
 print(tag_id)
-while tag_id == -1:
-    tag_id = cwe.check_apriltag()
-    print(tag_id)
+#while tag_id == -1:
+#    tag_id = cwe.check_apriltag()
+#    print(tag_id)
