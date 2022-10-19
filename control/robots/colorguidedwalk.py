@@ -256,7 +256,7 @@ class ColorWalkEngine(object):
         max_contour = []
         max_color = ''
         max_color_idx = -1
-        max_area = 150 #minimum area threshold
+        max_area = 1000 #minimum area threshold
         for color_idx, color_name in enumerate(self.colors):
             this_color_hsv = np.array(self.ground_truth_hsv[color_idx])
             image = self.cam.get_reading()
