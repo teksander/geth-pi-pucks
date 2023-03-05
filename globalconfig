@@ -6,8 +6,8 @@ export ROBOTS_NAME="pi"
 export MONITOR_NAME="eksander"
 export MONITOR_ID="100"
 
-# export SUBNET="172.27.1"
-export SUBNET="192.168.1"
+export SUBNET="172.27.1"
+# export SUBNET="192.168.1"
 
 export MAIN_DIR="/home/$USER/$BASE_FOLDER"
 export MAIN_DIR_ROBOTS="/home/$ROBOTS_NAME/$BASE_FOLDER"

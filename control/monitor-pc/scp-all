@@ -159,7 +159,7 @@ fi
 if [ $1 == "sshkeys" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		ssh-copy-id -i ~/.ssh/id_ed25519.pub $IP
+		ssh-copy-id -i ~/.ssh/pi-pucks.pub $IP
 	done
 	wait
 fi
