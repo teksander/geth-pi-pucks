@@ -3,8 +3,8 @@
 # Assumptions:
 # - tmux is installed 
 # - The Pi-puck IDs are listed in pi-pucks.txt
-source ../globalconfig
 
+source ../globalconfig
 
 NUM_ROB=$(wc -l < pi-pucks.txt)
 
@@ -35,6 +35,8 @@ tmux_ALL() {
 	    "${split_list[@]}" \
 	    set-option -w synchronize-panes ';' \
 		select-layout tiled ';' 
+
+	tmux send-keys "cd $MAIN_DIR_ROBOTS" Enter
 }
 
 if [[ $# -eq 0 ]]; then 
@@ -54,7 +56,7 @@ elif [[ $# -eq 1 ]]; then
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
 		tmux rename-session MAINLOOP
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py"
 
 	else 
 		tmux_ALL
@@ -67,6 +69,6 @@ elif [[ $# -eq 1 ]]; then
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
 		tmux rename-session MAINLOOP
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
+		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py"
 	fi
 fi
