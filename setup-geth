@@ -15,10 +15,10 @@ source globalconfig
 # cd  $MAIN_DIR
 
 # If the GETH process has not been initialized in the blockchain directory
-if [ ! -d "$BLOCKCHAINFOLDER/geth" ] 
+if [ ! -d "$MAIN_FOLDER/$BLOCKCHAIN_FOLDER/geth" ] 
 then
     geth init $GENESIS_FILE \
-    --datadir $BLOCKCHAINFOLDER
+    --datadir $BLOCKCHAIN_FOLDER
     echo "Initialized GETH with genesis block: $GENESIS_FILE"
 fi
 
@@ -31,7 +31,7 @@ else
 	ID="100"
 fi
 
-geth --datadir ${BLOCKCHAINFOLDER} \
+geth --datadir ${BLOCKCHAIN_FOLDER} \
 --syncmode "full" \
 --port 30311 \
 --ws \

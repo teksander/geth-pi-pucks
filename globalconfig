@@ -3,6 +3,7 @@
 # [PATHS]
 export BASE_FOLDER="geth-pi-pucks"
 export EXPERIMENT_FOLDER="FloorEstimation"
+export BLOCKCHAIN_FOLDER="blockchain"
 
 export ROBOTS_NAME="pi"
 export MONITOR_NAME="eksander"
@@ -13,9 +14,9 @@ export MAIN_DIR_ROBOTS="/home/$ROBOTS_NAME/$BASE_FOLDER"
 
 # [FILES]
 export IDS_FILE="$MAIN_DIR/monitor/pi-pucks.txt"
-export GENESIS_FILE="$MAIN_DIR/genesis/pipucks.json" 
-export CONTRACT_FILE="$MAIN_DIR/control/robots/scs/experiment_volker.sol"
-export CONTRACT_ABI="$MAIN_DIR/control/robots/scs/build/Estimation.abi"
+export GENESIS_FILE="$MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis/pipucks.json" 
+export CONTRACT_FILE="$MAIN_DIR/$EXPERIMENT_FOLDER/controllers/scs/experiment_volker.sol"
+export CONTRACT_ABI="$MAIN_DIR/$EXPERIMENT_FOLDER/controllers/scs/build/Estimation.abi"
 
 # [NETWORKS]
 export SUBNET="172.27.1"
