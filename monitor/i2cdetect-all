@@ -1,0 +1,46 @@
+#!/bin/bash
+# Short script to check if the i2c devices are availiable on all robots
+# Assumptions:
+# - The Pi-puck IDs are listed in pi-pucks.txt
+source ../globalconfig
+FAIL=0
+
+i2cdetect_ALL() {
+	local ID=$1
+	IP="${PREFIX}${ID}"
+	I2CCOUNT=$(ssh "$IP" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 ' | wc -l")
+	
+	if ((I2CCOUNT < 3)); then
+		echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
+	else
+		echo "$SUBNET.$ID I2C success (${I2CCOUNT} devices)"    
+	fi
+
+}
+
+battery_check_ALL() {
+	local ID=$1
+	IP="${PREFIX}${ID}"
+	echo $SUBNET.$ID
+	ssh "$IP" "python ${MAIN_DIR_ROBOTS}/control/robots/pi-puck-battery.py"
+	
+
+	# if ((I2CCOUNT < 3)); then
+	# 	echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
+	# else
+	# 	echo "$SUBNET.$ID I2C success (${I2CCOUNT} devices)"    
+	# fi
+
+}
+
+# Check I2C on each robot
+for ID in $(cat "$IDS_FILE"); do
+	i2cdetect_ALL "$ID" &
+done
+wait
+
+# Check Battery on each robot
+for ID in $(cat "$IDS_FILE"); do
+	battery_check_ALL "$ID" &
+done
+wait

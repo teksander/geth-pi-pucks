@@ -5,20 +5,20 @@
 cd $(dirname $0)
 source globalconfig
 
-# If data directory is not found
-if [ ! -d "$MAIN_DIR" ] 
-then
-	mkdir $MAIN_DIR
-    echo "Created new data directory: $MAIN_DIR"
-fi
+# # If data directory is not found
+# if [ ! -d "$MAIN_DIR" ] 
+# then
+# 	mkdir $MAIN_DIR
+#     echo "Created new data directory: $MAIN_DIR"
+# fi
 
-cd  $MAIN_DIR
+# cd  $MAIN_DIR
 
-# If the GETH process has not been initialized in the data directory
-if [ ! -d "$MAIN_DIR/geth" ] 
+# If the GETH process has not been initialized in the blockchain directory
+if [ ! -d "$BLOCKCHAINFOLDER/geth" ] 
 then
     geth init $GENESIS_FILE \
-    --datadir $MAIN_DIR
+    --datadir $BLOCKCHAINFOLDER
     echo "Initialized GETH with genesis block: $GENESIS_FILE"
 fi
 
@@ -31,7 +31,7 @@ else
 	ID="100"
 fi
 
-geth --datadir ${MAIN_DIR} \
+geth --datadir ${BLOCKCHAINFOLDER} \
 --syncmode "full" \
 --port 30311 \
 --ws \
@@ -56,9 +56,3 @@ geth --datadir ${MAIN_DIR} \
 
 echo ${ID}
 # --miner.gaslimit "0x9000000000000" \
-
-
-[
-"enode://bd270b952286994f08ce456c2ffe8e6e4dc5412e267f36bb1a63e08af2e1e4cb32938301403fbd5ada48b6f0449facc0359ad7556b2e321846c7d73aad6e88c3@172.27.1.114:30311?discport=0"
-"enode://944e779609c92c82eae2d92f90e765c3dd2e6342619591a5ab2fa3aa83ff97fa46cdc425bc202f3f55d5a045a1e9a8249c4be54cf0027e0bf8998131d8d04437@172.27.1.106:30311?discport=0"
-]
