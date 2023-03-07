@@ -27,7 +27,9 @@ if ((NUM_ROB != NUM_RESP)); then
 	exit 1         
 fi
 
-./i2cdetect-all
+echo "+-----------------------------------------------------------+"
+echo "Checking all robots..."
+./check-all
 
 echo "+-----------------------------------------------------------+"
 echo "Resetting Geth..."

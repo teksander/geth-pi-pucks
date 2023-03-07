@@ -1,5 +1,6 @@
-batctl/
-geth/
+geth/*
+data/gs/
+data/cam/
 results/plots/
 results/data/
 results/videos/
