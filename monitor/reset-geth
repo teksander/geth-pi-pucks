@@ -5,13 +5,11 @@ source ../globalconfig
 
 # Stop GETH Processes 
 echo "Stopping all GETH processes..."
-killall geth 2>/dev/null &
 ./ssh-all "killall geth 2>/dev/null" &
 wait
 
 # Reset GETH folders
 echo "Removing Pi-Puck chaindata..."
-rm -r "$MAIN_DIR"/geth > /dev/null 2>&1 &
-./ssh-all "rm -r $MAIN_DIR_ROBOTS/geth > /dev/null 2>&1" &
+./ssh-all "rm -r $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/geth > /dev/null 2>&1" &
 wait
 

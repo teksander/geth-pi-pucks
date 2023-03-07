@@ -14,100 +14,35 @@ source ../globalconfig
 
 if [ $# -eq 2 ]; then 
 	for ID in $(cat "$IDS_FILE"); do
-	IP="${PREFIX}${ID}"
-	scp -r "$1" "$IP:/home/pi/$2"  &
+		IP="${PREFIX}${ID}"
+		scp -r "$1" "$IP:$MAIN_DIR/$2"  &
 	done
 	wait
 fi
 
 # Customizable list of often uploaded folders/files
 if [ $1 == "scs" ]; then 
-	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/control/robots/scs/build" "$CONTRACT_FILE"
+	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/scs/build "$IP:$MAIN_DIR_ROBOTS/control/robots/scs/"  &
+		scp -r $MAIN_DIR/robots/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/scs/"  &
 	done
 	wait
 fi
 
+if [ $1 == "genesis" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis "$IP:$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis"  &
+	done
+	wait
+fi
 
 if [ $1 == "abi" ]; then 
-	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/control/robots/scs/build" "$CONTRACT_FILE"
+	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/scs/build/Estimation.abi "$IP:$MAIN_DIR_ROBOTS/control/robots/scs/build/"  &
-	done
-	wait
-fi
-
-if [ $1 == "mainloop" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/mainloop.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
-
-if [ $1 == "gs" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/groundsensor.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
-
-if [ $1 == "erb" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/erandb.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
-
-if [ $1 == "rgb" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/rgbleds.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
-
-if [ $1 == "aux" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/aux.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
-
-if [ $1 == "rw" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/randomwalk.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
-
-if [ $1 == "console" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/console.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
-
-if [ $1 == "testwhite" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/testWhite.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
-
-if [ $1 == "control" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control/"  &
+		scp -r $MAIN_DIR/robots/scs/build/Estimation.abi "$IP:$MAIN_DIR_ROBOTS/robots/scs/build/"  &
 	done
 	wait
 fi
@@ -120,23 +55,6 @@ if [ $1 == "setup-geth" ]; then
 	wait
 fi
 
-if [ $1 == "all" ]; then 
-	./ssh-all "rm -r $MAIN_DIR_ROBOTS > /dev/null 2>&1" &
-	wait
-	./ssh-all "mkdir $MAIN_DIR_ROBOTS; mkdir $MAIN_DIR_ROBOTS/control; mkdir $MAIN_DIR_ROBOTS/keystore; mkdir $MAIN_DIR_ROBOTS/genesis" &
-	wait
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control" &
-		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS" &
-		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS" &
-		scp -r $MAIN_DIR/setup-router "$IP:$MAIN_DIR_ROBOTS" &
-		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS" &
-		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS" &
-	done
-	wait
-fi
-
 if [ $1 == "setup-adhoc" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
@@ -144,17 +62,6 @@ if [ $1 == "setup-adhoc" ]; then
 	done
 	wait
 fi
-
-if [ $1 == "pb" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r /home/eksander/geth-pi-pucks/powerbutton.py "$IP:/home/pi/geth-pi-pucks"  &
-		scp -r /home/eksander/geth-pi-pucks/setup-router "$IP:/home/pi/geth-pi-pucks"  &
-		scp -r /home/eksander/geth-pi-pucks/powerbutton.service "$IP:/home/pi/geth-pi-pucks"  &
-	done
-	wait
-fi
-
 
 if [ $1 == "sshkeys" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
@@ -164,27 +71,129 @@ if [ $1 == "sshkeys" ]; then
 	wait
 fi
 
-if [ $1 == "battery" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/pi-puck-battery.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
+# if [ $1 == "mainloop" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/mainloop.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
 
-if [ $1 == "custom1" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r /home/eksander/Pi-pucks/pi-puck/utilities "$IP:$MAIN_DIR_ROBOTS/control/"  &
-		scp -r /home/eksander/Pi-pucks/RPi.GPIO-0.7.0.tar.gz "$IP:$MAIN_DIR_ROBOTS/control/"  &
-	done
-	wait
-fi
+# if [ $1 == "gs" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/groundsensor.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
 
-if [ $1 == "custom" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/control/robots/scikit-image-0.18.2.tar.gz "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-	done
-	wait
-fi
+# if [ $1 == "erb" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/erandb.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
+
+# if [ $1 == "rgb" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/rgbleds.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
+
+# if [ $1 == "aux" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/aux.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
+
+# if [ $1 == "rw" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/randomwalk.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
+
+# if [ $1 == "console" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/console.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
+
+# if [ $1 == "testwhite" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/testWhite.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
+
+# if [ $1 == "control" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control/"  &
+# 	done
+# 	wait
+# fi
+
+# if [ $1 == "battery" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/pi-puck-battery.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi
+
+
+# if [ $1 == "all" ]; then 
+# 	./ssh-all "rm -r $MAIN_DIR_ROBOTS > /dev/null 2>&1" &
+# 	wait
+# 	./ssh-all "mkdir $MAIN_DIR_ROBOTS; mkdir $MAIN_DIR_ROBOTS/control; mkdir $MAIN_DIR_ROBOTS/keystore; mkdir $MAIN_DIR_ROBOTS/genesis" &
+# 	wait
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control" &
+# 		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS" &
+# 		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS" &
+# 		scp -r $MAIN_DIR/setup-router "$IP:$MAIN_DIR_ROBOTS" &
+# 		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS" &
+# 		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS" &
+# 	done
+# 	wait
+# fi
+
+
+# if [ $1 == "pb" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r /home/eksander/geth-pi-pucks/powerbutton.py "$IP:/home/pi/geth-pi-pucks"  &
+# 		scp -r /home/eksander/geth-pi-pucks/setup-router "$IP:/home/pi/geth-pi-pucks"  &
+# 		scp -r /home/eksander/geth-pi-pucks/powerbutton.service "$IP:/home/pi/geth-pi-pucks"  &
+# 	done
+# 	wait
+# fi
+
+
+# if [ $1 == "custom1" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r /home/eksander/Pi-pucks/pi-puck/utilities "$IP:$MAIN_DIR_ROBOTS/control/"  &
+# 		scp -r /home/eksander/Pi-pucks/RPi.GPIO-0.7.0.tar.gz "$IP:$MAIN_DIR_ROBOTS/control/"  &
+# 	done
+# 	wait
+# fi
+
+# if [ $1 == "custom" ]; then 
+# 	for ID in $(cat "$IDS_FILE"); do
+# 		IP="${PREFIX}${ID}"
+# 		scp -r $MAIN_DIR/control/robots/scikit-image-0.18.2.tar.gz "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 	done
+# 	wait
+# fi

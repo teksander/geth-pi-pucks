@@ -22,7 +22,7 @@ echo "15" >> genesis.conf # 15 seconds block time
 # List of sealers
 for INDEX in $(seq 1 $NUM_NODES);
 do
-    KEY=$(cat "keystore-all/$INDEX")
+    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystore-all/$INDEX")
     echo ${KEY:12:40} >> genesis.conf 
 done
 echo "" >> genesis.conf 
@@ -30,15 +30,14 @@ echo "" >> genesis.conf
 # Pre-fund all accounts
 for INDEX in $(seq 0 $NUM_NODES);
 do
-    KEY=$(cat "keystore-all/$INDEX")
+    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystore-all/$INDEX")
     echo ${KEY:12:40} >> genesis.conf 
 done
 
 # Pre-fund the contract address
-CONTRACT_ADDRESS=`cat $MAIN_DIR/control/robots/scs/contractAddress.txt`
+CONTRACT_ADDRESS=`cat $MAIN_DIR/robots/scs/contractAddress.txt`
 echo $CONTRACT_ADDRESS >> genesis.conf 
 echo "" >> genesis.conf 
-
 
 echo "yes" >> genesis.conf  # Pre-compile addresses
 echo "1515" >> genesis.conf # Netid
@@ -46,45 +45,39 @@ echo "2" >> genesis.conf    # Manage existing genesis
 echo "2" >> genesis.conf    # Export genesis configurations
 
  # Export Path
-echo "$MAIN_DIR/genesis" >> genesis.conf 
+echo "$MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis" >> genesis.conf 
 
 ########## Generate Genesis Block ############
 echo "Generating Genesis Block..."
-cat "genesis.conf" | nohup puppeth --network=pipucks
-rm $MAIN_DIR/genesis/pipucks-harmony.json
+cat "genesis.conf" | "$MAIN_DIR/monitor/puppeth" --network=pipucks >/dev/null 2>&1
+rm $MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis/pipucks-harmony.json
 rm genesis.conf
 
 ########## Compile and Deploy Smart Contract ############
 echo "Compiling the Smart Contract..."
-./scp-all abi
-BINDATA=`cat $MAIN_DIR/control/robots/scs/build/Estimation.bin-runtime`
+./scp-all scs
+BINDATA=`cat $MAIN_DIR/robots/scs/build/$CONTRACT_NAME.bin-runtime`
 
-echo "Contract address:" `cat $MAIN_DIR/control/robots/scs/contractAddress.txt ` 
+# echo "Contract address:" `cat $MAIN_DIR/control/robots/scs/contractAddress.txt ` 
 
-echo "Deploying the Smart Contract..."
-sed -i "s|123\": {|123\": {\n\"code\": \"0xBINDATA\",|g" ${GENESIS_FILE}
-sed -i "s|BINDATA|$BINDATA|g" ${GENESIS_FILE}
+# echo "Deploying the Smart Contract..."
+# sed -i "s|123\": {|123\": {\n\"code\": \"0xBINDATA\",|g" ${GENESIS_FILE}
+# sed -i "s|BINDATA|$BINDATA|g" ${GENESIS_FILE}
 
-# Change the gas limit
-sed -i "s|0x47b760|0x9000000000|g" ${GENESIS_FILE}
+# # Change the gas limit
+# sed -i "s|0x47b760|0x9000000000|g" ${GENESIS_FILE}
 
-# Change the value of the pre-funded accounts
-sed -i "s|\"0x200000000000000000000000000000000000000000000000000000000000000\"|\"0xde0b6b3a7640000\"|g" ${GENESIS_FILE}
-# 0x1236efcbcbb3400000 = 336 ether
-# 0x1236efcbcbb340000 = 21 ether
-# 0xde0b6b3a7640000 = 1 ether
+# # Change the value of the pre-funded accounts
+# sed -i "s|\"0x200000000000000000000000000000000000000000000000000000000000000\"|\"0xde0b6b3a7640000\"|g" ${GENESIS_FILE}
+# # 0x1236efcbcbb3400000 = 336 ether
+# # 0x1236efcbcbb340000 = 21 ether
+# # 0xde0b6b3a7640000 = 1 ether
 
-# Undo for the contract account (first match)
-sed -i "0,/\"0xde0b6b3a7640000\"/s//\"0x200000000000000000000000000000000000000000000000000000000000000\"/" ${GENESIS_FILE}
+# # Undo for the contract account (first match)
+# sed -i "0,/\"0xde0b6b3a7640000\"/s//\"0x200000000000000000000000000000000000000000000000000000000000000\"/" ${GENESIS_FILE}
 
 
-# Update the contract ABI to make it compatible with the geth console 
-# (latest solc and latest geth console are incompatibe)
-# cp $CONTRACT_ABI ./OLDABI.abi
-# sed -e "s|\"stateMutability\":\"payable\"|\"stateMutability\":\"payable\",\"payable\":\"true\"|g" ./OLDABI.abi > $CONTRACT_ABI
-# rm ./OLDABI.abi
-
-########## Upload Genesis File ############
-echo "Uploading Genesis Block..."
-./scp-all $GENESIS_FILE $BASE_FOLDER/genesis
-wait
+# ########## Upload Genesis File ############
+# echo "Uploading Genesis Block..."
+# ./scp-all "genesis"
+# wait

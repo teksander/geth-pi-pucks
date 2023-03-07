@@ -5,15 +5,6 @@
 cd $(dirname $0)
 source globalconfig
 
-# # If data directory is not found
-# if [ ! -d "$MAIN_DIR" ] 
-# then
-# 	mkdir $MAIN_DIR
-#     echo "Created new data directory: $MAIN_DIR"
-# fi
-
-# cd  $MAIN_DIR
-
 # If the GETH process has not been initialized in the blockchain directory
 if [ ! -d "$MAIN_FOLDER/$BLOCKCHAIN_FOLDER/geth" ] 
 then

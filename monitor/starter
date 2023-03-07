@@ -1,19 +1,24 @@
 #!/bin/bash  
-# Short script begin the an experiment
+# Starts an experiment
+#
+# Options:
+# --reset    or -r  : will reset everything blockchain related
+# --start    or -s  : will start the experiment
+# --startz   or -sz : will start with no visualization
+# --logs     or -l  : will display monitor.log for all robots
+# --python   or -p  : will display python console for all robots
+# Example: 
+# . starter -r -s -l -p
+
 source ../globalconfig
 
+echo "+-----------------------------------------------------------+"
+echo "MAINFOLDER IS $MAIN_DIR"
 
-# Experiment Parameters
-NUM_ROB=$1
-NUM_BYZ=$2
-
-echo "Starting experiment with $NUM_ROB robots ($NUM_BYZ byzantines)"
-echo "----//----"
-
-# Update Responding Pi-Pucks
+echo "+-----------------------------------------------------------+"
+echo "Pinging robots..."
 ./ping-all
 wait
-echo "----//----"
 
 # Check responding robot count
 NUM_RESP=$(wc -l < pi-pucks.txt)
@@ -24,60 +29,60 @@ fi
 
 ./i2cdetect-all
 
-# Reset GETH 
-echo "Reseting Geth..."
+echo "+-----------------------------------------------------------+"
+echo "Resetting Geth..."
 ./reset-geth
 wait
-echo "----//----"
 
-if [[ "$3" == "--rebuild" ]]; then 
+for opt in "$@"
+do
+if [[ $opt == "--reset" || $opt == "-r" ]]; then
 
-	# Reset the Genesis File
-	echo "Reseting Genesis Block..."
+	echo "+-----------------------------------------------------------+"
+	echo "Resetting the Genesis Block..."
 	./reset-genesis
 	wait
-	echo "----//----"
 
-	# Distribute Keys
-	echo "Reseting Pi-Puck Keys..."
+	echo "+-----------------------------------------------------------+"
+	echo "Resetting the Pi-Puck keys..."
 	./reset-keys
 	wait
-	echo "----//----"
 fi
-
-# # Open console for time server
-# gnome-terminal --tab -- python3 -i console-pc.py
-
-# Open two TMUX sessions 
-tmux kill-session -t GETH >/dev/null 2>&1
-./tmux-all
-tmux rename-session GETH
-
-tmux kill-session -t MAINLOOP >/dev/null 2>&1
-./tmux-all
-tmux rename-session MAINLOOP
-
-# GETH TMUX session: Execute setup-geth (all robots)
-tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
-
-# MAINLOOP TMUX session: Execute mainloop.py with no option (good robots)
-# MAINLOOP TMUX session: Execute mainloop.py with option --byz (byzantine robots)
-BYZ_COUNT=0
-tmux set-option -w -t MAINLOOP synchronize-panes off
-# Randomely select byzantine robots:
-for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
-	if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz"
-		let BYZ_COUNT++
-	else
-		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
-	fi
 done
-tmux set-option -w -t MAINLOOP synchronize-panes on
-# sleep 3
-# tmux send-keys -t MAINLOOP:0.0 Enter
 
-python3 -i console-pc.py
+echo "+-----------------------------------------------------------+"
+echo "Starting Experiment"
+
+# # Open two TMUX sessions 
+# tmux kill-session -t GETH >/dev/null 2>&1
+# ./tmux-all
+# tmux rename-session GETH
+
+# tmux kill-session -t MAINLOOP >/dev/null 2>&1
+# ./tmux-all
+# tmux rename-session MAINLOOP
+
+# # GETH TMUX session: Execute setup-geth (all robots)
+# tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
+
+# # MAINLOOP TMUX session: Execute mainloop.py with no option (good robots)
+# # MAINLOOP TMUX session: Execute mainloop.py with option --byz (byzantine robots)
+# BYZ_COUNT=0
+# tmux set-option -w -t MAINLOOP synchronize-panes off
+# # Randomely select byzantine robots:
+# for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
+# 	if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
+# 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz"
+# 		let BYZ_COUNT++
+# 	else
+# 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
+# 	fi
+# done
+# tmux set-option -w -t MAINLOOP synchronize-panes on
+# # sleep 3
+# # tmux send-keys -t MAINLOOP:0.0 Enter
+
+# python3 -i console-pc.py
 
 # read -p "Press Enter when experiment is concluded"
 
