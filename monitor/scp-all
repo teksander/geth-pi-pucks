@@ -55,6 +55,14 @@ if [ $1 == "setup-geth" ]; then
 	wait
 fi
 
+if [ $1 == "setup-router" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/setup-router "$IP:$MAIN_DIR_ROBOTS" &
+	done
+	wait
+fi
+
 if [ $1 == "setup-adhoc" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
@@ -67,6 +75,22 @@ if [ $1 == "sshkeys" ]; then
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		ssh-copy-id -i ~/.ssh/pi-pucks.pub $IP
+	done
+	wait
+fi
+
+if [ $1 == "upcamera" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/robots/controllers/upcamera.py "$IP:$MAIN_DIR_ROBOTS/robots/controllers"  &
+	done
+	wait
+fi
+
+if [ $1 == "calib-camera" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r "$IP:$MAIN_DIR_ROBOTS/robots/controllers/calibration/cam" $MAIN_DIR/robots/controllers/calibration/   &
 	done
 	wait
 fi

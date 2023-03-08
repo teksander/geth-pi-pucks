@@ -20,8 +20,8 @@ export CONTRACT_FILE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/experiment_volker.sol"
 export CONTRACT_ABI="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/build/$CONTRACT_NAME.abi"
 
 # [NETWORKS]
-export SUBNET="172.27.1"
-# export SUBNET="192.168.1"
+# export SUBNET="172.27.1"
+export SUBNET="192.168.1"
 export MONITOR_ID="100"
 export PREFIX="${ROBOTS_NAME}@${SUBNET}."
 

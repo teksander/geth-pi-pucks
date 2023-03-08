@@ -4,11 +4,8 @@
 
 source globalconfig
 
-echo $USER	
-echo $ROBOTS_NAME
 # Make sure this is a Pi-Puck
-if [[ $USER != $ROBOTS_NAME ]]
-then
+if [[ $(whoami) != $ROBOTS_NAME && $SUDO_USER != $ROBOTS_NAME ]]; then
 	echo "! Only run this script on robots !"
 	exit 1
 fi

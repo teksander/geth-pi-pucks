@@ -1,5 +1,5 @@
-import cv2
-import picamera
+#!/usr/bin/env python3
+import cv2, picamera
 import os
 from picamera.array import PiRGBArray
 import logging
@@ -37,6 +37,7 @@ class UpCamera(object):
         :param freq: frequency of measurements in Hz (tip: 20Hz)
         """
         self.__stop = 1
+        self.id = open("/boot/pi-puck_id", "r").read().strip()
         self.camera = picamera.PiCamera()
         # set camera resolution to 640x480(Small resolution for faster speeds.)
         self.camera.resolution = (640, 480)
@@ -49,8 +50,8 @@ class UpCamera(object):
 
 
     def focal_calibration(self):
-        print("Start focusing")
 
+        print("Start focusing")
         max_index = 10
         max_value = 0.0
         last_value = 0.0
@@ -84,19 +85,24 @@ class UpCamera(object):
         # Adjust focus to the best
         focusing(max_index)
         print("Set focal distance to: ", max_index)
+
     def get_reading(self):
         rawCapture = PiRGBArray(self.camera)
         self.camera.capture(rawCapture, format="bgr", use_video_port=True)
         image = rawCapture.array
         rawCapture.truncate(0)
+        
+        # Rotate image
         if self.rotate:
             image = cv2.rotate(image, cv2.ROTATE_180)
-        #corp image according to the interesting region definition
+
+        # Crop image according to user-defined region
         centre = image.shape
         cx = centre[1]/2 - 480/2
         cy = centre[0]/2- self.interesting_region_h/2 + self.interesting_region_o
-        corp_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
-        return corp_img
+        crop_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
+        return crop_img
+
     def get_reading_raw(self):
         rawCapture = PiRGBArray(self.camera)
         self.camera.capture(rawCapture, format="bgr", use_video_port=True)
@@ -115,3 +121,28 @@ class UpCamera(object):
             feature.append(image[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0))
             idx += interval
         return feature
+
+    def get_image_raw(self,filename = 'test.jpg'):
+        # File to store image:
+        filename = 'calibration/cam/images/robot%s-test.jpg' % (self.id)
+        rawCapture = PiRGBArray(self.camera)
+        self.camera.capture(filename)
+
+
+        # image = rawCapture.array
+        # rawCapture.truncate(0)
+
+        # # Rotate image
+        # if self.rotate:
+        #     image = cv2.rotate(image, cv2.ROTATE_180)
+
+        # # Crop image according to user-defined region
+        # centre = image.shape
+        # cx = centre[1]/2 - 480/2
+        # cy = centre[0]/2- self.interesting_region_h/2 + self.interesting_region_o
+        # crop_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
+        # return crop_img
+
+    def stop(self):
+        """ This method is called before a clean exit """
+        self.camera.close()
