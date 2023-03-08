@@ -2,6 +2,8 @@
 # Short script for Pi-pucks to join the router network
 # Running this script will enable internet connection
 
+source globalconfig
+
 # Make sure this is a Pi-Puck
 if [[ $LOGNAME != $ROBOTS_NAME ]]
 then
