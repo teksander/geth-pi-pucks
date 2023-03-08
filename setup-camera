@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd ~
+git clone https://github.com/ArduCAM/RaspberryPi
+cd RaspberryPi
+git checkout 1a76f04c5dfba8da43d74f66829a059b78611df4

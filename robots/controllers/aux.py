@@ -10,6 +10,45 @@ import logging
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
+class Timer:
+    def __init__(self, rate, name = None):
+        self.name = name
+        self.rate = rate
+        self.time = time.time()
+        self.isLocked = False
+
+    def query(self, reset = True):
+        if self.remaining() < 0:
+            if reset:
+                self.reset()
+            return True
+        else:
+            return False
+
+    def remaining(self):
+        return self.rate - (time.time() - self.time)
+
+    def set(self, rate):
+        if not self.isLocked:
+            self.rate = rate
+            self.time = time.time()
+        return self
+
+    def reset(self):
+        if not self.isLocked:
+            self.time = time.time()
+        return self
+
+    def lock(self):
+        self.isLocked = True
+        return self
+
+    def unlock(self):
+        self.isLocked = False
+        return self
+
+
+
 class TicToc(object):
     """ Pendulum Class to Synchronize Output Timess
     """

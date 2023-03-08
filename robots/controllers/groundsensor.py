@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
 
-I2C_CHANNEL = 4
+I2C_CHANNEL = 13
 GS_I2C_ADDR = 0x60
 
 NOP_TIME = 0.000001
@@ -19,6 +19,7 @@ def __nop_delay(t):
 
 def e_init_gs():
 	global bus
+	trials=0
 	while True:
 		try:
 			bus = smbus.SMBus(I2C_CHANNEL)
@@ -142,7 +143,7 @@ class GroundSensor(object):
 			return None
 
 		else:
-			return self.groundValues;
+			return self.groundValues
 
 	def start(self):
 		""" This method is called to start __sensing """
