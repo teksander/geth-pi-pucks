@@ -4,6 +4,8 @@
 
 source globalconfig
 
+echo $LOGNAME	
+echo $ROBOTS_NAME
 # Make sure this is a Pi-Puck
 if [[ $LOGNAME != $ROBOTS_NAME ]]
 then
