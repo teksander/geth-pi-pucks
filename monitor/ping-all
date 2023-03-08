@@ -12,19 +12,19 @@ if [ "$SUBNET" == "172.27.1" ]; then
 	PIPUCK_ALL=( "${PIPUCK1_ALL[@]}" "${PIPUCK2_ALL[@]}" )
 else
 	echo "Scanning Router Network..."
-	PIPUCK_ALL=($(nmap -sn $SUBNET.* -oG - | grep '()' | cut -b 17-19))
+	PIPUCK_ALL=($(sudo nmap -sP 192.168.1.1/24 | awk '/^Nmap/{split($NF,ip,".");}/B8:27:EB/{print ip[4]}'))
 fi
 
 touch temp.txt
 
 # If user requests slow pinging
 if [[ "$1" == "--slow" ]]; then 
-	for ID in ${PIPUCK1_ALL[@]}; do
+	for ID in ${PIPUCK_ALL[@]}; do
 		( ping -n -c 1 -w 5 $SUBNET.$ID 1>/dev/null 2>&1 && echo $ID  >> temp.txt && printf "%-12s %s\n" $SUBNET.$ID responded) 
 		sleep 0.03
 	done 
 else
-	for ID in ${PIPUCK1_ALL[@]}; do
+	for ID in ${PIPUCK_ALL[@]}; do
 		( ping -n -c 1 -w 1 $SUBNET.$ID 1>/dev/null 2>&1 && echo $ID  >> temp.txt && printf "%-12s %s\n" $SUBNET.$ID responded) &
 		sleep 0.03
 	done 

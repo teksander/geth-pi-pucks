@@ -14,7 +14,7 @@ then
 fi
 
 # If is a Pi-Puck
-if [ $LOGNAME == "pi" ]
+if [[ $LOGNAME == $ROBOTS_NAME ]]
 then
 	FILE="/boot/pi-puck_id"
 	ID=$(cat "$FILE")

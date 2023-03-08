@@ -1,0 +1,3 @@
+[submodule "robots/arducam/RaspberryPi"]
+	path = robots/arducam/RaspberryPi
+	url = https://github.com/ArduCAM/RaspberryPi

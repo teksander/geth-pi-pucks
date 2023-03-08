@@ -2,6 +2,13 @@
 # Short script for Pi-pucks to join the router network
 # Running this script will enable internet connection
 
+# Make sure this is a Pi-Puck
+if [[ $LOGNAME != $ROBOTS_NAME ]]
+then
+	echo "! Only run this script on robots !"
+	exit 1
+fi
+
 # Run as SUDO
 [ "$UID" -eq 0 ] || exec sudo bash "$0" "$@"
 
