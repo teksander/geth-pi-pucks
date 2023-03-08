@@ -30,6 +30,8 @@ ageLimit = 2
 
 timeLimit = 1800
 
+DECIMAL_FACTOR =  1e6
+DEPOSITFACTOR = 4 #portion of assets deposted to support each vote
 # /* Global Variables */
 #######################################################################
 global startFlag, isByz
@@ -38,11 +40,12 @@ isByz = False
 
 global gasLimit, gasprice, gas
 gasLimit = 0x9000000
-gasprice = 0x900000
-gas = 0x90000
+gasprice = 0x000000 #no gas fee in our configuration
+gas = 0x00000
 
 global txList, startTime
 txList = []
+
 
 # /* Import Packages */
 #######################################################################
@@ -61,18 +64,22 @@ import subprocess
 import random
 from console import init_web3, registerSC
 from erandb import ERANDB
-from randomwalk import RandomWalk
 from groundsensor import GroundSensor
+from colorguidedwalk import ColorWalkEngine
 from rgbleds import RGBLEDs
+from statemachine import *
 from aux import *
 
+
+global clocks
+clocks = dict()
+clocks['query_sc'] = Timer(1)
 # Global parameters
 # subprocess.call("source ../../globalconfig")
 
-# # Calibrated parameters
-# with open('calibration/gsThreshes.txt') as calibFile:
-# 	gsThresh = list(map(int, calibFile.readline().split()))
-gsThresh = [700,700,700]
+# Calibrated parameters
+with open('calibration/gsThreshes.txt') as calibFile:
+	gsThresh = list(map(int, calibFile.readline().split()))
 
 # /* Initialize Logging Files and Console Logging*/
 #######################################################################
@@ -128,6 +135,9 @@ mainlogger.info('Initialising Python Geth Console...')
 w3 = init_web3()
 sc = registerSC(w3)
 
+# /* init fsm */
+
+
 # /* Init an instance of peer for this Pi-Puck */
 robotEN  = w3.geth.admin.nodeInfo().enode
 robotKEY = w3.eth.coinbase
@@ -153,56 +163,31 @@ mainlogger.info('Initialising ground-sensors...')
 gs = GroundSensor(gsFreq)
 
 # /* Init Random-Walk, __walking process */
-mainlogger.info('Initialising random-walk...')
-rw = RandomWalk(rwSpeed)
+mainlogger.info('Initialising walking controller...')
+#color walk engine without .start()
+cwe = ColorWalkEngine(rwSpeed)
+
+global color_idx, verified_colors, verified_idx
+color_idx = cwe.get_color_list()
+verified_colors=[0 for x in range(len(color_idx))]
+verified_idx=[]
 
 # /* Init LEDs */
 rgb = RGBLEDs()
 
 # List of submodules --> iterate .start() to start all
-submodules = [w3.geth.miner, tcp, erb, gs, rw]
+submodules = [w3.geth.miner, tcp, erb, gs]
+global fsm
+fsm = FiniteStateMachine(start=Idle.IDLE)
+
+global color_to_verify
+color_to_verify = [0, 0, 0]
 
 # /* Define Main-modules */
 #######################################################################
 # The 4 Main-modules: 
-# "Estimate"  (Rate 1Hz)  queries groundsensor and generates a robot estimate (opinion)
 # "Buffer"    (Rate 1Hz) queries RandB to get neighbor identities and add/remove on Geth
 # "Event"  (Every block) when a new block is detected make blockchain queries/sends/log block data 
-
-def Estimate(rate = estimateRate):
-	""" Control routine to update the local estimate of the robot """
-	global estimate
-	estimate = 0
-	totalWhite = 0
-	totalBlack = 0
-
-	while True:
-
-		if time.time()-startTime > timeLimit:
-			STOP()
-			time.sleep(10)
-			os.system('sudo reboot now')
-
-		if not startFlag:
-			mainlogger.info('Stopped Estimating')
-			break
-
-		tic = TicToc(rate, 'Estimate')
-
-		newValues = gs.getAvg()
-		if newValues:	
-			totalWhite += sum([x >= gsThresh[i] for i, x in enumerate(newValues)])
-			totalBlack += sum([x < gsThresh[i] for i, x  in enumerate(newValues)])
-			estimate = (0.5+totalWhite)/(totalWhite+totalBlack+1)
-
-			if isByz:	
-				estimate = 0
-
-			estimatelog.log([round(estimate,3),totalWhite,totalBlack,newValues[0],newValues[1],newValues[2]])
-		else:
-			estimatelog.log([None]) 
-
-		tic.toc()
 
 def Buffer(rate = bufferRate, ageLimit = ageLimit):
 	""" Control routine for robot-to-robot dynamic peering """
@@ -273,11 +258,11 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 		# Turn on LEDs accordingly
 		nPeers = len(gethIds)
 		if nPeers >= 2:
-			rw.setLEDs(0b11111111)
+			cwe.set_leds(0b11111111)
 		elif nPeers == 1:
-			rw.setLEDs(0b01010101)
+			cwe.set_leds(0b01010101)
 		elif nPeers == 0:
-			rw.setLEDs(0b00000000)
+			cwe.set_leds(0b00000000)
 
 		# Remove peers which are in geth but not in buffer
 		for peerId in getDiff():
@@ -341,39 +326,11 @@ def Event(rate = eventRate):
 	""" Control routine to perform tasks triggered by an event """
 	# sc.events.your_event_name.createFilter(fromBlock=block, toBlock=block, argument_filters={"arg1": "value"}, topics=[])
 	
-	global voteHashes, voteHash
+	global fsm, voteHashes, voteHash, color_to_verify
 	blockFilter = w3.eth.filter('latest')
-	myVoteCounter = 0
-	myOkVoteCounter = 0
 	voteHashes = []
 	voteHash = None
-	ticketPrice = 40
 	amRegistered = False
-
-	def vote():
-		nonlocal myVoteCounter, myOkVoteCounter
-		myVoteCounter += 1
-		try:
-			vote = int(estimate*1e7)
-			voteHash = sc.functions.sendVote(vote).transact({'from': me.key,'value': w3.toWei(ticketPrice,'ether'), 'gas':gasLimit, 'gasPrice':gasprice})
-			txList.append(voteHash)
-			# voteReceipt = w3.eth.waitForTransactionReceipt(voteHash, timeout=120)
-
-			votelog.log([vote])
-			myOkVoteCounter += 1
-			votelogger.debug('Voted successfully: %.2f (%i/%i)', estimate, myOkVoteCounter, myVoteCounter)
-			rgb.flashGreen()
-
-			return voteHash
-
-		except ValueError as e:
-			votelog.log(['Value Error'])
-			votelogger.debug('Failed to vote: (%i/%i). Error: %s', myOkVoteCounter, myVoteCounter, e)
-			rgb.flashRed()
-
-		except Exception as e:
-			votelogger.error('Failed to vote: (Unexpected)', e)
-			rgb.flashRed()
 
 	def blockHandle():
 		""" Tasks when a new block is added to the chain """
@@ -392,73 +349,97 @@ def Event(rate = eventRate):
 		# 2) Log relevant smart contract details
 		blockNr = w3.eth.blockNumber
 		balance = getBalance()
-		ubi = sc.functions.askForUBI().call({'gas':gasLimit})
-		payout = sc.functions.askForPayout().call({'gas':gasLimit})
-		robotCount = sc.functions.getRobotCount().call()
-		mean = sc.functions.getMean().call()
-		voteCount = sc.functions.getVoteCount().call()
-		voteOkCount = sc.functions.getVoteOkCount().call()
-		myVoteCounter = sc.functions.robot(me.key).call()[-2]
-		myVoteOkCounter = sc.functions.robot(me.key).call()[-1]
-		newRound = sc.functions.isNewRound().call()
-		consensus = sc.functions.isConverged().call()
 
-		sclog.log([blockNr, balance, ubi, payout, robotCount, mean, voteCount, voteOkCount, myVoteCounter,myVoteOkCounter, newRound, consensus])
+
+		sclog.log([blockNr, balance, ubi, payout,newRound])
 
 		rgb.flashWhite(0.2)
-
-		if consensus == 1:
-			rgb.setLED(rgb.all, [rgb.green]*3)
-			rgb.freeze()
-		elif rgb.frozen:
-			rgb.unfreeze()
-
 	while True:
 		if not startFlag:
 			mainlogger.info('Stopped Events')
 			break
-
 		tic = TicToc(rate, 'Event')
-
 		newBlocks = blockFilter.get_new_entries()
 		if newBlocks:
 			synclog.log([len(newBlocks)])
 			for blockHex in newBlocks:
 				blockHandle()
-
 			if not amRegistered:
 				amRegistered = sc.functions.robot(me.key).call()[0]
 				if amRegistered:
 					eventlogger.debug('Registered on-chain')
 
 			if amRegistered:
-
 				try:
 					scHandle()
 				except Exception as e:
 					eventlogger.warning(e)
 				else:
-					if ubi != 0:
-						ubiHash = sc.functions.askForUBI().transact({'gas':gasLimit})
-						eventlogger.debug('Asked for UBI: %s', ubi)
-						txList.append(ubiHash)
+					if fsm.query(Idle.IDLE):
+						fsm.setState(Scout.Query, message="Start exploration")
+					elif fsm.query(Scout.Query):
+						# check reported color.
+						verify_unseen = 0
+						if clocks['query_sc'].query():
+							source_list = sc.functions.getSourceList().call()
+							if len(source_list) > 0:
+								candidate_cluster = []
+								for idx, cluster in enumerate(source_list):
+									if cluster[3] == 0:  # exists cluster needs verification
+										candidate_cluster.append((cluster, idx))
+								if len(candidate_cluster) > 0:
+									# randomly select a cluster to verify
+									none_verified_idx = []
+									# idx_to_verity = random.randrange(len(candidate_cluster))
 
-					if payout != 0:
-						payHash = sc.functions.askForPayout().transact({'gas':gasLimit})
-						eventlogger.debug('Asked for payout: %s', payout)
-						txList.append(payHash)
-
-					if newRound:
-						try:
-							updateHash = sc.functions.updateMean().transact({'gas':gasLimit})
-							txList.append(updateHash)
-							eventlogger.debug('Updated mean')
-						except Exception as e:
-							eventlogger.debug(str(e))
-
-					if balance > 40.5 and voteHash == None:
-						voteHash = vote()
-						voteHashes.append(voteHash)
+									for idx_to_verity in range(len(candidate_cluster)):
+										is_verified = False
+										for idx_verified in verified_idx:
+											if candidate_cluster[idx_to_verity][1] == idx_verified:
+												is_verified = True
+										if not is_verified:
+											none_verified_idx.append(idx_to_verity)
+									if len(none_verified_idx) > 0:
+										select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
+										verified_idx.append(candidate_cluster[select_idx][1])
+										cluster = candidate_cluster[select_idx][0]
+										fsm.setState(Verify.DriveTo, message="Go to unverified source")
+										color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
+										color_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+										color_to_verify[2] = float(cluster[1]) / DECIMAL_FACTOR
+										verify_unseen = 1
+						if verify_unseen == 0:
+							found_color_idx, _, found_color_bgr = cwe.discover_color(10)[0]
+							if found_color_idx > -1:
+								fsm.setState(Scout.PrepReport, message="Prepare proposal")
+					elif fsm.query(Scout.PrepReport):
+						vote_support = getBalance()/DEPOSITFACTOR
+						tag_id = cwe.check_apriltag()
+						if not voteHash and verified_colors[color_idx] ==0:
+							voteHash = sc.functions.reportNewPt(int(found_color_bgr[0] * DECIMAL_FACTOR),
+																	int(found_color_bgr[1] * DECIMAL_FACTOR),
+																	int(found_color_bgr[2] * DECIMAL_FACTOR),
+																	int(tag_id),
+																	w3.toWei(vote_support, 'ether'),
+																	int(tag_id)).transact(
+								{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+								 'gasPrice': gasprice})
+						fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
+					elif fsm.query(Verify.DriveTo):
+						arrived = cwe.drive_to_rgb(color_to_verify, duration=60)
+						if arrived:
+							tag_id = cwe.check_apriltag()
+							vote_support = getBalance() / DEPOSITFACTOR
+							if vote_support > 0:
+								voteHash = w3.sc.functions.reportNewPt(int(color_to_verify[0] * DECIMAL_FACTOR),
+																		   int(color_to_verify[1] * DECIMAL_FACTOR),
+																		   int(color_to_verify[2] * DECIMAL_FACTOR),
+																		   int(tag_id),
+																		   w3.toWei(vote_support, 'ether'),
+																	   	int(tag_id)).transact(
+									{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+									 'gasPrice': gasprice})
+						fsm.setState(Scout.Query, message="Resume scout")
 
 					if voteHash:
 						try:
@@ -482,10 +463,6 @@ def Event(rate = eventRate):
 
 # /* Initialize background daemon threads for the Main-Modules*/
 #######################################################################
-
-estimateTh = threading.Thread(target=Estimate, args=())
-estimateTh.daemon = True   
-
 bufferTh = threading.Thread(target=Buffer, args=())
 bufferTh.daemon = True                         
 
@@ -493,7 +470,7 @@ eventTh = threading.Thread(target=Event, args=())
 eventTh.daemon = True                        
 
 # Ignore mainmodules by removing from list:
-mainmodules = [estimateTh, bufferTh, eventTh]
+mainmodules = [bufferTh, eventTh]
 # mainmodules = [estimateTh]
 
 def START(modules = submodules + mainmodules, logs = logmodules):
@@ -666,6 +643,7 @@ elif len(sys.argv) == 2:
 		mainlogger.info('Type Ctrl+C to stop experiment')
 		mainlogger.info('Robot ID: %s (Byzantine)', me.id)
 
+
 	elif sys.argv[1] == '--nowalk':
 
 		# /* Wait for Time Synchronization */ 
@@ -677,37 +655,22 @@ elif len(sys.argv) == 2:
 		txList.append(registerHash)
 
 		input("Press Enter to start experiment")
-		rw.setWalk(False)
+		cwe.rot.setWalk(False)
 		START()
 		mainlogger.info('Type Ctrl+C to stop experiment')
 		mainlogger.info('Robot ID: %s', me.id)
 
-	elif sys.argv[1] == '--debug-erb':
-
-		# /* Wait for Time Synchronization */ 
-		mainlogger.info('Waiting for Time Sync...')
-		waitForTS()
-
-		# /* Register robot to the Smart Contract*/
-		registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
-		txList.append(registerHash)
-
-		input("Press Enter to start experiment")
-		rw.setWalk(False)
-		START()
-		mainlogger.info('Type Ctrl+C to stop experiment')
-		mainlogger.info('Robot ID: %s', me.id)
 
 	# # Alternative start executions
 	# elif sys.argv[1] == '--sandbox':
 	# 	print('---//--- SANDBOX-MODE ---//---')		
 	# 	startFlag = 1	
 
-	elif sys.argv[1] == '--synctime':
-		print('---//--- SYNC-TIME ---//---')
-		# /* Wait for Time Synchronization */ 
-		waitForTS()
-		startFlag = 1
+	# elif sys.argv[1] == '--synctime':
+	# 	print('---//--- SYNC-TIME ---//---')
+	# 	# /* Wait for Time Synchronization */ 
+	# 	waitForTS()
+	# 	startFlag = 1
 
 	# elif sys.argv[1] == '--peer2pc':
 	# 	print('---//--- PEER-PC ---//---')

@@ -146,7 +146,7 @@ fi
 # if [ $1 == "battery" ]; then 
 # 	for ID in $(cat "$IDS_FILE"); do
 # 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots/pi-puck-battery.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 		scp -r $MAIN_DIR/control/robots/battery.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
 # 	done
 # 	wait
 # fi

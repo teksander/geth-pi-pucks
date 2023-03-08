@@ -23,7 +23,7 @@ i2cdetect_ALL() {
 battery_check_ALL() {
 	local ID=$1
 	IP="${PREFIX}${ID}"
-	BATTERY=$(ssh "$IP" "python ${MAIN_DIR_ROBOTS}/robots/controllers/pi-puck-battery.py"| awk '{print $3}' | grep -Eo '[0-9]+\.[0-9]+') 
+	BATTERY=$(ssh "$IP" "python ${MAIN_DIR_ROBOTS}/robots/controllers/battery.py"| awk '{print $3}' | grep -Eo '[0-9]+\.[0-9]+') 
 
 	if (( $(echo "$BATTERY < $MIN_BATTERY" | bc -l) )); then
 		echo "$SUBNET.$ID Battery failed ($BATTERY%)"
