@@ -16,7 +16,8 @@ export CONTRACT_NAME="Estimation"
 # [FILES]
 export IDS_FILE="$MAIN_DIR/monitor/pi-pucks.txt"
 export GENESIS_FILE="$MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis/pipucks.json" 
-export CONTRACT_FILE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/experiment_volker.sol"
+export CONTRACT_FILE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/kmeans_estimation_3D.sol"
+export CONTRACT_TEMPLATE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/kmeans_estimation_3D.x.sol"
 export CONTRACT_ABI="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/build/$CONTRACT_NAME.abi"
 
 # [NETWORKS]
@@ -28,3 +29,14 @@ export PREFIX="${ROBOTS_NAME}@${SUBNET}."
 # [EXPERIMENT]
 export NUM_ROB=1
 export NUM_BYZ=2
+
+# [SC Parameters]
+export DIMS=3
+export NUMPT=100
+export MAXLIFE=5
+export MINREP=15
+export RADIUS=10000 # 0.1
+export DECIMAL_FACTOR=100000 # 1e5
+export MAXUNVCLUSTER=3
+# shellcheck disable=SC2155
+export MINBALANCE=$(echo "200000000000000000000/$MAXUNVCLUSTER" | bc)

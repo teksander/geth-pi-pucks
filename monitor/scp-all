@@ -21,7 +21,17 @@ if [ $# -eq 2 ]; then
 fi
 
 # Customizable list of often uploaded folders/files
-if [ $1 == "scs" ]; then 
+if [ $1 == "scs" ]; then
+  #Regenerate sc from template
+  sed -e "s|DIMS|$DIMS|g"\
+    -e "s|NUMPT|$NUMPT|g"\
+    -e "s|MAXLIFE|$MAXLIFE|g"\
+    -e "s|MINREP|$MINREP|g"\
+    -e "s|RADIUS|$RADIUS|g"\
+    -e "s|MINBALANCE|$MINBALANCE|g"\
+    -e "s|MAXUNVCLUSTER|$MAXUNVCLUSTER|g"\
+  $CONTRACT_TEMPLATE > $CONTRACT_FILE
+
 	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
