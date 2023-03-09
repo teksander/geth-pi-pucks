@@ -9,9 +9,9 @@ export ROBOTS_NAME="pi"
 export MONITOR_NAME="eksander"
 
 export MAIN_DIR="/home/$USER/$BASE_FOLDER"
-export MAIN_DIR_ROBOTS="/home/$ROBOTS_NAME/$BASE_FOLDER"
+export MAIN_DIR_ROBOTS="/home/$ROBOTS_NAME/geth-pi-pucks"
 
-export CONTRACT_NAME="Estimation"
+export CONTRACT_NAME="ForagingPtManagement"
 
 # [FILES]
 export IDS_FILE="$MAIN_DIR/monitor/pi-pucks.txt"

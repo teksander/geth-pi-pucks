@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def init_web3():
 	w3 = None
 
-	provider = IPCProvider('~/geth-pi-pucks/geth.ipc')
+	provider = IPCProvider('~/geth-pi-pucks/blockchain/geth.ipc')
 
 	w3 = Web3(provider)
 	w3.provider = provider
@@ -34,7 +34,7 @@ def init_web3():
 def registerSC(w3):
     sc = None
 
-    abiPath = os.getcwd()+'/scs/build/Estimation.abi'
+    abiPath = os.getcwd()+'/scs/build/ForagingPtManagement.abi'
     abi = json.loads(open(abiPath).read())
 
     addressPath = os.getcwd()+'/scs/contractAddress.txt'

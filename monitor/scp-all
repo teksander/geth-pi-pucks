@@ -32,10 +32,10 @@ if [ $1 == "scs" ]; then
     -e "s|MAXUNVCLUSTER|$MAXUNVCLUSTER|g"\
   $CONTRACT_TEMPLATE> $CONTRACT_FILE
 
-	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
+	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/controllers/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/scs/"  &
+		scp -r $MAIN_DIR/robots/controllers/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/controllers/scs/"  &
 	done
 	wait
 fi
@@ -52,7 +52,15 @@ if [ $1 == "abi" ]; then
 	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/scs/build/Estimation.abi "$IP:$MAIN_DIR_ROBOTS/robots/scs/build/"  &
+		scp -r $MAIN_DIR/robots/scs/build/ForagingPtManagement.abi "$IP:$MAIN_DIR_ROBOTS/robots/scs/build/"  &
+	done
+	wait
+fi
+
+if [ $1 == "contractaddr" ]; then
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/robots/scs/contractAddress.txt "$IP:$MAIN_DIR_ROBOTS/robots/controllers/scs/"  &
 	done
 	wait
 fi
@@ -105,13 +113,15 @@ if [ $1 == "calib-camera" ]; then
 	wait
 fi
 
-# if [ $1 == "mainloop" ]; then 
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots/mainloop.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-# 	done
-# 	wait
-# fi
+ if [ $1 == "mainloop" ]; then
+ 	for ID in $(cat "$IDS_FILE"); do
+ 		IP="${PREFIX}${ID}"
+ 		scp -r $MAIN_DIR/robots/controllers/ "$IP:$MAIN_DIR_ROBOTS/robots/"  &
+ 	done
+ 	wait
+ fi
+
+
 
 # if [ $1 == "gs" ]; then 
 # 	for ID in $(cat "$IDS_FILE"); do
