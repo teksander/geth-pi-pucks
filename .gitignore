@@ -1,3 +1,4 @@
+monitor/pi-pucks.txt
 geth/*
 data/gs/
 data/cam/
@@ -6,6 +7,9 @@ results/data/
 results/videos/
 backup/
 
+
+.DS_Store
+.idea
 *.ipc
 
 # Byte-compiled / optimized / DLL files

@@ -124,7 +124,7 @@ class UpCamera(object):
 
     def get_image_raw(self,filename = 'test.jpg'):
         # File to store image:
-        filename = 'calibration/cam/images/robot%s-test.jpg' % (self.id)
+        filename = 'calibration/cam/images/robot%s-%s' % (self.id, filename)
         rawCapture = PiRGBArray(self.camera)
         self.camera.capture(filename)
 
