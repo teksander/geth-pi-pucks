@@ -551,7 +551,16 @@ signal.signal(signal.SIGINT, signal_handler)
 #######################################################################
 
 def getBalance():
-	return round(w3.fromWei(w3.eth.getBalance(me.key), 'ether'), 2)
+	#check all my balance, including those frozen in unverified clusters.
+	myBalance = float(w3.eth.getBalance(me.key))
+	points_list = w3.sc.functions.getPointListInfo().call()
+	source_list = w3.sc.functions.getSourceList().call()
+	for idx, cluster in enumerate(source_list):
+		if cluster[3] == 0:
+			for point_rec in points_list:
+				if point_rec[5] == me.key and int(point_rec[4]) == idx:
+					myBalance += float(point_rec[2]) / 1e18
+	return round(myBalance, 2)
 
 def getDiffEnodes(gethEnodes = None):
 	if gethEnodes:

@@ -156,7 +156,7 @@ class ColorWalkEngine(object):
                     self.colors.append(elements[0])
                     self.ground_truth_bgr.append([int(x) for x in elements[1:]])
         else:
-            print("color calibration fiule not found, use hard coded colors")
+            print("color calibration file not found, use hard coded colors")
             self.colors = ["red", "blue", "purple"]
             self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 138]]  # bgr
         if exists('calibration/' + robotID + '_hsv.csv'):
