@@ -384,7 +384,7 @@ def Event(rate = eventRate):
 						#check if any cluster avaiting verification on chain
 						if clocks['query_sc'].query():
 							source_list = sc.functions.getSourceList().call()
-							points_list = w3.sc.functions.getPointListInfo().call()
+							points_list = sc.functions.getPointListInfo().call()
 							if len(source_list) > 0:
 								candidate_cluster = []
 								for idx, cluster in enumerate(source_list):
@@ -399,7 +399,6 @@ def Event(rate = eventRate):
 									# no longer needed to maintain the verified index list, as we used the verified_by_me check above
 									# idx_to_verity = random.randrange(len(candidate_cluster))
 									select_idx = candidate_cluster[random.randrange(len(candidate_cluster))]
-									verified_idx.append(candidate_cluster[select_idx][1])
 									cluster = candidate_cluster[select_idx][0]
 									fsm.setState(Verify.DriveTo, message="Go to unverified source")
 									color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
@@ -445,7 +444,7 @@ def Event(rate = eventRate):
 							if vote_support > 0 and found_color_bgr!=-1:
 								for idx in range(3):
 									color_to_report[idx] = found_color_bgr[idx]
-								voteHash = w3.sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
+								voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 																		   int(color_to_report[1] * DECIMAL_FACTOR),
 																		   int(color_to_report[2] * DECIMAL_FACTOR)],
 																		   int(tag_id),
@@ -577,8 +576,8 @@ signal.signal(signal.SIGINT, signal_handler)
 def getBalance():
 	#check all my balance, including those frozen in unverified clusters.
 	myBalance = float(w3.eth.getBalance(me.key))
-	points_list = w3.sc.functions.getPointListInfo().call()
-	source_list = w3.sc.functions.getSourceList().call()
+	points_list = sc.functions.getPointListInfo().call()
+	source_list = sc.functions.getSourceList().call()
 	for idx, cluster in enumerate(source_list):
 		if cluster[3] == 0:
 			for point_rec in points_list:
