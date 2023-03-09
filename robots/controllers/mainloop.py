@@ -180,8 +180,9 @@ submodules = [w3.geth.miner, tcp, erb, gs]
 global fsm
 fsm = FiniteStateMachine(start=Idle.IDLE)
 
-global color_to_verify
+global color_to_verify, color_to_report
 color_to_verify = [0, 0, 0]
+color_to_report = [0, 0, 0]
 
 # /* Define Main-modules */
 #######################################################################
@@ -326,7 +327,7 @@ def Event(rate = eventRate):
 	""" Control routine to perform tasks triggered by an event """
 	# sc.events.your_event_name.createFilter(fromBlock=block, toBlock=block, argument_filters={"arg1": "value"}, topics=[])
 	
-	global fsm, voteHashes, voteHash, color_to_verify
+	global fsm, voteHashes, voteHash, color_to_verify, color_to_report
 	blockFilter = w3.eth.filter('latest')
 	voteHashes = []
 	voteHash = None
@@ -407,44 +408,60 @@ def Event(rate = eventRate):
 									verify_unseen = 1
 						if verify_unseen == 0:
 							found_color_idx, _, found_color_bgr = cwe.discover_color(10)
+							for idx in range(3):
+								color_to_report[idx] =  found_color_bgr[idx]
 							if found_color_idx > -1:
 								fsm.setState(Scout.PrepReport, message="Prepare proposal")
 					elif fsm.query(Scout.PrepReport):
 						vote_support = getBalance()/DEPOSITFACTOR
 						tag_id = cwe.check_apriltag()
 						if not voteHash ==0:
-							voteHash = sc.functions.reportNewPt(int(found_color_bgr[0] * DECIMAL_FACTOR),
-																	int(found_color_bgr[1] * DECIMAL_FACTOR),
-																	int(found_color_bgr[2] * DECIMAL_FACTOR),
+							voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
+																	int(color_to_report[1] * DECIMAL_FACTOR),
+																	int(color_to_report[2] * DECIMAL_FACTOR)],
 																	int(tag_id),
 																	w3.toWei(vote_support, 'ether'),
 																	int(tag_id)).transact(
 								{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 								 'gasPrice': gasprice})
 						else:
-							#send an empty trasnaction with intention ==3, help update the SC
-							voteHash = sc.functions.reportNewPt(int(0),
+							#send an empty trasnaction with intention ==3, help updating the SC
+							voteHash = sc.functions.reportNewPt([int(0),
 																int(0),
+																int(0)],
 																int(0),
-																int(0),
-																w3.toWei(vote_support, 'ether'),
+																w3.toWei(0.01, 'ether'),
 																int(3)).transact(
-								{'from': me.key, 'value': w3.toWei(0.1, 'ether'), 'gas': gasLimit,
+								{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
 								 'gasPrice': gasprice})
 						fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 					elif fsm.query(Verify.DriveTo):
 						arrived = cwe.drive_to_rgb(color_to_verify, duration=60)
 						if arrived:
 							tag_id = cwe.check_apriltag()
+							_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
+
 							vote_support = getBalance() / DEPOSITFACTOR
-							if vote_support > 0:
-								voteHash = w3.sc.functions.reportNewPt(int(color_to_verify[0] * DECIMAL_FACTOR),
-																		   int(color_to_verify[1] * DECIMAL_FACTOR),
-																		   int(color_to_verify[2] * DECIMAL_FACTOR),
+							if vote_support > 0 and found_color_bgr!=-1:
+								for idx in range(3):
+									color_to_report[idx] = found_color_bgr[idx]
+								voteHash = w3.sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
+																		   int(color_to_report[1] * DECIMAL_FACTOR),
+																		   int(color_to_report[2] * DECIMAL_FACTOR)],
 																		   int(tag_id),
 																		   w3.toWei(vote_support, 'ether'),
 																	   	int(tag_id)).transact(
 									{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+									 'gasPrice': gasprice})
+							else:
+								# send an empty trasnaction with intention ==3, help updating the SC
+								voteHash = sc.functions.reportNewPt([int(0),
+																	int(0),
+																	int(0)],
+																	int(0),
+																	w3.toWei(0.01, 'ether'),
+																	int(3)).transact(
+									{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
 									 'gasPrice': gasprice})
 						fsm.setState(Scout.Query, message="Resume scout")
 
