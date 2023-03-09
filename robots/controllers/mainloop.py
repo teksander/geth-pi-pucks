@@ -380,42 +380,39 @@ def Event(rate = eventRate):
 					elif fsm.query(Scout.Query):
 						# check reported color.
 						verify_unseen = 0
+						#check if any cluster avaiting verification on chain
 						if clocks['query_sc'].query():
 							source_list = sc.functions.getSourceList().call()
+							points_list = w3.sc.functions.getPointListInfo().call()
 							if len(source_list) > 0:
 								candidate_cluster = []
 								for idx, cluster in enumerate(source_list):
-									if cluster[3] == 0:  # exists cluster needs verification
+									verified_by_me = False
+									for point_rec in points_list:
+										if point_rec[5] == me.key and int(point_rec[4]) == idx:
+											verified_by_me = True
+									if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
 										candidate_cluster.append((cluster, idx))
 								if len(candidate_cluster) > 0:
 									# randomly select a cluster to verify
-									none_verified_idx = []
+									# no longer needed to maintain the verified index list, as we used the verified_by_me check above
 									# idx_to_verity = random.randrange(len(candidate_cluster))
-
-									for idx_to_verity in range(len(candidate_cluster)):
-										is_verified = False
-										for idx_verified in verified_idx:
-											if candidate_cluster[idx_to_verity][1] == idx_verified:
-												is_verified = True
-										if not is_verified:
-											none_verified_idx.append(idx_to_verity)
-									if len(none_verified_idx) > 0:
-										select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
-										verified_idx.append(candidate_cluster[select_idx][1])
-										cluster = candidate_cluster[select_idx][0]
-										fsm.setState(Verify.DriveTo, message="Go to unverified source")
-										color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
-										color_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
-										color_to_verify[2] = float(cluster[1]) / DECIMAL_FACTOR
-										verify_unseen = 1
+									select_idx = candidate_cluster[random.randrange(len(candidate_cluster))]
+									verified_idx.append(candidate_cluster[select_idx][1])
+									cluster = candidate_cluster[select_idx][0]
+									fsm.setState(Verify.DriveTo, message="Go to unverified source")
+									color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
+									color_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+									color_to_verify[2] = float(cluster[2]) / DECIMAL_FACTOR
+									verify_unseen = 1
 						if verify_unseen == 0:
-							found_color_idx, _, found_color_bgr = cwe.discover_color(10)[0]
+							found_color_idx, _, found_color_bgr = cwe.discover_color(10)
 							if found_color_idx > -1:
 								fsm.setState(Scout.PrepReport, message="Prepare proposal")
 					elif fsm.query(Scout.PrepReport):
 						vote_support = getBalance()/DEPOSITFACTOR
 						tag_id = cwe.check_apriltag()
-						if not voteHash and verified_colors[color_idx] ==0:
+						if not voteHash ==0:
 							voteHash = sc.functions.reportNewPt(int(found_color_bgr[0] * DECIMAL_FACTOR),
 																	int(found_color_bgr[1] * DECIMAL_FACTOR),
 																	int(found_color_bgr[2] * DECIMAL_FACTOR),
@@ -423,6 +420,16 @@ def Event(rate = eventRate):
 																	w3.toWei(vote_support, 'ether'),
 																	int(tag_id)).transact(
 								{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+								 'gasPrice': gasprice})
+						else:
+							#send an empty trasnaction with intention ==3, help update the SC
+							voteHash = sc.functions.reportNewPt(int(0),
+																int(0),
+																int(0),
+																int(0),
+																w3.toWei(vote_support, 'ether'),
+																int(3)).transact(
+								{'from': me.key, 'value': w3.toWei(0.1, 'ether'), 'gas': gasLimit,
 								 'gasPrice': gasprice})
 						fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 					elif fsm.query(Verify.DriveTo):
