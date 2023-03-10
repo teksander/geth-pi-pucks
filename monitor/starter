@@ -15,30 +15,41 @@ source ../globalconfig
 echo "+-----------------------------------------------------------+"
 echo "MAINFOLDER IS $MAIN_DIR"
 
+
+for opt in "$@"
+do
+if [[ $opt == "--ping" || $opt == "-p" ]]; then
+
 echo "+-----------------------------------------------------------+"
 echo "Pinging robots..."
 ./ping-all
 wait
 
-# Check responding robot count
-NUM_RESP=$(wc -l < pi-pucks.txt)
-if ((NUM_ROB != NUM_RESP)); then
-	printf '%s\n' "Not enough robots are responding. STOP" >&2 
-	exit 1         
-fi
+# # Check responding robot count
+# NUM_RESP=$(wc -l < pi-pucks.txt)
+# if ((NUM_ROB != NUM_RESP)); then
+# 	printf '%s\n' "Not enough robots are responding. STOP" >&2 
+# 	exit 1         
+# fi
 
 echo "+-----------------------------------------------------------+"
 echo "Checking all robots..."
 ./check-all
+
+
+fi
+done
 
 echo "+-----------------------------------------------------------+"
 echo "Resetting Geth..."
 ./reset-geth
 wait
 
+
 for opt in "$@"
 do
 if [[ $opt == "--reset" || $opt == "-r" ]]; then
+
 
 	echo "+-----------------------------------------------------------+"
 	echo "Resetting the Genesis Block..."
@@ -55,17 +66,20 @@ done
 echo "+-----------------------------------------------------------+"
 echo "Starting Experiment"
 
-# # Open two TMUX sessions 
-# tmux kill-session -t GETH >/dev/null 2>&1
-# ./tmux-all
-# tmux rename-session GETH
+# Open two TMUX sessions 
+tmux kill-session -t GETH >/dev/null 2>&1
+./tmux-all
+tmux rename-session GETH
 
-# tmux kill-session -t MAINLOOP >/dev/null 2>&1
-# ./tmux-all
-# tmux rename-session MAINLOOP
+tmux kill-session -t MAINLOOP >/dev/null 2>&1
+./tmux-all
+tmux rename-session MAINLOOP
 
-# # GETH TMUX session: Execute setup-geth (all robots)
-# tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
+# GETH TMUX session: Execute setup-geth (all robots)
+tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
+
+# GETH TMUX session: Execute setup-geth (all robots)
+tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS/robots/controllers" Enter
 
 # # MAINLOOP TMUX session: Execute mainloop.py with no option (good robots)
 # # MAINLOOP TMUX session: Execute mainloop.py with option --byz (byzantine robots)
