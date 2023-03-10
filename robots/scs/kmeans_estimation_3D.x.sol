@@ -9,7 +9,7 @@ contract ForagingPtManagement{
     uint constant min_rep     = ${MINREP};     //Minimum number of reported points that make contract verified
     int256 constant radius    = ${RADIUS};
     uint constant min_balance = ${MINBALANCE}; //Minimum number of balance to confirm a cluster
-    int256 constant max_unverified_cluster =  MAXUNVCLUSTER;
+    int256 constant max_unverified_cluster =  ${MAXUNVCLUSTER};
 
 
     address public minter;

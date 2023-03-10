@@ -24,6 +24,7 @@ fi
 
 geth --datadir ${BLOCKCHAIN_FOLDER} \
 --syncmode "full" \
+--keystore "keystore/${ID}"
 --port 30311 \
 --ws \
 --ws.addr "0.0.0.0" \

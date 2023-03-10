@@ -61,20 +61,29 @@ if [[ $opt == "--reset" || $opt == "-r" ]]; then
 fi
 done
 
-echo "+-----------------------------------------------------------+"
-echo "Starting Experiment"
+for opt in "$@"
+do
+if [[ $opt == "--start" || $opt == "-s" ]]; then
 
-# Open two TMUX sessions 
-tmux kill-session -t GETH >/dev/null 2>&1
-./tmux-all
-tmux rename-session GETH
+	echo "+-----------------------------------------------------------+"
+	echo "Starting Experiment"
 
-tmux kill-session -t MAIN >/dev/null 2>&1
-./tmux-all
-tmux rename-session MAIN
+	# Open two TMUX sessions 
+	tmux kill-session -t GETH >/dev/null 2>&1
+	./tmux-all
+	tmux rename-session GETH
 
-tmux send-keys -t GETH:0.$PANE "cd robots/controllers" Enter
-tmux send-keys -t MAIN:0.$PANE "cd robots/controllers" Enter
+	tmux kill-session -t MAIN >/dev/null 2>&1
+	./tmux-all
+	tmux rename-session MAIN
+
+	tmux send-keys -t GETH:0.$PANE "./setup-geth" Enter
+	tmux send-keys -t MAIN:0.$PANE "cd robots/controllers" Enter
+	
+fi
+done
+
+
 
 #python3 -i console-pc.py
 

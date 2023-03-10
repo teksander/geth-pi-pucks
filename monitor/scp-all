@@ -5,7 +5,7 @@
 # - Arg1 is the file to send; Arg2 is the folder in /home/pi/
 # Quick options:
 # 'scs'      (uploads smart contract build folder)
-# 'mainloop' (uploads the latest saved mainloop)
+# 'mainloop' (uploads the mainloop)
 # 'control'  (uploads the full robot control folder)
 # 'all'      (deletes and restores the main directory)
 

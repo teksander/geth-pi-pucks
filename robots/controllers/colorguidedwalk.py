@@ -11,11 +11,13 @@ from upcamera import UpCamera
 from rotation import Rotation
 from groundsensor import GroundSensor
 from PID import PID
+
+sys.path.append('/home/pi/geth-pi-pucks/robots/arducam/apriltag/python')
 import apriltag
 
 import sys
 
-sys.path.append('/home/pi/apriltag/python')
+
 
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
