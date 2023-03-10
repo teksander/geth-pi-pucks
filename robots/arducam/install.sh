@@ -5,7 +5,7 @@
 [ "$UID" -eq 0 ] || exec sudo bash "$0" "$@"
 
 # Make sure this is a Pi-Puck
-if [[ $SUDO_USER != $ROBOTS_NAME ]]; then
+if [[ $SUDO_USER != "pi" ]]; then
 	echo "! Only run this script on robots !"
 	exit 1
 fi

@@ -14,7 +14,6 @@ from PID import PID
 
 import sys
 
-sys.path.append('/home/pi/apriltag/python')
 import apriltag
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
