@@ -8,9 +8,12 @@ source globalconfig
 # If the GETH process has not been initialized in the blockchain directory
 if [ ! -d "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/geth" ] 
 then
-    geth init "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json" \
-    --datadir "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER"
-    echo "Initialized GETH with genesis block: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json"
+    geth init  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json" \
+    --datadir  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER" \
+    --keystore "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/keystore/${ID}"
+    echo "Initialized GETH"
+    echo "Genesis: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json"
+    echo "Keystore: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/keystore/${ID}"
 fi
 
 # If is a Pi-Puck
