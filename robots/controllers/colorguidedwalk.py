@@ -11,11 +11,12 @@ from upcamera import UpCamera
 from rotation import Rotation
 from groundsensor import GroundSensor
 from PID import PID
+import apriltag
 
 import sys
 
 sys.path.append('/home/pi/apriltag/python')
-#import apriltag
+
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
@@ -148,7 +149,7 @@ class ColorWalkEngine(object):
         self.rot.start()
         self.gs = GroundSensor(gsFreq)
         self.gs.start()
-        #self.april = apriltag.Detector()
+        self.april = apriltag.Detector()
         if exists('calibration/' + robotID + '.csv'):
             with open('calibration/' + robotID + '.csv', 'r') as color_gt:
                 for line in color_gt:
@@ -243,8 +244,7 @@ class ColorWalkEngine(object):
     def check_apriltag(self):
         image = self.cam.get_reading_raw()
         image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        #result = self.april.detect(image_grey)
-        result = None
+        result = self.april.detect(image_grey)
         this_id = 0
         if result:
             this_id = result[0].tag_id

@@ -166,7 +166,7 @@ gs = GroundSensor(gsFreq)
 mainlogger.info('Initialising walking controller...')
 #color walk engine without .start()
 cwe = ColorWalkEngine(rwSpeed)
-
+#cwe=None
 global color_idx, verified_colors, verified_idx
 color_idx = cwe.get_color_list()
 verified_colors=[0 for x in range(len(color_idx))]
@@ -377,9 +377,9 @@ def Main(rate = eventRate):
 					print('no color found, pass')
 		elif fsm.query(Scout.PrepReport):
 			vote_support = getBalance()/DEPOSITFACTOR
-			tag_id = cwe.check_apriltag()
-			if not voteHash ==0:
-				print("vote: ",color_to_report,"support: ", vote_support)
+			tag_id = cwe.check_apriltag() #id = 0 no tag,
+			if voteHash !=0 and tag_id !=0:
+				print("vote: ",color_to_report,"support: ", vote_support, "tagid: ", tag_id)
 				voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 														int(color_to_report[1] * DECIMAL_FACTOR),
 														int(color_to_report[2] * DECIMAL_FACTOR)],
