@@ -15,7 +15,7 @@ from PID import PID
 import sys
 
 sys.path.append('/home/pi/apriltag/python')
-import apriltag
+#import apriltag
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
@@ -148,7 +148,7 @@ class ColorWalkEngine(object):
         self.rot.start()
         self.gs = GroundSensor(gsFreq)
         self.gs.start()
-        self.april = apriltag.Detector()
+        #self.april = apriltag.Detector()
         if exists('calibration/' + robotID + '.csv'):
             with open('calibration/' + robotID + '.csv', 'r') as color_gt:
                 for line in color_gt:
@@ -156,7 +156,7 @@ class ColorWalkEngine(object):
                     self.colors.append(elements[0])
                     self.ground_truth_bgr.append([int(x) for x in elements[1:]])
         else:
-            print("color calibration fiule not found, use hard coded colors")
+            print("color calibration file not found, use hard coded colors")
             self.colors = ["red", "blue", "purple"]
             self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 138]]  # bgr
         if exists('calibration/' + robotID + '_hsv.csv'):
@@ -206,7 +206,7 @@ class ColorWalkEngine(object):
                 dir_ang = (cen - 240) / 480
             else:
                 detect_color = False
-            print("angular direction: ", dir_ang)
+            #print("angular direction: ", dir_ang)
             if abs(dir_ang) < 0.15:
                 isTracking = True
             else:
@@ -219,11 +219,11 @@ class ColorWalkEngine(object):
                 walk_dir = random.choice(["s", "cw", "ccw"])
                 self.rot.setPattern(walk_dir, 3)
             elif dir_ang > 0:
-                print("cur angle: ", dir_ang)
+                #print("cur angle: ", dir_ang)
                 walk_time = np.ceil(1 + int(dir_ang))
                 self.rot.setPattern("cw", walk_time)
             elif dir_ang < 0:
-                print("cur angle: ", dir_ang)
+                #print("cur angle: ", dir_ang)
                 walk_time = np.ceil(1 - int(abs(dir_ang)))
                 self.rot.setPattern("ccw", walk_time)
         self.rot.setWalk(False)
@@ -243,7 +243,8 @@ class ColorWalkEngine(object):
     def check_apriltag(self):
         image = self.cam.get_reading_raw()
         image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        result = self.april.detect(image_grey)
+        #result = self.april.detect(image_grey)
+        result = None
         this_id = -1
         if result:
             this_id = result[0].tag_id
@@ -297,11 +298,11 @@ class ColorWalkEngine(object):
         self.rot.setLEDs(state)
 
 
-cwe = ColorWalkEngine(500)
-print(cwe.discover_color(60)[1])
-print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
-tag_id = cwe.check_apriltag()
-print(tag_id)
+# cwe = ColorWalkEngine(500)
+# print(cwe.discover_color(60)[1])
+# print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
+# tag_id = cwe.check_apriltag()
+# print(tag_id)
 # while tag_id == -1:
 #    tag_id = cwe.check_apriltag()
 #    print(tag_id)

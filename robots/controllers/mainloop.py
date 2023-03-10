@@ -78,8 +78,8 @@ clocks['query_sc'] = Timer(1)
 # subprocess.call("source ../../globalconfig")
 
 # Calibrated parameters
-with open('calibration/gsThreshes.txt') as calibFile:
-	gsThresh = list(map(int, calibFile.readline().split()))
+#with open('calibration/gsThreshes.txt') as calibFile:
+#	gsThresh = list(map(int, calibFile.readline().split()))
 
 # /* Initialize Logging Files and Console Logging*/
 #######################################################################
@@ -180,8 +180,9 @@ submodules = [w3.geth.miner, tcp, erb, gs]
 global fsm
 fsm = FiniteStateMachine(start=Idle.IDLE)
 
-global color_to_verify
+global color_to_verify, color_to_report
 color_to_verify = [0, 0, 0]
+color_to_report = [0, 0, 0]
 
 # /* Define Main-modules */
 #######################################################################
@@ -299,7 +300,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 		# Logs	
 		if bufferlog.isReady():
 			# Low frequency logging of chaindata size and cpu usage
-			chainSize = getFolderSize('/home/pi/geth-pi-pucks/geth')
+			chainSize = getFolderSize('/home/pi/geth-pi-pucks/blockchain/geth')
 			cpuPercent= getCPUPercent()
 			extralog.log([chainSize,cpuPercent])
 			bufferlog.log([len(gethIds), len(erbIds), len(tcp.allowed), ';'.join(erbIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
@@ -321,12 +322,135 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 			localBuffer()
 
 		tic.toc()
-	
+
+def Main(rate = eventRate):
+	global fsm, voteHashes, voteHash, color_to_verify, color_to_report
+	blockFilter = w3.eth.filter('latest')
+	voteHashes = []
+	voteHash = None
+	while True:
+		if not startFlag:
+			mainlogger.info('Stopped Events')
+			break
+		tic = TicToc(rate, 'Event')
+		newBlocks = blockFilter.get_new_entries()
+		if fsm.query(Idle.IDLE):
+			fsm.setState(Scout.Query, message="Start exploration")
+		elif fsm.query(Scout.Query):
+			print("start scout: ")
+			# check reported color.
+			verify_unseen = 0
+			#check if any cluster avaiting verification on chain
+			if clocks['query_sc'].query():
+				source_list = sc.functions.getSourceList().call()
+				points_list = sc.functions.getPointListInfo().call()
+				print("get source list: ", source_list)
+				if len(source_list) > 0:
+					candidate_cluster = []
+					for idx, cluster in enumerate(source_list):
+						verified_by_me = False
+						for point_rec in points_list:
+							if point_rec[5] == me.key and int(point_rec[4]) == idx:
+								verified_by_me = True
+						if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
+							candidate_cluster.append((cluster, idx))
+					if len(candidate_cluster) > 0:
+						# randomly select a cluster to verify
+						# no longer needed to maintain the verified index list, as we used the verified_by_me check above
+						# idx_to_verity = random.randrange(len(candidate_cluster))
+						select_idx = candidate_cluster[random.randrange(len(candidate_cluster))]
+						cluster = candidate_cluster[select_idx][0]
+						fsm.setState(Verify.DriveTo, message="Go to unverified source")
+						color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
+						color_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+						color_to_verify[2] = float(cluster[2]) / DECIMAL_FACTOR
+						verify_unseen = 1
+			if verify_unseen == 0:
+				print("try dissover color: ")
+				found_color_idx, _, found_color_bgr = cwe.discover_color(10)
+				print(found_color_bgr)
+				for idx in range(3):
+					color_to_report[idx] =  found_color_bgr[idx]
+				if found_color_idx > -1:
+					fsm.setState(Scout.PrepReport, message="Prepare proposal")
+		elif fsm.query(Scout.PrepReport):
+			vote_support = getBalance()/DEPOSITFACTOR
+			tag_id = cwe.check_apriltag()
+			if not voteHash ==0:
+				voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
+														int(color_to_report[1] * DECIMAL_FACTOR),
+														int(color_to_report[2] * DECIMAL_FACTOR)],
+														int(tag_id),
+														w3.toWei(vote_support, 'ether'),
+														int(tag_id)).transact(
+					{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+					 'gasPrice': gasprice})
+			else:
+				#send an empty trasnaction with intention ==3, help updating the SC
+				voteHash = sc.functions.reportNewPt([int(0),
+													int(0),
+													int(0)],
+													int(0),
+													w3.toWei(0.01, 'ether'),
+													int(3)).transact(
+					{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
+					 'gasPrice': gasprice})
+			fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
+		elif fsm.query(Verify.DriveTo):
+			arrived = cwe.drive_to_rgb(color_to_verify, duration=60)
+			if arrived:
+				tag_id = cwe.check_apriltag()
+				_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
+
+				vote_support = getBalance() / DEPOSITFACTOR
+				if vote_support > 0 and found_color_bgr!=-1:
+					for idx in range(3):
+						color_to_report[idx] = found_color_bgr[idx]
+					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
+															   int(color_to_report[1] * DECIMAL_FACTOR),
+															   int(color_to_report[2] * DECIMAL_FACTOR)],
+															   int(tag_id),
+															   w3.toWei(vote_support, 'ether'),
+															int(tag_id)).transact(
+						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+						 'gasPrice': gasprice})
+				else:
+					# send an empty trasnaction with intention ==3, help updating the SC
+					voteHash = sc.functions.reportNewPt([int(0),
+														int(0),
+														int(0)],
+														int(0),
+														w3.toWei(0.01, 'ether'),
+														int(3)).transact(
+						{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
+						 'gasPrice': gasprice})
+			fsm.setState(Scout.Query, message="Resume scout")
+
+		if voteHash:
+			try:
+				tx = w3.eth.getTransaction(voteHash)
+				txIndex = tx['transactionIndex']
+				txBlock = tx['blockNumber']
+				txNonce = tx['nonce']
+			except:
+				votelogger.warning('Vote disappered wtf. Voting again.')
+				voteHash = None
+
+			try:
+				txRecpt = w3.eth.getTransactionReceipt(voteHash)
+				votelogger.debug('Vote included in block!')
+				# print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
+				voteHash = None
+			except:
+				votelogger.debug('Vote not yet included on block')
+
+		tic.toc()
+
 def Event(rate = eventRate):
 	""" Control routine to perform tasks triggered by an event """
 	# sc.events.your_event_name.createFilter(fromBlock=block, toBlock=block, argument_filters={"arg1": "value"}, topics=[])
 	
-	global fsm, voteHashes, voteHash, color_to_verify
+	global fsm, voteHashes, voteHash, color_to_verify, color_to_report
 	blockFilter = w3.eth.filter('latest')
 	voteHashes = []
 	voteHash = None
@@ -364,100 +488,115 @@ def Event(rate = eventRate):
 			synclog.log([len(newBlocks)])
 			for blockHex in newBlocks:
 				blockHandle()
-			if not amRegistered:
-				amRegistered = sc.functions.robot(me.key).call()[0]
-				if amRegistered:
-					eventlogger.debug('Registered on-chain')
+		if fsm.query(Idle.IDLE):
+			fsm.setState(Scout.Query, message="Start exploration")
+		elif fsm.query(Scout.Query):
+			print("start scout: ")
+			# check reported color.
+			verify_unseen = 0
+			#check if any cluster avaiting verification on chain
+			if clocks['query_sc'].query():
+				source_list = sc.functions.getSourceList().call()
+				points_list = sc.functions.getPointListInfo().call()
+				print("get source list: ", source_list)
+				if len(source_list) > 0:
+					candidate_cluster = []
+					for idx, cluster in enumerate(source_list):
+						verified_by_me = False
+						for point_rec in points_list:
+							if point_rec[5] == me.key and int(point_rec[4]) == idx:
+								verified_by_me = True
+						if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
+							candidate_cluster.append((cluster, idx))
+					if len(candidate_cluster) > 0:
+						# randomly select a cluster to verify
+						# no longer needed to maintain the verified index list, as we used the verified_by_me check above
+						# idx_to_verity = random.randrange(len(candidate_cluster))
+						select_idx = candidate_cluster[random.randrange(len(candidate_cluster))]
+						cluster = candidate_cluster[select_idx][0]
+						fsm.setState(Verify.DriveTo, message="Go to unverified source")
+						color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
+						color_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
+						color_to_verify[2] = float(cluster[2]) / DECIMAL_FACTOR
+						verify_unseen = 1
+			if verify_unseen == 0:
+				print("try dissover color: ")
+				found_color_idx, _, found_color_bgr = cwe.discover_color(10)
+				print(found_color_bgr)
+				for idx in range(3):
+					color_to_report[idx] =  found_color_bgr[idx]
+				if found_color_idx > -1:
+					fsm.setState(Scout.PrepReport, message="Prepare proposal")
+		elif fsm.query(Scout.PrepReport):
+			vote_support = getBalance()/DEPOSITFACTOR
+			tag_id = cwe.check_apriltag()
+			if not voteHash ==0:
+				voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
+														int(color_to_report[1] * DECIMAL_FACTOR),
+														int(color_to_report[2] * DECIMAL_FACTOR)],
+														int(tag_id),
+														w3.toWei(vote_support, 'ether'),
+														int(tag_id)).transact(
+					{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+					 'gasPrice': gasprice})
+			else:
+				#send an empty trasnaction with intention ==3, help updating the SC
+				voteHash = sc.functions.reportNewPt([int(0),
+													int(0),
+													int(0)],
+													int(0),
+													w3.toWei(0.01, 'ether'),
+													int(3)).transact(
+					{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
+					 'gasPrice': gasprice})
+			fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
+		elif fsm.query(Verify.DriveTo):
+			arrived = cwe.drive_to_rgb(color_to_verify, duration=60)
+			if arrived:
+				tag_id = cwe.check_apriltag()
+				_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
 
-			if amRegistered:
-				try:
-					scHandle()
-				except Exception as e:
-					eventlogger.warning(e)
+				vote_support = getBalance() / DEPOSITFACTOR
+				if vote_support > 0 and found_color_bgr!=-1:
+					for idx in range(3):
+						color_to_report[idx] = found_color_bgr[idx]
+					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
+															   int(color_to_report[1] * DECIMAL_FACTOR),
+															   int(color_to_report[2] * DECIMAL_FACTOR)],
+															   int(tag_id),
+															   w3.toWei(vote_support, 'ether'),
+															int(tag_id)).transact(
+						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+						 'gasPrice': gasprice})
 				else:
-					if fsm.query(Idle.IDLE):
-						fsm.setState(Scout.Query, message="Start exploration")
-					elif fsm.query(Scout.Query):
-						# check reported color.
-						verify_unseen = 0
-						if clocks['query_sc'].query():
-							source_list = sc.functions.getSourceList().call()
-							if len(source_list) > 0:
-								candidate_cluster = []
-								for idx, cluster in enumerate(source_list):
-									if cluster[3] == 0:  # exists cluster needs verification
-										candidate_cluster.append((cluster, idx))
-								if len(candidate_cluster) > 0:
-									# randomly select a cluster to verify
-									none_verified_idx = []
-									# idx_to_verity = random.randrange(len(candidate_cluster))
+					# send an empty trasnaction with intention ==3, help updating the SC
+					voteHash = sc.functions.reportNewPt([int(0),
+														int(0),
+														int(0)],
+														int(0),
+														w3.toWei(0.01, 'ether'),
+														int(3)).transact(
+						{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
+						 'gasPrice': gasprice})
+			fsm.setState(Scout.Query, message="Resume scout")
 
-									for idx_to_verity in range(len(candidate_cluster)):
-										is_verified = False
-										for idx_verified in verified_idx:
-											if candidate_cluster[idx_to_verity][1] == idx_verified:
-												is_verified = True
-										if not is_verified:
-											none_verified_idx.append(idx_to_verity)
-									if len(none_verified_idx) > 0:
-										select_idx = none_verified_idx[random.randrange(len(none_verified_idx))]
-										verified_idx.append(candidate_cluster[select_idx][1])
-										cluster = candidate_cluster[select_idx][0]
-										fsm.setState(Verify.DriveTo, message="Go to unverified source")
-										color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
-										color_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
-										color_to_verify[2] = float(cluster[1]) / DECIMAL_FACTOR
-										verify_unseen = 1
-						if verify_unseen == 0:
-							found_color_idx, _, found_color_bgr = cwe.discover_color(10)[0]
-							if found_color_idx > -1:
-								fsm.setState(Scout.PrepReport, message="Prepare proposal")
-					elif fsm.query(Scout.PrepReport):
-						vote_support = getBalance()/DEPOSITFACTOR
-						tag_id = cwe.check_apriltag()
-						if not voteHash and verified_colors[color_idx] ==0:
-							voteHash = sc.functions.reportNewPt(int(found_color_bgr[0] * DECIMAL_FACTOR),
-																	int(found_color_bgr[1] * DECIMAL_FACTOR),
-																	int(found_color_bgr[2] * DECIMAL_FACTOR),
-																	int(tag_id),
-																	w3.toWei(vote_support, 'ether'),
-																	int(tag_id)).transact(
-								{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
-								 'gasPrice': gasprice})
-						fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
-					elif fsm.query(Verify.DriveTo):
-						arrived = cwe.drive_to_rgb(color_to_verify, duration=60)
-						if arrived:
-							tag_id = cwe.check_apriltag()
-							vote_support = getBalance() / DEPOSITFACTOR
-							if vote_support > 0:
-								voteHash = w3.sc.functions.reportNewPt(int(color_to_verify[0] * DECIMAL_FACTOR),
-																		   int(color_to_verify[1] * DECIMAL_FACTOR),
-																		   int(color_to_verify[2] * DECIMAL_FACTOR),
-																		   int(tag_id),
-																		   w3.toWei(vote_support, 'ether'),
-																	   	int(tag_id)).transact(
-									{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
-									 'gasPrice': gasprice})
-						fsm.setState(Scout.Query, message="Resume scout")
+		if voteHash:
+			try:
+				tx = w3.eth.getTransaction(voteHash)
+				txIndex = tx['transactionIndex']
+				txBlock = tx['blockNumber']
+				txNonce = tx['nonce']
+			except:
+				votelogger.warning('Vote disappered wtf. Voting again.')
+				voteHash = None
 
-					if voteHash:
-						try:
-							tx = w3.eth.getTransaction(voteHash)
-							txIndex = tx['transactionIndex']
-							txBlock = tx['blockNumber']
-							txNonce = tx['nonce']
-						except:
-							votelogger.warning('Vote disappered wtf. Voting again.')
-							voteHash = None
-
-						try:
-							txRecpt = w3.eth.getTransactionReceipt(voteHash)
-							votelogger.debug('Vote included in block!')
-							# print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
-							voteHash = None
-						except:
-							votelogger.debug('Vote not yet included on block')
+			try:
+				txRecpt = w3.eth.getTransactionReceipt(voteHash)
+				votelogger.debug('Vote included in block!')
+				# print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
+				voteHash = None
+			except:
+				votelogger.debug('Vote not yet included on block')
 
 		tic.toc()
 
@@ -490,6 +629,7 @@ def START(modules = submodules + mainmodules, logs = logmodules):
 			module.start()
 		except:
 			mainlogger.critical('Error Starting Module')
+	Main(eventRate)
 
 
 
@@ -551,7 +691,16 @@ signal.signal(signal.SIGINT, signal_handler)
 #######################################################################
 
 def getBalance():
-	return round(w3.fromWei(w3.eth.getBalance(me.key), 'ether'), 2)
+	#check all my balance, including those frozen in unverified clusters.
+	myBalance = float(w3.eth.getBalance(me.key))
+	points_list = sc.functions.getPointListInfo().call()
+	source_list = sc.functions.getSourceList().call()
+	for idx, cluster in enumerate(source_list):
+		if cluster[3] == 0:
+			for point_rec in points_list:
+				if point_rec[5] == me.key and int(point_rec[4]) == idx:
+					myBalance += float(point_rec[2]) / 1e18
+	return round(myBalance, 2)
 
 def getDiffEnodes(gethEnodes = None):
 	if gethEnodes:
@@ -614,11 +763,11 @@ if len(sys.argv) == 1:
 
 	# /* Wait for Time Synchronization */ 
 	mainlogger.info('Waiting for Time Sync...')
-	waitForTS()
+	#waitForTS()
 
 	# /* Register robot to the Smart Contract*/
-	registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
-	txList.append(registerHash)
+	#registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
+	#txList.append(registerHash)
 
 	input("Press Enter to start experiment")
 	START()
@@ -631,11 +780,11 @@ elif len(sys.argv) == 2:
 
 		# /* Wait for Time Synchronization */ 
 		mainlogger.info('Waiting for Time Sync...')
-		waitForTS()
+		#waitForTS()
 
 		# /* Register robot to the Smart Contract*/
-		registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
-		txList.append(registerHash)
+		#registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
+		#txList.append(registerHash)
 
 		input("Press Enter to start experiment")
 		isByz = 1
@@ -648,11 +797,11 @@ elif len(sys.argv) == 2:
 
 		# /* Wait for Time Synchronization */ 
 		mainlogger.info('Waiting for Time Sync...')
-		waitForTS()
+		#waitForTS()
 
 		# /* Register robot to the Smart Contract*/
-		registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
-		txList.append(registerHash)
+		#registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
+		#txList.append(registerHash)
 
 		input("Press Enter to start experiment")
 		cwe.rot.setWalk(False)

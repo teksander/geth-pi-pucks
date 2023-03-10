@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 import time
-from aenum import Enum, auto
+#from aenum import Enum, auto
 
-class Idle(Enum):
+class Idle():
     IDLE   = 1
 
-class Scout(Enum):
+class Scout():
     Query    = 2
     PrepReport = 3
 
-class Verify(Enum):
+class Verify():
     DriveTo = 4
     PrepReport = 5
 
@@ -52,13 +52,8 @@ class FiniteStateMachine(object):
 
     def onTransition(self, state, message):
         # Robot actions to perform on every transition
-
-        if message != None:
-            self.robot.log.info("%s -> %s%s", self._currState, state, ' | '+ message)
-        
-        self.robot.variables.set_attribute("grabStone", "")
-        self.robot.variables.set_attribute("dropStone", "")
-        self.robot.variables.set_attribute("state", str(state))
-
-
+        pass
+        # if message != None:
+        #     self.robot.log.info("%s -> %s%s", self._currState, state, ' | '+ message)
+        #
 
