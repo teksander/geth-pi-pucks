@@ -6,11 +6,11 @@ cd $(dirname $0)
 source globalconfig
 
 # If the GETH process has not been initialized in the blockchain directory
-if [ ! -d "$MAIN_FOLDER/$BLOCKCHAIN_FOLDER/geth" ] 
+if [ ! -d "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/geth" ] 
 then
-    geth init $GENESIS_FILE \
-    --datadir $BLOCKCHAIN_FOLDER
-    echo "Initialized GETH with genesis block: $GENESIS_FILE"
+    geth init "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json" \
+    --datadir "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER"
+    echo "Initialized GETH with genesis block: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json"
 fi
 
 # If is a Pi-Puck
@@ -22,9 +22,8 @@ else
 	ID="100"
 fi
 
-geth --datadir ${BLOCKCHAIN_FOLDER} \
+geth --datadir "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER" \
 --syncmode "full" \
---keystore "keystore/${ID}"
 --port 30311 \
 --ws \
 --ws.addr "0.0.0.0" \

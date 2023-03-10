@@ -54,10 +54,10 @@ if [[ $opt == "--reset" || $opt == "-r" ]]; then
 	./reset-genesis
 	wait
 
-	echo "+-----------------------------------------------------------+"
-	echo "Resetting the Pi-Puck keys..."
-	./reset-keys
-	wait
+	# echo "+-----------------------------------------------------------+"
+	# echo "Resetting the Pi-Puck keys..."
+	# ./reset-keys
+	# wait
 fi
 done
 

@@ -22,10 +22,6 @@ fi
 
 # Customizable list of often uploaded folders/files
 if [ $1 == "scs" ]; then
-
-	envsubst < $CONTRACT_TEMPLATE > $CONTRACT_FILE
-
-	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		scp -r $MAIN_DIR/robots/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/scs"  &
@@ -42,10 +38,9 @@ if [ $1 == "genesis" ]; then
 fi
 
 if [ $1 == "abi" ]; then 
-	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/scs/build/ForagingPtManagement.abi "$IP:$MAIN_DIR_ROBOTS/robots/scs/build/"  &
+		scp -r $MAIN_DIR/robots/scs/build/$CONTRACT_NAME.abi "$IP:$MAIN_DIR_ROBOTS/robots/scs/build/"  &
 	done
 	wait
 fi
@@ -70,6 +65,14 @@ if [ $1 == "setup-router" ]; then
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		scp -r $MAIN_DIR/setup-router "$IP:$MAIN_DIR_ROBOTS" &
+	done
+	wait
+fi
+
+if [ $1 == "globalconfig" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS" &
 	done
 	wait
 fi

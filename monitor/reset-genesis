@@ -20,17 +20,17 @@ echo "2" >> genesis.conf  # Clique - proof-of-authority
 echo "15" >> genesis.conf # 15 seconds block time
 
 # List of sealers
-for INDEX in $(seq 1 $NUM_NODES);
+for ID in $(cat "$IDS_FILE");
 do
-    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystore-all/$INDEX")
+    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystore/$ID")
     echo ${KEY:12:40} >> genesis.conf 
 done
 echo "" >> genesis.conf 
 
 # Pre-fund all accounts
-for INDEX in $(seq 0 $NUM_NODES);
+for ID in $(cat "$IDS_FILE");
 do
-    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystore-all/$INDEX")
+    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystore/$ID")
     echo ${KEY:12:40} >> genesis.conf 
 done
 
@@ -55,7 +55,12 @@ rm genesis.conf
 
 ########## Compile and Deploy Smart Contract ############
 echo "Compiling the Smart Contract..."
-./scp-all scs
+
+envsubst < $CONTRACT_TEMPLATE > $CONTRACT_FILE
+solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
+
+./scp-all abi
+
 BINDATA=`cat $MAIN_DIR/robots/scs/build/$CONTRACT_NAME.bin-runtime`
 
 echo "Contract address:" `cat $MAIN_DIR/robots/scs/contractAddress.txt ` 
