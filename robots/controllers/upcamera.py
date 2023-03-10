@@ -28,7 +28,6 @@ def calculation(camera):
     rawCapture.truncate(0)
     return __laplacian(image)
 
-
 class UpCamera(object):
     """ set up an camera object for the R0176 Arducam camera.
     """
