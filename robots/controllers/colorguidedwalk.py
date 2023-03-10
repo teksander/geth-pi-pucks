@@ -11,10 +11,12 @@ from upcamera import UpCamera
 from rotation import Rotation
 from groundsensor import GroundSensor
 from PID import PID
+import apriltag
 
 import sys
 
-import apriltag
+sys.path.append('/home/pi/apriltag/python')
+
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
@@ -243,8 +245,7 @@ class ColorWalkEngine(object):
         image = self.cam.get_reading_raw()
         image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         result = self.april.detect(image_grey)
-        result = None
-        this_id = -1
+        this_id = 0
         if result:
             this_id = result[0].tag_id
         else:

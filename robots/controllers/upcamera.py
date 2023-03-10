@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import os
-import cv2, picamera
+import picamera, cv2
 from picamera.array import PiRGBArray
+import os
 import logging
-
 
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -28,7 +27,6 @@ def calculation(camera):
     image = rawCapture.array
     rawCapture.truncate(0)
     return __laplacian(image)
-
 
 class UpCamera(object):
     """ set up an camera object for the R0176 Arducam camera.

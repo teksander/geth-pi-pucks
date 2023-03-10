@@ -10,11 +10,11 @@
 # /* Logging Levels for Console and File */
 #######################################################################
 loglevel = 30
-logtofile = False 
+logtofile = False
 
 # /* Experiment Parameters */
 #######################################################################
-tcpPort = 40421 
+tcpPort = 40421
 erbDist = 175
 erbtFreq = 10
 gsFreq = 20
@@ -22,7 +22,7 @@ rwSpeed = 600
 pcID = '100'
 
 estimateRate = 1
-voteRate = 45 
+voteRate = 45
 bufferRate = 0.33
 eventRate = 1
 globalPeers = 0
@@ -142,7 +142,7 @@ sc = registerSC(w3)
 robotEN  = w3.geth.admin.nodeInfo().enode
 robotKEY = w3.eth.coinbase
 me = Peer(robotID, robotEN, robotKEY)
-	
+
 # /* Init an instance of peer for the monitor PC */
 pc = Peer(pcID)
 
@@ -166,7 +166,7 @@ gs = GroundSensor(gsFreq)
 mainlogger.info('Initialising walking controller...')
 #color walk engine without .start()
 cwe = ColorWalkEngine(rwSpeed)
-
+#cwe=None
 global color_idx, verified_colors, verified_idx
 color_idx = cwe.get_color_list()
 verified_colors=[0 for x in range(len(color_idx))]
@@ -202,7 +202,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 				newId = newId.strip()
 				pb.addPeer(newId)
 
-		for peer in pb.buffer: 
+		for peer in pb.buffer:
 			if int(me.id) > int(peer.id):
 				try:
 					peer.enode = tcp.request(newPeer.ip, tcp.port)
@@ -239,20 +239,20 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 			# elif int(me.id) > int(peer.id) and peer.timeout<=0:
 			elif peer.timeout<=0:
-				if not peer.enode: 
+				if not peer.enode:
 					try:
 						peer.enode = tcp.request(peer.ip, tcp.port)
-						bufferlogger.debug('Requested peer enode %s @ age %.2f', peer.id, peer.age)   		 
+						bufferlogger.debug('Requested peer enode %s @ age %.2f', peer.id, peer.age)
 					except:
 						peer.trials += 1
-						if peer.trials == 5: 
+						if peer.trials == 5:
 							peer.setTimeout()
 							bufferlogger.warning('Timed-out peer  %s @ age %.2f', peer.id, peer.age)
 						continue
 				else:
 					if peer.id not in gethIds:
 						w3.geth.admin.addPeer(peer.enode)
-						peer.setTimeout(3)  
+						peer.setTimeout(3)
 						bufferlogger.debug('Added peer %s @ age %.2f', peer.id, peer.age)
 
 
@@ -284,7 +284,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 				erb.stop()
 				erbTimeout = 2
 				timeoutStamp = time.time()
-				
+
 		else:
 			print('Timed out')
 			if (erbTimeout - (time.time() - timeoutStamp)) <= 0:
@@ -295,16 +295,16 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 		pb.addPeer(erbIds)
 		for erbId in erbIds:
-			tcp.allow(erbId)	
+			tcp.allow(erbId)
 
-		# Logs	
+		# Logs
 		if bufferlog.isReady():
 			# Low frequency logging of chaindata size and cpu usage
 			chainSize = getFolderSize('/home/pi/geth-pi-pucks/blockchain/geth')
 			cpuPercent= getCPUPercent()
 			extralog.log([chainSize,cpuPercent])
 			bufferlog.log([len(gethIds), len(erbIds), len(tcp.allowed), ';'.join(erbIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
-		
+
 	while True:
 		if not startFlag:
 			gethEnodes = getEnodes()
@@ -314,7 +314,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 			break
 
 		tic = TicToc(rate, 'Buffer')
-				
+
 		if globalPeers:
 			globalBuffer()
 			break
@@ -337,7 +337,6 @@ def Main(rate = eventRate):
 		if fsm.query(Idle.IDLE):
 			fsm.setState(Scout.Query, message="Start exploration")
 		elif fsm.query(Scout.Query):
-			print("start scout: ")
 			# check reported color.
 			verify_unseen = 0
 			#check if any cluster avaiting verification on chain
@@ -369,22 +368,27 @@ def Main(rate = eventRate):
 				print("try dissover color: ")
 				found_color_idx, _, found_color_bgr = cwe.discover_color(10)
 				print(found_color_bgr)
-				for idx in range(3):
-					color_to_report[idx] =  found_color_bgr[idx]
-				if found_color_idx > -1:
-					fsm.setState(Scout.PrepReport, message="Prepare proposal")
+				if found_color_bgr != -1:
+					for idx in range(3):
+						color_to_report[idx] =  found_color_bgr[idx]
+					if found_color_idx > -1:
+						fsm.setState(Scout.PrepReport, message="Prepare proposal")
+				else:
+					print('no color found, pass')
 		elif fsm.query(Scout.PrepReport):
 			vote_support = getBalance()/DEPOSITFACTOR
-			tag_id = cwe.check_apriltag()
-			if not voteHash ==0:
+			tag_id = cwe.check_apriltag() #id = 0 no tag,
+			if voteHash !=0 and tag_id !=0:
+				print("vote: ",color_to_report,"support: ", vote_support, "tagid: ", tag_id)
 				voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 														int(color_to_report[1] * DECIMAL_FACTOR),
 														int(color_to_report[2] * DECIMAL_FACTOR)],
 														int(tag_id),
 														w3.toWei(vote_support, 'ether'),
-														int(tag_id)).transact(
+														int(tag_id), 0).transact(
 					{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 					 'gasPrice': gasprice})
+
 			else:
 				#send an empty trasnaction with intention ==3, help updating the SC
 				voteHash = sc.functions.reportNewPt([int(0),
@@ -392,6 +396,7 @@ def Main(rate = eventRate):
 													int(0)],
 													int(0),
 													w3.toWei(0.01, 'ether'),
+													0, #this is realType, for debugging
 													int(3)).transact(
 					{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
 					 'gasPrice': gasprice})
@@ -406,12 +411,13 @@ def Main(rate = eventRate):
 				if vote_support > 0 and found_color_bgr!=-1:
 					for idx in range(3):
 						color_to_report[idx] = found_color_bgr[idx]
+					print("report bgr color: ", color_to_report)
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															   int(color_to_report[1] * DECIMAL_FACTOR),
 															   int(color_to_report[2] * DECIMAL_FACTOR)],
 															   int(tag_id),
 															   w3.toWei(vote_support, 'ether'),
-															int(tag_id)).transact(
+															int(tag_id), 0).transact(
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
 				else:
@@ -421,161 +427,7 @@ def Main(rate = eventRate):
 														int(0)],
 														int(0),
 														w3.toWei(0.01, 'ether'),
-														int(3)).transact(
-						{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
-						 'gasPrice': gasprice})
-			fsm.setState(Scout.Query, message="Resume scout")
-
-		if voteHash:
-			try:
-				tx = w3.eth.getTransaction(voteHash)
-				txIndex = tx['transactionIndex']
-				txBlock = tx['blockNumber']
-				txNonce = tx['nonce']
-			except:
-				votelogger.warning('Vote disappered wtf. Voting again.')
-				voteHash = None
-
-			try:
-				txRecpt = w3.eth.getTransactionReceipt(voteHash)
-				votelogger.debug('Vote included in block!')
-				# print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
-				voteHash = None
-			except:
-				votelogger.debug('Vote not yet included on block')
-
-		tic.toc()
-
-def Event(rate = eventRate):
-	""" Control routine to perform tasks triggered by an event """
-	# sc.events.your_event_name.createFilter(fromBlock=block, toBlock=block, argument_filters={"arg1": "value"}, topics=[])
-	
-	global fsm, voteHashes, voteHash, color_to_verify, color_to_report
-	blockFilter = w3.eth.filter('latest')
-	voteHashes = []
-	voteHash = None
-	amRegistered = False
-
-	def blockHandle():
-		""" Tasks when a new block is added to the chain """
-
-		# 1) Log relevant block details 
-		block = w3.eth.getBlock(blockHex)
-		txPending = str(eval(w3.geth.txpool.status()['pending']))
-		txQueue = str(eval(w3.geth.txpool.status()['queued']))
-
-		blocklog.log([time.time()-block.timestamp, round(block.timestamp-blocklog.tStart, 3), block.number, block.hash.hex(), block.parentHash.hex(), block.difficulty, block.totalDifficulty, block.size, len(block.transactions), len(block.uncles), txPending, txQueue])
-
-	def scHandle():
-		""" Interact with SC when new blocks are synchronized """
-		global ubi, payout, newRound, balance
-
-		# 2) Log relevant smart contract details
-		blockNr = w3.eth.blockNumber
-		balance = getBalance()
-
-
-		sclog.log([blockNr, balance, ubi, payout,newRound])
-
-		rgb.flashWhite(0.2)
-	while True:
-		if not startFlag:
-			mainlogger.info('Stopped Events')
-			break
-		tic = TicToc(rate, 'Event')
-		newBlocks = blockFilter.get_new_entries()
-		if newBlocks:
-			synclog.log([len(newBlocks)])
-			for blockHex in newBlocks:
-				blockHandle()
-		if fsm.query(Idle.IDLE):
-			fsm.setState(Scout.Query, message="Start exploration")
-		elif fsm.query(Scout.Query):
-			print("start scout: ")
-			# check reported color.
-			verify_unseen = 0
-			#check if any cluster avaiting verification on chain
-			if clocks['query_sc'].query():
-				source_list = sc.functions.getSourceList().call()
-				points_list = sc.functions.getPointListInfo().call()
-				print("get source list: ", source_list)
-				if len(source_list) > 0:
-					candidate_cluster = []
-					for idx, cluster in enumerate(source_list):
-						verified_by_me = False
-						for point_rec in points_list:
-							if point_rec[5] == me.key and int(point_rec[4]) == idx:
-								verified_by_me = True
-						if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
-							candidate_cluster.append((cluster, idx))
-					if len(candidate_cluster) > 0:
-						# randomly select a cluster to verify
-						# no longer needed to maintain the verified index list, as we used the verified_by_me check above
-						# idx_to_verity = random.randrange(len(candidate_cluster))
-						select_idx = candidate_cluster[random.randrange(len(candidate_cluster))]
-						cluster = candidate_cluster[select_idx][0]
-						fsm.setState(Verify.DriveTo, message="Go to unverified source")
-						color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
-						color_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
-						color_to_verify[2] = float(cluster[2]) / DECIMAL_FACTOR
-						verify_unseen = 1
-			if verify_unseen == 0:
-				print("try dissover color: ")
-				found_color_idx, _, found_color_bgr = cwe.discover_color(10)
-				print(found_color_bgr)
-				for idx in range(3):
-					color_to_report[idx] =  found_color_bgr[idx]
-				if found_color_idx > -1:
-					fsm.setState(Scout.PrepReport, message="Prepare proposal")
-		elif fsm.query(Scout.PrepReport):
-			vote_support = getBalance()/DEPOSITFACTOR
-			tag_id = cwe.check_apriltag()
-			if not voteHash ==0:
-				voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
-														int(color_to_report[1] * DECIMAL_FACTOR),
-														int(color_to_report[2] * DECIMAL_FACTOR)],
-														int(tag_id),
-														w3.toWei(vote_support, 'ether'),
-														int(tag_id)).transact(
-					{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
-					 'gasPrice': gasprice})
-			else:
-				#send an empty trasnaction with intention ==3, help updating the SC
-				voteHash = sc.functions.reportNewPt([int(0),
-													int(0),
-													int(0)],
-													int(0),
-													w3.toWei(0.01, 'ether'),
-													int(3)).transact(
-					{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
-					 'gasPrice': gasprice})
-			fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
-		elif fsm.query(Verify.DriveTo):
-			arrived = cwe.drive_to_rgb(color_to_verify, duration=60)
-			if arrived:
-				tag_id = cwe.check_apriltag()
-				_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
-
-				vote_support = getBalance() / DEPOSITFACTOR
-				if vote_support > 0 and found_color_bgr!=-1:
-					for idx in range(3):
-						color_to_report[idx] = found_color_bgr[idx]
-					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
-															   int(color_to_report[1] * DECIMAL_FACTOR),
-															   int(color_to_report[2] * DECIMAL_FACTOR)],
-															   int(tag_id),
-															   w3.toWei(vote_support, 'ether'),
-															int(tag_id)).transact(
-						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
-						 'gasPrice': gasprice})
-				else:
-					# send an empty trasnaction with intention ==3, help updating the SC
-					voteHash = sc.functions.reportNewPt([int(0),
-														int(0),
-														int(0)],
-														int(0),
-														w3.toWei(0.01, 'ether'),
-														int(3)).transact(
+														0, int(3)).transact(
 						{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
 			fsm.setState(Scout.Query, message="Resume scout")
@@ -603,10 +455,10 @@ def Event(rate = eventRate):
 # /* Initialize background daemon threads for the Main-Modules*/
 #######################################################################
 bufferTh = threading.Thread(target=Buffer, args=())
-bufferTh.daemon = True                         
+bufferTh.daemon = True
 
-eventTh = threading.Thread(target=Event, args=())
-eventTh.daemon = True                        
+eventTh = threading.Thread(target=Main, args=())
+eventTh.daemon = True
 
 # Ignore mainmodules by removing from list:
 mainmodules = [bufferTh, eventTh]
@@ -623,13 +475,13 @@ def START(modules = submodules + mainmodules, logs = logmodules):
 		except:
 			mainlogger.critical('Error Starting Log')
 
-	startFlag = 1 
+	startFlag = 1
 	for module in modules:
 		try:
 			module.start()
 		except:
 			mainlogger.critical('Error Starting Module')
-	Main(eventRate)
+	#Main(eventRate)
 
 
 
@@ -653,13 +505,13 @@ def STOP(modules = submodules, logs = logmodules):
 			log.close()
 		except:
 			mainlogger.warning('Error Closing Logfile')
-			
+
 	if isByz:
 		pass
 		mainlogger.info('This Robot was BYZANTINE')
 
 	txlog.start()
-	
+
 	for txHash in txList:
 
 		try:
@@ -669,10 +521,10 @@ def STOP(modules = submodules, logs = logmodules):
 		else:
 			try:
 				txRecpt = w3.eth.getTransactionReceipt(txHash)
-				mined = 'Yes' 
+				mined = 'Yes'
 				txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
 			except:
-				mined = 'No' 
+				mined = 'No'
 				txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
 
 	txlog.close()
@@ -685,14 +537,14 @@ def signal_handler(sig, frame):
 		print('Experiment is running. Type STOP() to stop')
 
 
-signal.signal(signal.SIGINT, signal_handler)	
+signal.signal(signal.SIGINT, signal_handler)
 
 # /* Some useful functions */
 #######################################################################
 
 def getBalance():
 	#check all my balance, including those frozen in unverified clusters.
-	myBalance = float(w3.eth.getBalance(me.key))
+	myBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether"))
 	points_list = sc.functions.getPointListInfo().call()
 	source_list = sc.functions.getSourceList().call()
 	for idx, cluster in enumerate(source_list):
@@ -719,7 +571,7 @@ def getEnodes():
 
 def getEnodeById(__id, gethEnodes = None):
     if not gethEnodes:
-        gethEnodes = getEnodes() 
+        gethEnodes = getEnodes()
     for enode in gethEnodes:
         if readEnode(enode, output = 'id') == __id:
             return enode
@@ -755,13 +607,13 @@ def waitForPC():
 		except:
 			time.sleep(1)
 
-# /* BEGIN EXPERIMENT */ 
+# /* BEGIN EXPERIMENT */
 #######################################################################
 
 if len(sys.argv) == 1:
 	#######################################################################
 
-	# /* Wait for Time Synchronization */ 
+	# /* Wait for Time Synchronization */
 	mainlogger.info('Waiting for Time Sync...')
 	#waitForTS()
 
@@ -778,7 +630,7 @@ if len(sys.argv) == 1:
 elif len(sys.argv) == 2:
 	if sys.argv[1] == '--byz':
 
-		# /* Wait for Time Synchronization */ 
+		# /* Wait for Time Synchronization */
 		mainlogger.info('Waiting for Time Sync...')
 		#waitForTS()
 
@@ -795,7 +647,7 @@ elif len(sys.argv) == 2:
 
 	elif sys.argv[1] == '--nowalk':
 
-		# /* Wait for Time Synchronization */ 
+		# /* Wait for Time Synchronization */
 		mainlogger.info('Waiting for Time Sync...')
 		#waitForTS()
 
@@ -812,12 +664,12 @@ elif len(sys.argv) == 2:
 
 	# # Alternative start executions
 	# elif sys.argv[1] == '--sandbox':
-	# 	print('---//--- SANDBOX-MODE ---//---')		
-	# 	startFlag = 1	
+	# 	print('---//--- SANDBOX-MODE ---//---')
+	# 	startFlag = 1
 
 	# elif sys.argv[1] == '--synctime':
 	# 	print('---//--- SYNC-TIME ---//---')
-	# 	# /* Wait for Time Synchronization */ 
+	# 	# /* Wait for Time Synchronization */
 	# 	waitForTS()
 	# 	startFlag = 1
 
@@ -825,7 +677,7 @@ elif len(sys.argv) == 2:
 	# 	print('---//--- PEER-PC ---//---')
 	# 	# /* Wait for PC Enode */
 	# 	waitForPC()
-	# 	startFlag = 1	
+	# 	startFlag = 1
 
 
 
