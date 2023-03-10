@@ -32,7 +32,6 @@ wait
 #	exit 1
 #fi
 
-
 echo "+-----------------------------------------------------------+"
 echo "Checking all robots..."
 ./check-all
@@ -40,16 +39,15 @@ echo "Checking all robots..."
 fi
 done
 
-echo "+-----------------------------------------------------------+"
-echo "Resetting Geth..."
-./reset-geth
-wait
-
 
 for opt in "$@"
 do
 if [[ $opt == "--reset" || $opt == "-r" ]]; then
 
+	echo "+-----------------------------------------------------------+"
+	echo "Resetting Geth..."
+	./reset-geth
+	wait
 
 	echo "+-----------------------------------------------------------+"
 	echo "Resetting the Genesis Block..."
@@ -71,12 +69,12 @@ tmux kill-session -t GETH >/dev/null 2>&1
 ./tmux-all
 tmux rename-session GETH
 
-tmux kill-session -t MAINLOOP >/dev/null 2>&1
+tmux kill-session -t MAIN >/dev/null 2>&1
 ./tmux-all
-tmux rename-session MAINLOOP
+tmux rename-session MAIN
 
-
-tmux send-keys -t MAINLOOP:0.$PANE "cd robots/controllers" Enter
+tmux send-keys -t GETH:0.$PANE "cd robots/controllers" Enter
+tmux send-keys -t MAIN:0.$PANE "cd robots/controllers" Enter
 
 #python3 -i console-pc.py
 

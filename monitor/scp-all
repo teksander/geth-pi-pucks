@@ -22,20 +22,13 @@ fi
 
 # Customizable list of often uploaded folders/files
 if [ $1 == "scs" ]; then
-  #Regenerate sc from template
-  sed -e "s|DIMS|$DIMS|g"\
-    -e "s|NUMPT|$NUMPT|g"\
-    -e "s|MAXLIFE|$MAXLIFE|g"\
-    -e "s|MINREP|$MINREP|g"\
-    -e "s|RADIUS|$RADIUS|g"\
-    -e "s|MINBALANCE|$MINBALANCE|g"\
-    -e "s|MAXUNVCLUSTER|$MAXUNVCLUSTER|g"\
-  $CONTRACT_TEMPLATE> $CONTRACT_FILE
 
-	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/controllers/scs/build" "$CONTRACT_FILE"
+	envsubst < $CONTRACT_TEMPLATE > $CONTRACT_FILE
+
+	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/controllers/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/controllers/scs"  &
+		scp -r $MAIN_DIR/robots/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/scs"  &
 	done
 	wait
 fi
@@ -60,7 +53,7 @@ fi
 if [ $1 == "contractaddr" ]; then
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/scs/contractAddress.txt "$IP:$MAIN_DIR_ROBOTS/robots/controllers/scs/"  &
+		scp -r $MAIN_DIR/robots/scs/contractAddress.txt "$IP:$MAIN_DIR_ROBOTS/robots/scs/"  &
 	done
 	wait
 fi
@@ -105,7 +98,7 @@ if [ $1 == "upcamera" ]; then
 	wait
 fi
 
-if [ $1 == "calib-camera" ]; then 
+if [ $1 == "calibration" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		scp -r "$IP:$MAIN_DIR_ROBOTS/robots/controllers/calibration/cam" $MAIN_DIR/robots/controllers/calibration/   &
@@ -121,7 +114,13 @@ fi
  	wait
  fi
 
-
+ if [ $1 == "control" ]; then
+ 	for ID in $(cat "$IDS_FILE"); do
+ 		IP="${PREFIX}${ID}"
+ 		scp -r $MAIN_DIR/robots/controllers/ "$IP:$MAIN_DIR_ROBOTS/robots/"  &
+ 	done
+ 	wait
+ fi
 
 # if [ $1 == "gs" ]; then 
 # 	for ID in $(cat "$IDS_FILE"); do
@@ -175,14 +174,6 @@ fi
 # 	for ID in $(cat "$IDS_FILE"); do
 # 		IP="${PREFIX}${ID}"
 # 		scp -r $MAIN_DIR/control/robots/testWhite.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-# 	done
-# 	wait
-# fi
-
-# if [ $1 == "control" ]; then 
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control/"  &
 # 	done
 # 	wait
 # fi

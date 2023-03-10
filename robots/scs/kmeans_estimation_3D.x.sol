@@ -3,12 +3,12 @@ pragma solidity ^0.8.4;
 
 contract ForagingPtManagement{
 
-    uint constant space_size  = DIMS;
-    uint constant num_pt      = NUMPT;
-    uint constant max_life    = MAXLIFE;
-    uint constant min_rep     = MINREP;     //Minimum number of reported points that make contract verified
-    int256 constant radius    = RADIUS;
-    uint constant min_balance = MINBALANCE; //Minimum number of balance to confirm a cluster
+    uint constant space_size  = ${DIMS};
+    uint constant num_pt      = ${NUMPT};
+    uint constant max_life    = ${MAXLIFE};
+    uint constant min_rep     = ${MINREP};     //Minimum number of reported points that make contract verified
+    int256 constant radius    = ${RADIUS};
+    uint constant min_balance = ${MINBALANCE}; //Minimum number of balance to confirm a cluster
     int256 constant max_unverified_cluster =  MAXUNVCLUSTER;
 
 

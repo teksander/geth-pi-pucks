@@ -23,5 +23,13 @@ if python3 -c "import apriltag" &> /dev/null
 then
     echo "Apriltag is already installed"
 else
-    pip3  install apriltag-0.0.16-cp37-cp37m-linux_armv6l.whl
+    apt update
+    apt install cmake
+    cd apriltag
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    make
+    sudo make install
+    echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pi/apriltag/build/lib' >> ~/.bashrc
 fi
