@@ -24,17 +24,31 @@ echo "+-----------------------------------------------------------+"
 echo "Pinging robots..."
 ./ping-all
 wait
+<<<<<<< HEAD
 ## Check responding robot count
 #NUM_RESP=$(wc -l < pi-pucks.txt)
 #if ((NUM_ROB != NUM_RESP)); then
 #	printf '%s\n' "Not enough robots are responding. STOP" >&2
 #	exit 1
 #fi
+=======
+
+# # Check responding robot count
+# NUM_RESP=$(wc -l < pi-pucks.txt)
+# if ((NUM_ROB != NUM_RESP)); then
+# 	printf '%s\n' "Not enough robots are responding. STOP" >&2 
+# 	exit 1         
+# fi
+>>>>>>> 764f23c6028a4372377868b35c590052f11858da
 
 echo "+-----------------------------------------------------------+"
 echo "Checking all robots..."
 ./check-all
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 764f23c6028a4372377868b35c590052f11858da
 fi
 done
 
@@ -43,9 +57,11 @@ echo "Resetting Geth..."
 ./reset-geth
 wait
 
+
 for opt in "$@"
 do
 if [[ $opt == "--reset" || $opt == "-r" ]]; then
+
 
 	echo "+-----------------------------------------------------------+"
 	echo "Resetting the Genesis Block..."
@@ -62,21 +78,27 @@ done
 echo "+-----------------------------------------------------------+"
 echo "Starting Experiment"
 
- # Open two TMUX sessions
- tmux kill-session -t GETH >/dev/null 2>&1
- ./tmux-all
- tmux rename-session GETH
+# Open two TMUX sessions 
+tmux kill-session -t GETH >/dev/null 2>&1
+./tmux-all
+tmux rename-session GETH
 
- tmux kill-session -t MAINLOOP >/dev/null 2>&1
- ./tmux-all
- tmux rename-session MAINLOOP
+tmux kill-session -t MAINLOOP >/dev/null 2>&1
+./tmux-all
+tmux rename-session MAINLOOP
 
- # GETH TMUX session: Execute setup-geth (all robots)
- tmux send-keys -t GETH "./setup-geth" Enter
-
+<<<<<<< HEAD
 tmux send-keys -t MAINLOOP:0.$PANE "cd robots/controllers" Enter
 
 #python3 -i console-pc.py
+=======
+# GETH TMUX session: Execute setup-geth (all robots)
+tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
+
+# GETH TMUX session: Execute setup-geth (all robots)
+tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS/robots/controllers" Enter
+
+>>>>>>> 764f23c6028a4372377868b35c590052f11858da
 # # MAINLOOP TMUX session: Execute mainloop.py with no option (good robots)
 # # MAINLOOP TMUX session: Execute mainloop.py with option --byz (byzantine robots)
 # BYZ_COUNT=0
@@ -94,7 +116,7 @@ tmux send-keys -t MAINLOOP:0.$PANE "cd robots/controllers" Enter
 # # sleep 3
 # # tmux send-keys -t MAINLOOP:0.0 Enter
 
-
+# python3 -i console-pc.py
 
 # read -p "Press Enter when experiment is concluded"
 

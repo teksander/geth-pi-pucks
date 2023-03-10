@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import cv2, picamera
-import os
+import picamera, cv2
 from picamera.array import PiRGBArray
+import os
 import logging
+
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)

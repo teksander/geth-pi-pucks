@@ -245,7 +245,7 @@ class ColorWalkEngine(object):
         image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         #result = self.april.detect(image_grey)
         result = None
-        this_id = -1
+        this_id = 0
         if result:
             this_id = result[0].tag_id
         else:
