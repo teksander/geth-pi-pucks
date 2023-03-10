@@ -1,0 +1,4 @@
+include *.txt *.md
+recursive-include core *.*
+recursive-include opencv *.*
+recursive-include python *.py

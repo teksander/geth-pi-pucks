@@ -15,7 +15,7 @@ from PID import PID
 import sys
 
 sys.path.append('/home/pi/apriltag/python')
-#import apriltag
+import apriltag
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
@@ -148,7 +148,7 @@ class ColorWalkEngine(object):
         self.rot.start()
         self.gs = GroundSensor(gsFreq)
         self.gs.start()
-        #self.april = apriltag.Detector()
+        self.april = apriltag.Detector()
         if exists('calibration/' + robotID + '.csv'):
             with open('calibration/' + robotID + '.csv', 'r') as color_gt:
                 for line in color_gt:
@@ -243,7 +243,7 @@ class ColorWalkEngine(object):
     def check_apriltag(self):
         image = self.cam.get_reading_raw()
         image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        #result = self.april.detect(image_grey)
+        result = self.april.detect(image_grey)
         result = None
         this_id = -1
         if result:
