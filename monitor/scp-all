@@ -35,7 +35,7 @@ if [ $1 == "scs" ]; then
 	solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/controllers/scs/build" "$CONTRACT_FILE"
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/controllers/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/controllers/scs/"  &
+		scp -r $MAIN_DIR/robots/controllers/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/controllers/scs"  &
 	done
 	wait
 fi
@@ -43,7 +43,7 @@ fi
 if [ $1 == "genesis" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis "$IP:$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis"  &
+		scp -r $MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis "$IP:$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER"  &
 	done
 	wait
 fi

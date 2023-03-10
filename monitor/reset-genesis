@@ -56,7 +56,7 @@ rm genesis.conf
 ########## Compile and Deploy Smart Contract ############
 echo "Compiling the Smart Contract..."
 ./scp-all scs
-BINDATA=`cat $MAIN_DIR/robots/scs/build/$CONTRACT_NAME.bin-runtime`
+BINDATA=`cat $MAIN_DIR/robots/controllers/scs/build/$CONTRACT_NAME.bin-runtime`
 
 echo "Contract address:" `cat $MAIN_DIR/robots/scs/contractAddress.txt ` 
 
@@ -76,6 +76,9 @@ sed -i "s|\"0x200000000000000000000000000000000000000000000000000000000000000\"|
 # Undo for the contract account (first match)
 sed -i "0,/\"0xde0b6b3a7640000\"/s//\"0x200000000000000000000000000000000000000000000000000000000000000\"/" ${GENESIS_FILE}
 
+cp $CONTRACT_ABI ./OLDABI.abi
+sed -e "s|\"stateMutability\":\"payable\"|\"stateMutability\":\"payable\",\"payable\":\"true\"|g" ./OLDABI.abi > $CONTRACT_ABI
+rm ./OLDABI.abi
 
 ########## Upload Genesis File ############
 echo "Uploading Genesis Block..."

@@ -18,11 +18,11 @@ export IDS_FILE="$MAIN_DIR/monitor/pi-pucks.txt"
 export GENESIS_FILE="$MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis/pipucks.json" 
 export CONTRACT_FILE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/kmeans_estimation_3D.sol"
 export CONTRACT_TEMPLATE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/kmeans_estimation_3D.x.sol"
-export CONTRACT_ABI="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/build/$CONTRACT_NAME.abi"
+export CONTRACT_ABI="$MAIN_DIR/$EXPERIMENT_FOLDER/controllers/scs/build/$CONTRACT_NAME.abi"
 
 # [NETWORKS]
 export SUBNET="172.27.1"
-# export SUBNET="192.168.1"
+#export SUBNET="192.168.1"
 export MONITOR_ID="100"
 export PREFIX="${ROBOTS_NAME}@${SUBNET}."
 
