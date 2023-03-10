@@ -34,10 +34,10 @@ def init_web3():
 def registerSC(w3):
     sc = None
 
-    abiPath = os.getcwd()+'/scs/build/ForagingPtManagement.abi'
+    abiPath = os.path.dirname(os.getcwd())+'/scs/build/ForagingPtManagement.abi'
     abi = json.loads(open(abiPath).read())
 
-    addressPath = os.getcwd()+'/scs/contractAddress.txt'
+    addressPath = os.path.dirname(os.getcwd())+'/scs/contractAddress.txt'
     address = '0x'+open(addressPath).read().rstrip()
 
     sc = w3.eth.contract(abi=abi, address=address)

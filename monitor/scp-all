@@ -122,6 +122,16 @@ fi
  	wait
  fi
 
+
+ if [ $1 == "arducam" ]; then
+ 	for ID in $(cat "$IDS_FILE"); do
+ 		IP="${PREFIX}${ID}"
+ 		scp -r $MAIN_DIR/robots/arducam/ "$IP:$MAIN_DIR_ROBOTS/robots/"  &
+ 	done
+ 	wait
+ fi
+
+
 # if [ $1 == "gs" ]; then 
 # 	for ID in $(cat "$IDS_FILE"); do
 # 		IP="${PREFIX}${ID}"
