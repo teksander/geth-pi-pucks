@@ -64,18 +64,353 @@ contract ForagingPtManagement{
     function reportNewPt(int256[space_size] memory position, uint category, uint256 amount, uint256 realType, uint256 intention) public payable{
         require(msg.value == amount);
         uint256 curtime = block.timestamp;
+
+        // Assign point a cluster
+        info.minDistance = 1e10;
+        info.minClusterIdx = 0;
+        info.foundCluster = 0;
+        unverfied_clusters = 0;
+
+        int256[space_size] memory position_avg;
+        //average of all supportive votes
+        int256[space_size] memory position_sup_avg;
+
+        int256 this_distance = 0;
+
+        // Recluster all points k // can be skipped in certain task configurations
+
+        for (uint k=0; k<pointList.length; k++){
+            for (uint i=0; i<clusterList.length; i++){
+
+                // Process cluster expiration amount
+                if (clusterList[i].verified==1 && clusterList[i].life<curtime){
+                    // verified cluster where credit is already redistributed
+                    clusterList[i].verified=2;
+                }
+                if (unverfied_clusters>=max_unverified_cluster){
+                    clusterList[i].verified=3;
+                }
+                // Check if the newly reported pt belongs to any cluster
+                if (clusterList[i].verified==0){ // Awaiting verification, only check clusters that are awaiting verification
+                    unverfied_clusters+=1;
+                    for (uint j=0; j<space_size; j++){
+                        position_avg[j] = (int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
+                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit+amount);
+                    }
+                    if(category==1){
+                        for (uint j=0; j<space_size; j++){
+                        position_sup_avg[j] = (int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
+                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit_food+amount);
+                        }
+                    }
+                    this_distance = getDistance(position_avg, pointList[k].position);
+
+                    if (this_distance<info.minDistance){
+                        info.minDistance = this_distance;
+                        info.minClusterIdx = i;
+                        info.foundCluster = 1;
+                        info.position  = position_avg;
+                        info.positiono = position_sup_avg;
+                        info.minClusterStatus = clusterList[i].verified;
+                    }
+                }
+            }
+            // Update the membership to the nearest cluster of point[k]
+            if (info.minClusterIdx != uint(pointList[k].cluster)){
+                clusterList[uint(pointList[k].cluster)].num_rep-=1;
+                clusterList[uint(pointList[k].cluster)].total_credit-=pointList[k].credit;
+                if (pointList[k].category==1){
+                    clusterList[uint(pointList[k].cluster)].total_credit_food-=pointList[k].credit;
+                }
+                clusterList[info.minClusterIdx].num_rep+=1;
+                clusterList[info.minClusterIdx].total_credit+=pointList[k].credit;
+                clusterList[info.minClusterIdx].position = info.position;
+                if (pointList[k].category==1){
+                    clusterList[info.minClusterIdx].total_credit_food+=pointList[k].credit;
+                    clusterList[info.minClusterIdx].sup_position = info.positiono;
+                }
+                pointList[k].cluster = int256(info.minClusterIdx);
+            }
+
+        }
+
+        // Unique report
+        for (uint i=0; i<clusterList.length; i++){
+            if (clusterList[i].verified==0){
+                for (uint k=0; k<pointList.length-1; k++){
+                    for (uint l=k+1; l<pointList.length; l++){
+                        if (pointList[k].cluster == int256(i) && pointList[l].cluster == int256(i) && pointList[k].sender == pointList[l].sender){
+                            payable(pointList[l].sender).transfer(pointList[l].credit);
+                            clusterList[i].num_rep-=1;
+                            clusterList[i].total_credit-=pointList[l].credit;
+                            if (pointList[l].category==1){
+                                clusterList[i].total_credit_food-=pointList[l].credit;
+                            }
+                            pointList[l].cluster=-1;
+                         }
+                    }
+                }
+            }
+
+        }
+
+        // Assign new point a cluster
+        info.minDistance = 1e10;
+        info.minClusterIdx = 0;
+        info.foundCluster = 0;
+        unverfied_clusters = 0;
+        this_distance = 0;
+
+        // Does it need to go back to zeros?
+        // int256[space_size] position_avg;
+        // int256 this_distance = 0;
+
+        if (category==1 && clusterList.length == 0){
+            clusterList.push(Cluster(position, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention, position));
+            pointList.push(Point(position, amount, category, 0, msg.sender, realType));
+        }
+        else{
+            // Search for closest unverified cluster
+            for (uint i=0; i<clusterList.length; i++){
+                //Process cluster expirationamount
+                if (clusterList[i].verified==1 && clusterList[i].life<curtime){
+                    // verified cluster where credit is already redistributed
+                    clusterList[i].verified=2;
+                }
+
+                if (unverfied_clusters>=max_unverified_cluster){
+                    clusterList[i].verified=3;
+                }
+                //Check if the newly reported pt belongs to any cluster
+                if (clusterList[i].verified==0){ //Cluster awaiting verification
+                    unverfied_clusters+=1;
+                    for (uint j=0; j<space_size; j++){
+                        position_avg[j] = (int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
+                                         + int256(position[j])*int256(amount))/int256(clusterList[i].total_credit+amount);
+                    }
+                    if(category==1){
+                        for (uint j=0; j<space_size; j++){
+                        position_sup_avg[j] = (int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
+                                         + int256(position[j])*int256(amount))/int256(clusterList[i].total_credit_food+amount);
+                        }
+                    }
+                    this_distance = getDistance(position_avg, position);
+
+
+                    if (this_distance<=radius && this_distance<info.minDistance){
+                        info.minDistance = this_distance;
+                        info.minClusterIdx = i;
+                        info.foundCluster = 1;
+                        // info.x=x_avg;
+                        // info.y=y_avg;
+                        // info.xo = x;
+                        // info.yo = y;
+                        info.position  = position_avg;
+                        info.positiono = position_sup_avg;
+                        info.minClusterStatus = clusterList[i].verified;
+                    }
+                    else if (info.foundCluster == 0){
+                        //only for debugging purpose
+                        info.minDistance = this_distance;
+                        info.minClusterIdx = i;
+                        info.foundCluster = 0;
+                        // info.x=x_avg;
+                        // info.y=y_avg;
+                        // info.xo = x;
+                        // info.yo = y;
+                        info.position  = position_avg;
+                        info.positiono = position_sup_avg;
+                        info.minClusterStatus = clusterList[i].verified;
+                    }
+                }
+            }
+
+
+            //if exists non-verified cluster that the new point belongs
+            if (info.minClusterStatus == 0 && info.foundCluster==1 && clusterList[info.minClusterIdx].init_reporter != msg.sender && intention !=3){
+                clusterList[info.minClusterIdx].num_rep+=1;
+                clusterList[info.minClusterIdx].total_credit+=amount;
+                //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
+                if (category==1){
+                    clusterList[info.minClusterIdx].total_credit_food+=amount;
+                    clusterList[info.minClusterIdx].sup_position = info.positiono;
+                }
+
+                // clusterList[info.minClusterIdx].x = info.x;
+                // clusterList[info.minClusterIdx].y = info.y;
+                clusterList[info.minClusterIdx].position = info.position;
+
+                //ADD CORRESPONDING POINT
+                pointList.push(Point(position, amount, category, int256(info.minClusterIdx), msg.sender, realType));
+                //Remove redundant reporters from the pointList
+                for (uint k=0; k<pointList.length-1; k++){
+                    for (uint l=k+1; l<pointList.length; l++){
+                        if (pointList[k].cluster == int256(info.minClusterIdx) && pointList[l].cluster == int256(info.minClusterIdx) && pointList[k].sender == pointList[l].sender){
+                            payable(pointList[l].sender).transfer(pointList[l].credit);
+                            clusterList[info.minClusterIdx].num_rep-=1;
+                            clusterList[info.minClusterIdx].total_credit-=pointList[l].credit;
+                            if (pointList[l].category==1){
+                                clusterList[info.minClusterIdx].total_credit_food-=pointList[l].credit;
+                            }
+                            pointList[l].cluster=-1;
+                         }
+                    }
+                }
+            }
+            else if (category==1 && info.foundCluster==0 && clusterList[info.minClusterIdx].init_reporter != msg.sender && unverfied_clusters<max_unverified_cluster && intention !=3){
+                //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster, this is only for experimental purpose
+                clusterList.push(Cluster(position,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,position));
+                pointList.push(Point(position,amount, category, int256(clusterList.length-1), msg.sender, realType));
+            }
+            else{
+                //Do nothing and transfer back, if anything else
+                payable(msg.sender).transfer(amount);
+            }
+        }
+
+        //If cluster receives enough samples, verified.
+        uint256 total_non_food_credit = 0;
+        uint256 bonus_credit = 0;
+        for(uint i=0; i<clusterList.length; i++){
+            if (clusterList[i].verified==0 && clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=min_balance && clusterList[i].total_credit_food>(clusterList[i].total_credit-clusterList[i].total_credit_food)){
+                clusterList[i].verified=1; //cluster verified
+                clusterList[i].life = curtime+max_life;
+                total_non_food_credit = clusterList[i].total_credit-clusterList[i].total_credit_food;
+                //Redistribute money
+                uint256 food_num =0;
+                for (uint j=0; j<pointList.length; j++){
+                    if (pointList[j].cluster == int256(i) && pointList[j].category ==1){
+                        food_num+=1;
+                     }
+                }
+
+                for (uint j=0; j<pointList.length; j++){
+                    if (pointList[j].cluster == int256(i) && pointList[j].category ==1){
+                        //bonus_credit = total_non_food_credit*pointList[j].credit/clusterList[info.minClusterIdx].total_credit_food;
+                        if (food_num>0){
+                            bonus_credit = total_non_food_credit/food_num;
+                        }
+                        else{
+                            bonus_credit = 0;
+                        }
+                        payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
+                     }
+                }
+                uint c = 0;
+                uint curLength = pointList.length;
+                while(c<curLength){
+                    if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
+                        pointList[c] = pointList[pointList.length-1];
+                        pointList.pop();
+                        curLength = pointList.length;
+                    }
+                    else{
+                        c+=1;
+                    }
+                }
+            }
+            else if (clusterList[i].verified==0 && clusterList[i].num_rep>=min_rep && clusterList[i].total_credit>=min_balance && clusterList[i].total_credit_food<(clusterList[i].total_credit-clusterList[i].total_credit_food)){
+                clusterList[i].verified=2; //cluster abandon
+                total_non_food_credit = clusterList[i].total_credit-clusterList[i].total_credit_food;
+                //Redistribute money
+                //WVG wining side
+                uint256 non_food_num =0;
+                for (uint j=0; j<pointList.length; j++){
+                    if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
+                        non_food_num+=1;
+                     }
+                }
+                for (uint j=0; j<pointList.length; j++){
+                    if (pointList[j].cluster == int256(i) && pointList[j].category ==0){
+                        // bonus_credit = clusterList[i].total_credit_food*pointList[j].credit/total_non_food_credit;
+                        if (non_food_num>0){
+                            bonus_credit = clusterList[i].total_credit_food/non_food_num;
+                        }
+                        else{
+                            bonus_credit = 0;
+                        }
+
+                        payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
+                     }
+                }
+                //remove points
+                uint c = 0;
+                uint curLength = pointList.length;
+                while(c<curLength){
+                    if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
+                        pointList[c] = pointList[pointList.length-1];
+                        pointList.pop();
+                        curLength = pointList.length;
+                    }
+                    else{
+                        c+=1;
+                    }
+                }
+            }
+            else if (clusterList[i].verified==3){
+                for (uint j=0; j<pointList.length; j++){
+                if (pointList[j].cluster == int256(i)){
+                    payable(pointList[j].sender).transfer(pointList[j].credit);
+                 }
+                }
+                //remove points
+            uint c = 0;
+            uint curLength = pointList.length;
+                while(c<curLength){
+                    if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
+                        pointList[c] = pointList[pointList.length-1];
+                        pointList.pop();
+                        curLength = pointList.length;
+                    }
+                    else{
+                        c+=1;
+                    }
+                }
+            }
+        }
+
     }
 
     //----- setters and getters ------
 
-    function getSourceList() public view returns(int){
-        return 0;
+    function getSourceList() public view returns(Cluster[] memory){
+        return clusterList;
     }
-    function getClusterInfo() public view returns(int){
-        return 0;
+    function getClusterInfo() public view returns(clusterInfo memory){
+        return info;
     }
-    function getPointListInfo() public view returns(int){
-        return 0;
+    function getPointListInfo() public view returns(Point[]  memory){
+        return pointList;
     }
 
+    //------ pure functions (math) ------
+
+    function getDistance2D(int256 _x1, int256 _x2, int256 _y1, int256 _y2) private pure returns(int256) {
+        // Return a distance measure in 2D space
+        return sqrt(((_x2 - _x1)**2) + ((_y2 - _y1)**2));
+    }
+
+    function getDistance(int256[space_size] memory _p1, int256[space_size] memory _p2) private pure returns(int256) {
+        // Return a distance measure in generic dimensions
+        int256 sqsum = 0;
+        for (uint j=0; j<space_size; j++){
+            sqsum += (_p2[j]-_p1[j])**2;
+        }
+        return sqrt(sqsum);
+    }
+
+    function sqrt(int256 _kx) private pure returns (int256 _ky) {
+        // Return an approximation of the sqrt
+        int256 _kz = (_kx + 1) / 2;
+        _ky = _kx;
+        while (_kz < _ky) {
+            _ky = _kz;
+            _kz = (_kx / _kz + _kz) / 2;
+        }
+    }
+
+    function abs(int256 _k) private pure returns (int256) {
+        // Return the absolute value
+        return _k >= 0 ? _k : -_k;
+    }
 }
