@@ -5,48 +5,53 @@
 cd $(dirname $0)
 source globalconfig
 
+# If is a Pi-Puck
+if [[ $LOGNAME == $ROBOTS_NAME ]]
+then
+    FILE="/boot/pi-puck_id"
+    ID=$(cat "$FILE")
+else
+    ID="100"
+fi
+
+# If using router
+if echo "$SUBNET" | grep -q "192.168"; then
+    ID=$(ip addr | grep -m 1 -oE  $SUBNET.[0-9]+ | cut -d '.' -f 4 | head -n 1)
+fi
+
+MSG="-------------------------\n"
+
 # If the GETH process has not been initialized in the blockchain directory
 if [ ! -d "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/geth" ] 
 then
     geth init  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json" \
-    --datadir  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER" \
-    --keystore "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/keystore/${ID}"
-    echo "Initialized GETH"
-    echo "Genesis: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json"
-    echo "Keystore: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/keystore/${ID}"
+    --datadir  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER" 
+
+    MSG+="Initialized GETH\n"
+    MSG+="Genesis: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json\n"
+    MSG+="Keystore: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/keystores/${ID}\n"
 fi
 
-# If is a Pi-Puck
-if [[ $LOGNAME == $ROBOTS_NAME ]]
-then
-	FILE="/boot/pi-puck_id"
-	ID=$(cat "$FILE")
-else
-	ID="100"
-fi
+MSG+="GETH running @ ${SUBNET}.${ID}\n"
+MSG+="-------------------------"
+
+echo "" & sleep 5 &&  echo -e $MSG & disown
 
 geth --datadir "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER" \
+--keystore "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/keystores/$ID" \
 --syncmode "full" \
 --port 30311 \
 --ws \
 --ws.addr "0.0.0.0" \
 --ws.port 3335 \
---ws.origins 172.17.0.0 \
 --ws.api "personal,eth,net,web3,txpool,miner,admin" \
 --networkid 1515 \
 --allow-insecure-unlock \
 --lightkdf \
---verbosity 5 \
+--verbosity 4 \
 --vmdebug \
 --nodiscover \
 --miner.gasprice "0x1" \
 --miner.gastarget "0x1" \
 --miner.gaslimit "0x9000000000" \
 --nat=extip:"${SUBNET}.${ID}" 
-
-# Flags to maybe fix the peering delay issue
-# --maxpendpeers 5 \
-# --config ${MAIN_DIR}/geth/geth-config.toml
-
-echo ${ID}
-# --miner.gaslimit "0x9000000000000" \

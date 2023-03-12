@@ -24,17 +24,22 @@ fi
 if [ $1 == "scs" ]; then
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/scs"  &
+		scp -r $MAIN_DIR/robots/scs/build "$IP:$MAIN_DIR_ROBOTS/robots/scs" &
 	done
 	wait
+fi
+
+if [ $1 == "globalconfig" ]; then 
+	for ID in $(cat "$IDS_FILE"); do
+		rsync $MAIN_DIR/globalconfig "$PREFIX$ID:$MAIN_DIR_ROBOTS"
+	done
 fi
 
 if [ $1 == "genesis" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $GENESIS_FILE "$IP:$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis"  &
+		scp -r $GENESIS_FILE "$IP:$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis" 
 	done
-	wait
 fi
 
 if [ $1 == "abi" ]; then 
@@ -69,13 +74,6 @@ if [ $1 == "setup-router" ]; then
 	wait
 fi
 
-if [ $1 == "globalconfig" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS" &
-	done
-	wait
-fi
 
 if [ $1 == "setup-adhoc" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
@@ -133,6 +131,7 @@ fi
  	done
  	wait
  fi
+
 
 
 # if [ $1 == "gs" ]; then 

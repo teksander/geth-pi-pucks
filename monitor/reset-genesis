@@ -22,7 +22,7 @@ echo "15" >> genesis.conf # 15 seconds block time
 # List of sealers
 for ID in $(cat "$IDS_FILE");
 do
-    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystore/$ID")
+    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystores/$ID/$ID")
     echo ${KEY:12:40} >> genesis.conf 
 done
 echo "" >> genesis.conf 
@@ -30,7 +30,7 @@ echo "" >> genesis.conf
 # Pre-fund all accounts
 for ID in $(cat "$IDS_FILE");
 do
-    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystore/$ID")
+    KEY=$(cat "$MAIN_DIR/$BLOCKCHAIN_FOLDER/keystores/$ID/$ID")
     echo ${KEY:12:40} >> genesis.conf 
 done
 

@@ -44,6 +44,8 @@ for opt in "$@"
 do
 if [[ $opt == "--reset" || $opt == "-r" ]]; then
 
+	./scp-all globalconfig
+
 	echo "+-----------------------------------------------------------+"
 	echo "Resetting Geth..."
 	./reset-geth
@@ -53,11 +55,7 @@ if [[ $opt == "--reset" || $opt == "-r" ]]; then
 	echo "Resetting the Genesis Block..."
 	./reset-genesis
 	wait
-
-	# echo "+-----------------------------------------------------------+"
-	# echo "Resetting the Pi-Puck keys..."
-	# ./reset-keys
-	# wait
+	
 fi
 done
 
