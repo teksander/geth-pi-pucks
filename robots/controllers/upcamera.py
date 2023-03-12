@@ -122,27 +122,17 @@ class UpCamera(object):
             idx += interval
         return feature
 
-    def get_image_raw(self,filename = 'test.jpg'):
+    def get_image_raw(self,filename = 'test'):
         # File to store image:
-        filename = 'calibration/cam/images/robot%s-%s' % (self.id, filename)
+        filename = '../calibration/cam/images/%s-%s.jpg' % (filename, self.id)
         rawCapture = PiRGBArray(self.camera)
         self.camera.capture(filename)
-
-
-        # image = rawCapture.array
-        # rawCapture.truncate(0)
-
-        # # Rotate image
-        # if self.rotate:
-        #     image = cv2.rotate(image, cv2.ROTATE_180)
-
-        # # Crop image according to user-defined region
-        # centre = image.shape
-        # cx = centre[1]/2 - 480/2
-        # cy = centre[0]/2- self.interesting_region_h/2 + self.interesting_region_o
-        # crop_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
-        # return crop_img
 
     def stop(self):
         """ This method is called before a clean exit """
         self.camera.close()
+
+if __name__ == "__main__":
+    cam = UpCamera(500)
+    cam.get_image_raw()
+    cam.stop()

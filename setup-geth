@@ -27,7 +27,7 @@ then
     geth init  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json" \
     --datadir  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER" 
 
-    MSG+="Initialized GETH\n"
+    MSG+="GETH initialized @ $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/geth\n"
     MSG+="Genesis: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json\n"
     MSG+="Keystore: $MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/keystores/${ID}\n"
 fi

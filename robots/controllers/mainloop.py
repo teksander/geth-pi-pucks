@@ -78,7 +78,7 @@ clocks['query_sc'] = Timer(1)
 # subprocess.call("source ../../globalconfig")
 
 # Calibrated parameters
-#with open('calibration/gsThreshes.txt') as calibFile:
+#with open('../calibration/gsThreshes.txt') as calibFile:
 #	gsThresh = list(map(int, calibFile.readline().split()))
 
 # /* Initialize Logging Files and Console Logging*/
