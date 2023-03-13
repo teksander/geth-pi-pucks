@@ -3,8 +3,6 @@
 # Optional flags:
 # --byz       (starts experiment as a byzantine robot)
 # --sandbox   (control sensors and actuators without starting experiment)
-# --synctime  (synchronizes clocks and enters sandbox)
-# --peer2pc   (peers to the computer and enters sandbox)
 # --nowalk    (normal experiment but robots don't move)
 
 # /* Logging Levels for Console and File */
@@ -51,7 +49,7 @@ txList = []
 #######################################################################
 import logging
 if logtofile:
-	logFile = 'logs/loggers.txt'
+	logFile = '../logs/loggers.txt'
 	logging.basicConfig(filename=logFile, filemode='w+', format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 else:
 	logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -84,28 +82,33 @@ clocks['query_sc'] = Timer(1)
 # /* Initialize Logging Files and Console Logging*/
 #######################################################################
 
-robotID = open("/boot/pi-puck_id", "r").read().strip()
-
 # Experiment data logs (recorded to file)
 header = ['ESTIMATE','W','B','S1','S2','S3']
-estimatelog = Logger('logs/estimate.csv', header, 10)
+estimatelog = Logger('../logs/estimate.csv', header, 10)
+
 header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-bufferlog = Logger('logs/buffer.csv', header, 2)
+bufferlog = Logger('../logs/buffer.csv', header, 2)
+
 header = ['VOTE']
-votelog = Logger('logs/vote.csv', header)
+votelog = Logger('../logs/vote.csv', header)
+
 header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
-blocklog = Logger('logs/block.csv', header)
+blocklog = Logger('../logs/block.csv', header)
+
 header = ['BLOCK', 'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
-sclog = Logger('logs/sc.csv', header)
+sclog = Logger('../logs/sc.csv', header)
+
 header = ['#BLOCKS']
-synclog = Logger('logs/sync.csv', header)
+synclog = Logger('../logs/sync.csv', header)
+
 header = ['CHAINDATASIZE', '%CPU']
-extralog = Logger('logs/extra.csv', header, 5)
+extralog = Logger('../logs/extra.csv', header, 5)
+
 header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
-txlog = Logger('logs/tx.csv', header)
+txlog = Logger('../logs/tx.csv', header)
 
 # List of logmodules --> iterate .start() to start all; remove from list to ignore
-logmodules = [bufferlog, estimatelog, votelog, sclog, blocklog, synclog, extralog]
+logmodules = [estimatelog, bufferlog, votelog, blocklog, sclog, synclog, extralog, txlog]
 
 # Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
 mainlogger = logging.getLogger('main')
@@ -130,18 +133,15 @@ logging.getLogger('rgbleds').setLevel(loglevel)
 # /* Initialize Sub-modules */
 #######################################################################
 
+robotID = open("/boot/pi-puck_id", "r").read().strip()
+
 # /* Init web3.py */
 mainlogger.info('Initialising Python Geth Console...')
 w3 = init_web3()
 sc = registerSC(w3)
 
-# /* init fsm */
-
-
 # /* Init an instance of peer for this Pi-Puck */
-robotEN  = w3.geth.admin.nodeInfo().enode
-robotKEY = w3.eth.coinbase
-me = Peer(robotID, robotEN, robotKEY)
+me = Peer(robotID, w3.enode, w3.key)
 
 # /* Init an instance of peer for the monitor PC */
 pc = Peer(pcID)
@@ -533,9 +533,12 @@ def signal_handler(sig, frame):
 	if not startFlag:
 		mainlogger.info('Experiment has not started. Exiting')
 		sys.exit()
-	elif startFlag:
-		print('Experiment is running. Type STOP() to stop')
 
+	elif startFlag:
+		STOP()
+		print('Experiment is stopped. Exiting')
+		sys.exit()
+		
 
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -586,115 +589,31 @@ def getIds(__enodes = None):
 def getIps():
     return [enode.split('@',2)[1].split(':',2)[0] for enode in getEnodes()]
 
-def waitForTS():
-	while True:
-		try:
-			TIME = tcp.request(pc.ip, 40123)
-			subprocess.call(["sudo","timedatectl","set-time",TIME])
-			mainlogger.info('Synced Time: %s', TIME)
-			break
-		except:
-			time.sleep(1)
-
-def waitForPC():
-	while True:
-		try:
-			pc.enode = tcp.request(pc.ip, tcpPort)
-			pc.key = tcp.request(pc.ip, 40422)
-			w3.geth.admin.addPeer(pc.enode)
-			mainlogger.info('Peered to PC')
-			break
-		except:
-			time.sleep(1)
-
 # /* BEGIN EXPERIMENT */
 #######################################################################
 
+input("Press Enter to start experiment")
+
 if len(sys.argv) == 1:
-	#######################################################################
-
-	# /* Wait for Time Synchronization */
-	mainlogger.info('Waiting for Time Sync...')
-	#waitForTS()
-
-	# /* Register robot to the Smart Contract*/
-	#registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
-	#txList.append(registerHash)
-
-	input("Press Enter to start experiment")
+	
 	START()
-	mainlogger.info('Type Ctrl+C to stop experiment')
 	mainlogger.info('Robot ID: %s', me.id)
-
 
 elif len(sys.argv) == 2:
 	if sys.argv[1] == '--byz':
-
-		# /* Wait for Time Synchronization */
-		mainlogger.info('Waiting for Time Sync...')
-		#waitForTS()
-
-		# /* Register robot to the Smart Contract*/
-		#registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
-		#txList.append(registerHash)
-
-		input("Press Enter to start experiment")
 		isByz = 1
+
 		START()
-		mainlogger.info('Type Ctrl+C to stop experiment')
 		mainlogger.info('Robot ID: %s (Byzantine)', me.id)
 
-
 	elif sys.argv[1] == '--nowalk':
-
-		# /* Wait for Time Synchronization */
-		mainlogger.info('Waiting for Time Sync...')
-		#waitForTS()
-
-		# /* Register robot to the Smart Contract*/
-		#registerHash = sc.functions.registerRobot().transact({'gas':gasLimit, 'gasPrice':gasprice})
-		#txList.append(registerHash)
-
-		input("Press Enter to start experiment")
 		cwe.rot.setWalk(False)
+
 		START()
-		mainlogger.info('Type Ctrl+C to stop experiment')
 		mainlogger.info('Robot ID: %s', me.id)
 
+	elif sys.argv[1] == '--sandbox':
+		print('---//--- SANDBOX-MODE ---//---')
+		startFlag = 1
 
-	# # Alternative start executions
-	# elif sys.argv[1] == '--sandbox':
-	# 	print('---//--- SANDBOX-MODE ---//---')
-	# 	startFlag = 1
-
-	# elif sys.argv[1] == '--synctime':
-	# 	print('---//--- SYNC-TIME ---//---')
-	# 	# /* Wait for Time Synchronization */
-	# 	waitForTS()
-	# 	startFlag = 1
-
-	# elif sys.argv[1] == '--peer2pc':
-	# 	print('---//--- PEER-PC ---//---')
-	# 	# /* Wait for PC Enode */
-	# 	waitForPC()
-	# 	startFlag = 1
-
-
-
-# # Correct way to log to file: Setup a new handler and log everything..
-# logFormatter = logging.Formatter('[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
-# fileHandler = logging.FileHandler(logFile)
-# fileHandler.setFormatter(logFormatter)
-# fileHandler.setLevel(fileloglevel)
-# if fileloglevel != 0:
-# 	logging.getLogger('main').addHandler(fileHandler)
-# 	logging.getLogger('estimate').addHandler(fileHandler)
-# 	logging.getLogger('buffer').addHandler(fileHandler)
-# 	logging.getLogger('events').addHandler(fileHandler)
-# 	logging.getLogger('voting').addHandler(fileHandler)
-# 	logging.getLogger('console').addHandler(fileHandler)
-# 	logging.getLogger('erandb').addHandler(fileHandler)
-# 	logging.getLogger('randomwalk').addHandler(fileHandler)
-# 	logging.getLogger('groundsensor').addHandler(fileHandler)
-# 	logging.getLogger('aux').addHandler(fileHandler)
-# 	logging.getLogger('rgbleds').addHandler(fileHandler)
+mainlogger.info('Type Ctrl+C to stop experiment')

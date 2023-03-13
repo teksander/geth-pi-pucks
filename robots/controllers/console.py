@@ -22,23 +22,23 @@ def init_web3():
 	w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 	w3.geth.personal.unlockAccount(w3.eth.coinbase,"",0)
 	w3.eth.defaultAccount = w3.eth.coinbase
-	key = w3.eth.coinbase
-	enode = w3.geth.admin.nodeInfo().enode
+	w3.key = w3.eth.coinbase
+	w3.enode = w3.geth.admin.nodeInfo().enode
 
 	logger.info('VERSION: %s', w3.clientVersion)
-	logger.info('ADDRESS: %s', key)
-	logger.info('ENODE: %s', enode)
+	logger.info('ADDRESS: %s', w3.key)
+	logger.info('ENODE: %s', w3.enode)
 
 	return w3
 
 def registerSC(w3):
     sc = None
 
-    abiPath = os.path.dirname(os.getcwd())+'/scs/build/ForagingPtManagement.abi'
-    abi = json.loads(open(abiPath).read())
+    abiFile = '../scs/build/ForagingPtManagement.abi'
+    abi = json.loads(open(abiFile).read())
 
-    addressPath = os.path.dirname(os.getcwd())+'/scs/contractAddress.txt'
-    address = '0x'+open(addressPath).read().rstrip()
+    addressFile = '../scs/contractAddress.txt'
+    address = '0x'+open(addressFile).read().rstrip()
 
     sc = w3.eth.contract(abi=abi, address=address)
     return sc
@@ -73,16 +73,7 @@ def globalBuffer():
 				break
 			except:
 				time.sleep(0.5)
-				
-def waitForTS():
-	while True:
-		try:
-			TIME = tcp.request(pc.ip, 40123)
-			subprocess.call(["sudo","timedatectl","set-time",TIME])
-			print('Synced Time')
-			break
-		except:
-			time.sleep(1)
+
 
 def getBalance():
     # Return own balance in ether
@@ -116,6 +107,5 @@ if __name__ == "__main__":
 			peerBuffer = []
 			# globalBuffer()
 			waitForPC()
-			waitForTS()
 
 			w3.geth.miner.start()

@@ -9,30 +9,29 @@
 
 ID_FILE="/boot/pi-puck_id"
 
-if test -f "$ID_FILE"; then
-	# Pi-Puck ID and network IF
+# Pi-Pucks ID/IF
+if [ -f "$ID_FILE" ]; then
 	ID=$(cat $ID_FILE)
 	IF=wlan0
-	echo "Joining Ad-hoc network with Pi-Puck ID $ID"
+	
+# Monitor ID/IF 
 else
-	# Monitor-PC ID and network IF
 	ID="100"
-	# IF=wlx801f025a9a7f
 	IF=wlx801f025a9aa1
-	echo "Joining Ad-hoc network with ID $ID"
 fi
 
-	# User chosen ID/IF 
+# User-defined ID/IF
 if [ "$#" -eq 1 ]; then
 	ID=$1
 elif [ "$#" -eq 2 ]; then
 	ID=$1
 	IF=$2
-	echo "Joining Ad-hoc network with ID $ID"
 fi
 
+echo "Joining Ad-hoc network with ID $ID @ IF $IF"
+
 # Disable wpa_supplicant and dhcpcd	on the Pi-Pucks
-if test -f "$ID_FILE"; then
+if [ -f "$ID_FILE" ]; then
     systemctl stop wpa_supplicant.service
     systemctl disable wpa_supplicant.service
     systemctl stop dhcpcd.service

@@ -1,13 +1,15 @@
 #!/bin/bash  
 # Short script to send a file/folder to all robots
-# Assumptions:
-# - The Pi-puck IDs are listed in pi-pucks.txt
-# - Arg1 is the file to send; Arg2 is the folder in /home/pi/
-# Quick options:
-# 'scs'      (uploads smart contract build folder)
-# 'mainloop' (uploads the mainloop)
-# 'control'  (uploads the full robot control folder)
-# 'all'      (deletes and restores the main directory)
+# Arguments:
+# - Arg1 is the file to send in $MAIN_DIR
+# - Arg2 is the destination in $MAIN_DIR_ROBOTS
+# Alternatively:
+# - Arg1 is one pre-set quick option
+# Examples:
+# 'scp-all scs'      (uploads smart contract build folder)
+# 'scp-all mainloop' (uploads the mainloop)
+# 'scp-all control'  (uploads the full robot control folder)
+# 'scp-all all'      (deletes and restores the main directory)
 
 
 source ../globalconfig
@@ -15,7 +17,7 @@ source ../globalconfig
 if [ $# -eq 2 ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r "$1" "$IP:$MAIN_DIR/$2"  &
+		scp -r "$1" "$IP:$MAIN_DIR_ROBOTS/$2"  &
 	done
 	wait
 fi
@@ -45,7 +47,7 @@ fi
 if [ $1 == "abi" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/scs/build/$CONTRACT_NAME.abi "$IP:$MAIN_DIR_ROBOTS/robots/scs/build/"  &
+		scp -r $MAIN_DIR/robots/scs/build/$CONTRACT_NAME.abi "$IP:$MAIN_DIR_ROBOTS/robots/scs/build"  &
 	done
 	wait
 fi

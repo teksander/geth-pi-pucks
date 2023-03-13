@@ -1,8 +1,7 @@
 #!/bin/bash  
 # Short script to generate and upload a new genesis block
 # Assumptions:
-# - The Pi-puck IDs (initial sealers) are listed in pi-pucks.txt
-# - puppeth is installed
+# - puppeth is in PATH
 
 source ../globalconfig
 

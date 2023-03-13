@@ -55,6 +55,11 @@ if [[ $opt == "--reset" || $opt == "-r" ]]; then
 	echo "Resetting the Genesis Block..."
 	./reset-genesis
 	wait
+
+	echo "+-----------------------------------------------------------+"
+	echo "Synchronizing clocks..."
+	TIME=$(date +"%F %T")
+	./ssh-all "sudo timedatectl set-time '$TIME'"
 	
 fi
 done
@@ -66,69 +71,21 @@ if [[ $opt == "--start" || $opt == "-s" ]]; then
 	echo "+-----------------------------------------------------------+"
 	echo "Starting Experiment"
 
-	# Open two TMUX sessions 
-	tmux kill-session -t GETH >/dev/null 2>&1
-	./tmux-all
-	tmux rename-session GETH
-
-	tmux kill-session -t MAIN >/dev/null 2>&1
-	./tmux-all
-	tmux rename-session MAIN
-
-	tmux send-keys -t GETH:0.$PANE "./setup-geth" Enter
-	tmux send-keys -t MAIN:0.$PANE "cd robots/controllers" Enter
+	./tmux-all "geth + main"
 	
 fi
 done
 
-
-
-#python3 -i console-pc.py
-
-
-# # MAINLOOP TMUX session: Execute mainloop.py with no option (good robots)
-# # MAINLOOP TMUX session: Execute mainloop.py with option --byz (byzantine robots)
-# BYZ_COUNT=0
-# tmux set-option -w -t MAINLOOP synchronize-panes off
-# # Randomely select byzantine robots:
-# for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
-# 	if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
-# 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py --byz"
-# 		let BYZ_COUNT++
-# 	else
-# 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/control/robots" Enter "python3 -i mainloop.py"
-# 	fi
-# done
-# tmux set-option -w -t MAINLOOP synchronize-panes on
-# # sleep 3
-# # tmux send-keys -t MAINLOOP:0.0 Enter
-
-# python3 -i console-pc.py
-
 # read -p "Press Enter when experiment is concluded"
 
-# # Stop the Experiment
-# tmux send-keys -t MAINLOOP:0.0 C-c
-# sleep 0.5
-# tmux send-keys -t MAINLOOP:0.0 C-d
-# sleep 1
-# tmux send-keys -t GETH:0.0 C-c
-# sleep 1
-# tmux kill-session -t GETH
+# for opt in "$@"
+# do
+# if [[ $opt == "--collect" || $opt == "-c" ]]; then
 
-# # Record log files
-# while true; do
+# 	echo "+-----------------------------------------------------------+"
+# 	echo "Collecting Logs"
 
-# 	echo "What is the experiment repetition number?"
-# 	read REP_NUMBER
-
-# 	LOG_FOLDER=experiment_$EXPERIMENT_NAME/${NUM_ROB}rob-${NUM_BYZ}byz-$REP_NUMBER
-
-# 	echo "RECORD THE ROBOT LOGS TO: $LOG_FOLDER ? [Y/N]"
-# 	read CONF
-# 	if [ $CONF = "Y" -o $CONF = "y" ]; then
-# 		break
-# 	fi
+# 	./collect-logs $LOG_FOLDER
+	
+# fi
 # done
-
-# ./collect-logs $LOG_FOLDER

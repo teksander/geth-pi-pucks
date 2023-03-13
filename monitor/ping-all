@@ -1,9 +1,9 @@
 #!/bin/bash  
 # Short script to ping the complete list of Pi-Pucks
-# Returns a text file pi-pucks.txt containing the responding Pi-Puck IDs
+# Returns a text file containing the responding Pi-Puck IDs
 source ../globalconfig
 
-> pi-pucks.txt
+> $IDS_FILE
 PIPUCK1_ALL=(101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120)
 PIPUCK2_ALL=(201 202 203 204 206 207 208 209 210 211 212 213 214 215 216)
 
@@ -32,7 +32,7 @@ fi
 
 wait
 wc -l temp.txt | awk '{ print "Robot Count: " $1 }'
-sort -n temp.txt >> pi-pucks.txt
+sort -n temp.txt >> $IDS_FILE
 rm temp.txt
 
 

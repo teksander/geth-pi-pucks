@@ -2,16 +2,15 @@
 # Short script to open TMUX console with a pane for each robot
 # Assumptions:
 # - tmux is installed 
-# - The Pi-puck IDs are listed in pi-pucks.txt
 
 source ../globalconfig
 
-NUM_ROB=$(wc -l < pi-pucks.txt)
+NUM_ROB=$(wc -l < "$IDS_FILE")
 
 # Collect all robot IP addresses in a list
 ALL_IPS=()
 for ID in $(cat "$IDS_FILE"); do
-	ALL_IPS+=(${PREFIX}${ID})
+	ALL_IPS+=($PREFIX$ID)
 done
 
 
@@ -34,13 +33,12 @@ tmux_ALL() {
 	gnome-terminal --geometry="$geom" -- tmux new-session ssh "${ALL_IPS[0]}" ';' \
 	    "${split_list[@]}" \
 	    set-option -w synchronize-panes ';' \
-		select-layout tiled ';' 
-
-	tmux send-keys "cd $MAIN_DIR_ROBOTS" Enter
+		select-layout tiled ';' 	
 }
 
 if [[ $# -eq 0 ]]; then 
 	tmux_ALL
+	tmux send-keys "cd $MAIN_DIR_ROBOTS" Enter
 
 elif [[ $# -eq 1 ]]; then 
 
@@ -51,7 +49,7 @@ elif [[ $# -eq 1 ]]; then
 		tmux rename-session GETH
 		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth"
 
-	elif [[ $1 == "mainloop" ]]; then 
+	elif [[ $1 == "main" ]]; then 
 		tmux_ALL
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1

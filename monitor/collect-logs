@@ -1,7 +1,6 @@
 #!/bin/bash  
 # Short script to extract log files from all robots listed
-# Assumptions:
-# - The Pi-puck IDs are listed in pi-pucks.txt
+
 source ../globalconfig
 
 if [ "$#" -eq 1 ]; then

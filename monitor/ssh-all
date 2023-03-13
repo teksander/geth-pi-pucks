@@ -1,15 +1,14 @@
 #!/bin/bash
-# Short script to command all robots via Cluster SSH
-# Assumptions:
-# - The Pi-puck IDs are listed in pi-pucks.txt
+# Short script to control all robots via SSH
+# Arguments:
+# - Arg1 is the command to execute in all robots
 
 source ../globalconfig
 
 # Send individual command to each robot
 if [ "$#" -eq 1 ]; then
 	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		ssh "$IP" "$1" &
+		ssh "${PREFIX}${ID}" "$1" &
 		sleep 0.02
 	done
 fi

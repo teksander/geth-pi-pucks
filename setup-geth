@@ -3,27 +3,25 @@
 
 # Header
 cd $(dirname $0)
+
 source globalconfig
 
+ID=$MONITOR_ID
+ID_FILE="/boot/pi-puck_id"
+MSG="-------------------------\n"
+
 # If is a Pi-Puck
-if [[ $LOGNAME == $ROBOTS_NAME ]]
-then
-    FILE="/boot/pi-puck_id"
-    ID=$(cat "$FILE")
-else
-    ID="100"
+if [ -f "$ID_FILE" ]; then
+    ID=$(cat "$ID_FILE")
 fi
 
-# If using router
-if echo "$SUBNET" | grep -q "192.168"; then
+# If using router network
+if grep -q "192.168" <<< "$SUBNET"; then
     ID=$(ip addr | grep -m 1 -oE  $SUBNET.[0-9]+ | cut -d '.' -f 4 | head -n 1)
 fi
 
-MSG="-------------------------\n"
-
 # If the GETH process has not been initialized in the blockchain directory
-if [ ! -d "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/geth" ] 
-then
+if [ ! -d "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/geth" ]; then
     geth init  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json" \
     --datadir  "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER" 
 
