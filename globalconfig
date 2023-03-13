@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # [PATHS]
-export BASE_FOLDER="geth-pi-pucks"
+export BASE_FOLDER="blockchain_robots/geth-pi-pucks"
 export EXPERIMENT_FOLDER="robots"
 export BLOCKCHAIN_FOLDER="blockchain"
 
@@ -12,18 +12,17 @@ export MAIN_DIR="/home/$USER/$BASE_FOLDER"
 export MAIN_DIR_ROBOTS="/home/$ROBOTS_NAME/geth-pi-pucks"
 
 export CONTRACT_NAME="ForagingPtManagement"
-export GENESIS_NAME="pipucks"
 
 # [FILES]
 export IDS_FILE="$MAIN_DIR/monitor/pi-pucks.txt"
-export GENESIS_FILE="$MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis/$GENESIS_NAME.json" 
+export GENESIS_FILE="$MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis/pipucks.json" 
 export CONTRACT_FILE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/kmeans_estimation_3D.sol"
 export CONTRACT_TEMPLATE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/kmeans_estimation_3D.x.sol"
-export CONTRACT_ABI="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/build/$CONTRACT_NAME.abi"
+export CONTRACT_ABI="$MAIN_DIR/$EXPERIMENT_FOLDER/controllers/scs/build/$CONTRACT_NAME.abi"
 
 # [NETWORKS]
-# export SUBNET="172.27.1"
-export SUBNET="192.168.1"
+export SUBNET="172.27.1"
+#export SUBNET="192.168.1"
 export MONITOR_ID="100"
 export PREFIX="${ROBOTS_NAME}@${SUBNET}."
 
@@ -31,7 +30,7 @@ export PREFIX="${ROBOTS_NAME}@${SUBNET}."
 export NUM_ROB=1
 export NUM_BYZ=2
 
-# [SC]
+# [SC Parameters]
 export DIMS=3
 export NUMPT=100
 export MAXLIFE=5
@@ -40,4 +39,7 @@ export RADIUS=10000 # 0.1
 export DECIMAL_FACTOR=100000 # 1e5
 export MAXUNVCLUSTER=3
 # shellcheck disable=SC2155
-export MINBALANCE=$(echo "200000000000000000000/$MAXUNVCLUSTER" | bc)
+#export TOTALASSETS="200000000000000000000"
+#export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER | bc)
+#No bc on the robots, temp solution
+export MINBALANCE=66666666666666666666
