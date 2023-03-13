@@ -121,6 +121,14 @@ fi
  	wait
  fi
 
+  if [ $1 == "globalconfig" ]; then
+ 	for ID in $(cat "$IDS_FILE"); do
+ 		IP="${PREFIX}${ID}"
+ 		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS/globalconfig"  &
+ 	done
+ 	wait
+ fi
+
 
 
 # if [ $1 == "gs" ]; then 
