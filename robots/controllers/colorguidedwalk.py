@@ -296,6 +296,10 @@ class ColorWalkEngine(object):
     def set_leds(self, state):
         self.rot.setLEDs(state)
 
+    def stop(self):
+        self.rot.setWalk(False)
+
+
 
 # cwe = ColorWalkEngine(500)
 # print(cwe.discover_color(60)[1])

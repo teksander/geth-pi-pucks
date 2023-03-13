@@ -160,7 +160,8 @@ erb = ERANDB(erbDist, erbtFreq)
 
 # /* Init Ground-Sensors, __mapping process and vote function */
 mainlogger.info('Initialising ground-sensors...')
-gs = GroundSensor(gsFreq)
+#cwe inits a gs instance as well
+#gs = GroundSensor(gsFreq)
 
 # /* Init Random-Walk, __walking process */
 mainlogger.info('Initialising walking controller...')
@@ -176,7 +177,7 @@ verified_idx=[]
 rgb = RGBLEDs()
 
 # List of submodules --> iterate .start() to start all
-submodules = [w3.geth.miner, tcp, erb, gs]
+submodules = [w3.geth.miner, tcp, erb]
 global fsm
 fsm = FiniteStateMachine(start=Idle.IDLE)
 
