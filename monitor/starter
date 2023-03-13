@@ -2,13 +2,13 @@
 # Starts an experiment
 #
 # Options:
+# --ping     or -p  : will ping to identify and check reachable robots
 # --reset    or -r  : will reset everything blockchain related
-# --start    or -s  : will start the experiment
-# --startz   or -sz : will start with no visualization
-# --logs     or -l  : will display monitor.log for all robots
-# --python   or -p  : will display python console for all robots
+# --start    or -s  : will open tmux windows to start experiment
+# --collect  or -c  : will collect logs at the end of the experiment
+
 # Example: 
-# . starter -r -s -l -p
+# . starter -p -r -s -c
 
 source ../globalconfig
 
@@ -25,16 +25,16 @@ echo "Pinging robots..."
 ./ping-all
 wait
 
+echo "+-----------------------------------------------------------+"
+echo "Checking all robots..."
+./check-all
+
 ## Check responding robot count
 #NUM_RESP=$(wc -l < pi-pucks.txt)
 #if ((NUM_ROB != NUM_RESP)); then
 #	printf '%s\n' "Not enough robots are responding. STOP" >&2
 #	exit 1
 #fi
-
-echo "+-----------------------------------------------------------+"
-echo "Checking all robots..."
-./check-all
 
 fi
 done
