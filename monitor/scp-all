@@ -115,8 +115,8 @@ fi
 if [ $1 == "calib" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		rsync -avz "$IP:$MAIN_DIR_ROBOTS/robots/calibration/cam/" $MAIN_DIR/robots/calibration/cam/
-		rsync -avz "$IP:$MAIN_DIR_ROBOTS/robots/calibration/gs/" $MAIN_DIR/robots/calibration/gs/
+		scp -r "$IP:$MAIN_DIR_ROBOTS/robots/calibration/cam/" $MAIN_DIR/robots/calibration/cam/
+#		rsync -avz "$IP:$MAIN_DIR_ROBOTS/robots/calibration/gs/" $MAIN_DIR/robots/calibration/gs/
 	done
 	wait
 fi

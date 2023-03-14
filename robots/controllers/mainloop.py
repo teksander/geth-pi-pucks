@@ -390,13 +390,18 @@ def Main(rate = eventRate):
 						color_to_report = repeat_sampled_color
 					else:
 						print("color repeat sampling failed, report one time measure")
-					print("vote: ",color_to_report,"support: ", vote_support, "tagid: ", tag_id)
+
+					if int(tag_id)>10:
+						is_useful = 1
+					else:
+						is_useful = 0
+					print("vote: ", color_to_report, "support: ", vote_support, "tagid: ", tag_id, "vote: ", is_useful)
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															int(color_to_report[1] * DECIMAL_FACTOR),
 															int(color_to_report[2] * DECIMAL_FACTOR)],
-															int(tag_id),
+															is_useful,
 															w3.toWei(vote_support, 'ether'),
-															int(tag_id), 0).transact(
+															is_useful, 0).transact(
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
 
@@ -432,12 +437,16 @@ def Main(rate = eventRate):
 						for idx in range(3):
 							color_to_report[idx] = found_color_bgr[idx]
 					print("verified and report bgr color: ", color_to_report)
+					if int(tag_id)>10:
+						is_useful = 1
+					else:
+						is_useful = 0
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															   int(color_to_report[1] * DECIMAL_FACTOR),
 															   int(color_to_report[2] * DECIMAL_FACTOR)],
-															   int(tag_id),
+															   is_useful,
 															   w3.toWei(vote_support, 'ether'),
-															int(tag_id), 0).transact(
+															is_useful, 0).transact(
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
 				else:
@@ -509,10 +518,11 @@ def STOP(modules = submodules, logs = logmodules):
 	mainlogger.info('Stopping Experiment')
 	global startFlag
 
+
 	mainlogger.info('--/-- Stopping Main-modules --/--')
 	startFlag = 0
 	time.sleep(1.5)
-
+	cwe.stop()
 	mainlogger.info('--/-- Stopping Sub-modules --/--')
 	for submodule in modules:
 		try:

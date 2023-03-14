@@ -309,6 +309,7 @@ class ColorWalkEngine(object):
 
     def stop(self):
         self.rot.setWalk(False)
+        self.gs.stop()
 
 
 if __name__ == "__main__":

@@ -47,7 +47,7 @@ elif [[ $# -eq 1 ]]; then
 		# Rename to GETH and setup Geth
 		tmux kill-session -t GETH >/dev/null 2>&1
 		tmux rename-session GETH
-		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth"
+		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
 
 	elif [[ $1 == "main" ]]; then 
 		tmux_ALL

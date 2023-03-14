@@ -27,6 +27,8 @@ contract ForagingPtManagement{
     }
 
     struct Cluster{
+        // int x;
+        // int y;
         int[space_size] position;
         uint life;
         uint verified;
@@ -40,6 +42,10 @@ contract ForagingPtManagement{
     }
 
     struct clusterInfo{
+        // int x;
+        // int y;
+        // int xo;
+        // int yo;
         int[space_size] position;
         int[space_size] positiono;
         int256 minDistance;
