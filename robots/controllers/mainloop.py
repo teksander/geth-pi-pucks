@@ -184,7 +184,7 @@ fsm = FiniteStateMachine(start=Idle.IDLE)
 global color_to_verify, color_to_report
 color_to_verify = [0, 0, 0]
 color_to_report = [0, 0, 0]
-
+color_name_to_report = ''
 # /* Define Main-modules */
 #######################################################################
 # The 4 Main-modules: 
@@ -325,7 +325,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 		tic.toc()
 
 def Main(rate = eventRate):
-	global fsm, voteHashes, voteHash, color_to_verify, color_to_report
+	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report
 	blockFilter = w3.eth.filter('latest')
 	voteHashes = []
 	voteHash = None
@@ -366,53 +366,72 @@ def Main(rate = eventRate):
 						color_to_verify[2] = float(cluster[2]) / DECIMAL_FACTOR
 						verify_unseen = 1
 			if verify_unseen == 0:
-				print("try dissover color: ")
-				found_color_idx, _, found_color_bgr = cwe.discover_color(10)
-				print(found_color_bgr)
+				print("try to discover color: ")
+				found_color_idx, found_color_name, found_color_bgr = cwe.discover_color(10)
+				print("found color: ", found_color_name, ' ', found_color_bgr)
 				if found_color_bgr != -1:
 					for idx in range(3):
 						color_to_report[idx] =  found_color_bgr[idx]
+					color_name_to_report = found_color_name
 					if found_color_idx > -1:
 						fsm.setState(Scout.PrepReport, message="Prepare proposal")
 				else:
 					print('no color found, pass')
 		elif fsm.query(Scout.PrepReport):
-			vote_support = getBalance()/DEPOSITFACTOR
-			tag_id = cwe.check_apriltag() #id = 0 no tag,
-			if voteHash !=0 and tag_id !=0:
-				print("vote: ",color_to_report,"support: ", vote_support, "tagid: ", tag_id)
-				voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
-														int(color_to_report[1] * DECIMAL_FACTOR),
-														int(color_to_report[2] * DECIMAL_FACTOR)],
-														int(tag_id),
-														w3.toWei(vote_support, 'ether'),
-														int(tag_id), 0).transact(
-					{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
-					 'gasPrice': gasprice})
+			arrived = cwe.drive_to_rgb(color_to_report, duration=60)  # drive to the color that has been found during scout
+			if arrived:
+				vote_support = getBalance()/DEPOSITFACTOR
+				tag_id = cwe.check_apriltag() #id = 0 no tag,
+				if voteHash !=0 and tag_id !=0:
+					#repeat sampling of the color to report
+					print("found color, start repeat sampling...")
+					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=5)
+					if repeat_sampled_color[0] !=-1:
+						color_to_report = repeat_sampled_color
+					else:
+						print("color repeat sampling failed, report one time measure")
+					print("vote: ",color_to_report,"support: ", vote_support, "tagid: ", tag_id)
+					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
+															int(color_to_report[1] * DECIMAL_FACTOR),
+															int(color_to_report[2] * DECIMAL_FACTOR)],
+															int(tag_id),
+															w3.toWei(vote_support, 'ether'),
+															int(tag_id), 0).transact(
+						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
+						 'gasPrice': gasprice})
 
+				else:
+					#send an empty trasnaction with intention ==3, help updating the SC
+					voteHash = sc.functions.reportNewPt([int(0),
+														int(0),
+														int(0)],
+														int(0),
+														w3.toWei(0.01, 'ether'),
+														0, #this is realType, for debugging
+														int(3)).transact(
+						{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
+						 'gasPrice': gasprice})
+				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 			else:
-				#send an empty trasnaction with intention ==3, help updating the SC
-				voteHash = sc.functions.reportNewPt([int(0),
-													int(0),
-													int(0)],
-													int(0),
-													w3.toWei(0.01, 'ether'),
-													0, #this is realType, for debugging
-													int(3)).transact(
-					{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
-					 'gasPrice': gasprice})
-			fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
+				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 		elif fsm.query(Verify.DriveTo):
-			arrived = cwe.drive_to_rgb(color_to_verify, duration=60)
+			arrived = cwe.drive_to_rgb(color_to_verify, duration=60) #try to find and drive to the color for 60 sec
 			if arrived:
 				tag_id = cwe.check_apriltag()
 				_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
 
 				vote_support = getBalance() / DEPOSITFACTOR
-				if vote_support > 0 and found_color_bgr!=-1:
-					for idx in range(3):
-						color_to_report[idx] = found_color_bgr[idx]
-					print("report bgr color: ", color_to_report)
+				if vote_support > 0 and found_color_bgr[0]!=-1:
+					print("found color, start repeat sampling...")
+					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=5)
+					if repeat_sampled_color[0]!=-1:
+						for idx in range(3):
+							color_to_report[idx] = repeat_sampled_color[idx]
+					else:
+						print("repeat sampling failed, report one-time measure")
+						for idx in range(3):
+							color_to_report[idx] = found_color_bgr[idx]
+					print("verified and report bgr color: ", color_to_report)
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															   int(color_to_report[1] * DECIMAL_FACTOR),
 															   int(color_to_report[2] * DECIMAL_FACTOR)],

@@ -4,27 +4,19 @@
 # - The Pi-puck IDs are listed in pi-pucks.txt
 # - The robots are randomely placed in an arena with binary floor data
 
-source ../globalconfig
+source ../../globalconfig
 
 
-./tmux-all
+../tmux-all
 tmux kill-session -t CALIBRATE >/dev/null 2>&1
 tmux rename-session CALIBRATE
-tmux send-keys -t CALIBRATE "cd $MAIN_DIR_ROBOTS/control/robots/calibration" Enter "python3 -i calibrate-gs.py"
+tmux send-keys -t CALIBRATE "cd $MAIN_DIR_ROBOTS/robots/calibration" Enter "python3 -i calibrate-cam.py"
 
 read -p "Press Enter when robots finish collecting data"
 
 
 for ID in $(cat "$IDS_FILE"); do
-	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/calibration/$ID.csv $MAIN_DIR/control/monitor-pc/calibration
+	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_test_capture.jpg $MAIN_DIR/monitor/calibration
 done
 
 wait
-
-python3 calibration/histogram.py
-
-wait
-
-for ID in $(cat "$IDS_FILE"); do
-	scp -r $MAIN_DIR/control/monitor-pc/calibration/$ID-threshes.txt pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/calibration/gsThreshes.txt
-done

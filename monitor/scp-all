@@ -85,6 +85,17 @@ if [ $1 == "setup-adhoc" ]; then
 	wait
 fi
 
+
+if [ $1 == "calibration-py" ]; then
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/robots/calibration/calibrate-cam.py "$IP:$MAIN_DIR_ROBOTS/robots/calibration/"  &
+		scp -r $MAIN_DIR/robots/calibration/calibrate-gs.py "$IP:$MAIN_DIR_ROBOTS/robots/calibration/"  &
+	done
+	wait
+fi
+
+
 if [ $1 == "sshkeys" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"

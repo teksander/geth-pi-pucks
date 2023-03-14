@@ -183,7 +183,18 @@ class ColorWalkEngine(object):
                     return color_idx, color_name, color_rgb
         self.rot.setWalk(False)
         return -1, -1, -1
-
+    def repeat_sampling(self, color_name, repeat_times = 5):
+        measure_list = []
+        for idx in range(repeat_times):
+            found_color_idx, found_color_name, found_color_rgb = self.check_all_color()
+            if color_name == found_color_name:
+                measure_list.append(found_color_rgb)
+            walk_dir = ["cw", "ccw"][idx % 2]
+            self.rot.setPattern(walk_dir, 1)
+        if measure_list:
+            return np.mean(measure_list,axis=0)
+        else:
+            return [-1,-1,-1]
     def drive_to_hsv(self, this_color_hsv, duration=30):
         arrived_count = 0
         detect_color = False
@@ -191,7 +202,7 @@ class ColorWalkEngine(object):
         while arrived_count < 5 and time.time() - startTime < duration:
             newValues = self.gs.getAvg()
             if newValues:
-                print(np.mean(newValues), newValues)
+                #print(np.mean(newValues), newValues)
                 if np.mean(newValues) > 700 and detect_color:  # see color and white board at once
                     self.rot.setWalk(False)
                     arrived_count += 1
@@ -270,10 +281,10 @@ class ColorWalkEngine(object):
         if max_color_idx != -1:
             avg_color_mask = np.zeros(image.shape[:2], np.uint8)
             cv2.drawContours(avg_color_mask, [max_contour], -1, 255, -1)
-            mean_color_rgb = cv2.mean(image, mask=avg_color_mask)
-            print("max area: ", max_area, max_color)
+            mean_color_rgb = cv2.mean(image, mask=avg_color_mask)[:3]
+            print("max area: ", max_area, max_color, mean_color_rgb)
             return max_color_idx, max_color, mean_color_rgb
-        return -1, -1, -1
+        return -1, -1, [-1,-1,-1]
 
     def check_rgb_color(self, bgr_feature):
         # check specific bgr array
@@ -300,12 +311,12 @@ class ColorWalkEngine(object):
         self.rot.setWalk(False)
 
 
-
-# cwe = ColorWalkEngine(500)
-# print(cwe.discover_color(60)[1])
-# print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
-# tag_id = cwe.check_apriltag()
-# print(tag_id)
-# while tag_id == -1:
-#    tag_id = cwe.check_apriltag()
-#    print(tag_id)
+if __name__ == "__main__":
+    cwe = ColorWalkEngine(500)
+    print(cwe.discover_color(60)[1])
+    print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
+    tag_id = cwe.check_apriltag()
+    print(tag_id)
+    while tag_id == -1:
+       tag_id = cwe.check_apriltag()
+       print(tag_id)
