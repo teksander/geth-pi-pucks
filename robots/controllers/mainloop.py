@@ -420,7 +420,8 @@ def Main(rate = eventRate):
 			else:
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 		elif fsm.query(Verify.DriveTo):
-			arrived = cwe.drive_to_rgb(color_to_verify, duration=60) #try to find and drive to the color for 60 sec
+			verification_attempt = 0
+			arrived = cwe.drive_to_rgb(color_to_verify, duration=120) #try to find and drive to the color for 120 sec
 			if arrived:
 				tag_id = cwe.check_apriltag()
 				_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
@@ -450,14 +451,15 @@ def Main(rate = eventRate):
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
 				else:
-					# send an empty trasnaction with intention ==3, help updating the SC
-					voteHash = sc.functions.reportNewPt([int(0),
-														int(0),
-														int(0)],
-														int(0),
-														w3.toWei(0.01, 'ether'),
-														0, int(3)).transact(
-						{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
+					vote_support = getBalance() / DEPOSITFACTOR
+					# send a transaction that reject the proposal
+					voteHash = sc.functions.reportNewPt([int(color_to_verify[0] * DECIMAL_FACTOR),
+														 int(color_to_verify[1] * DECIMAL_FACTOR),
+														 int(color_to_verify[2] * DECIMAL_FACTOR)],
+														0,
+														w3.toWei(vote_support, 'ether'),
+														0, 0).transact(
+						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
 			fsm.setState(Scout.Query, message="Resume scout")
 
