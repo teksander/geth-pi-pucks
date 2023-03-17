@@ -25,6 +25,9 @@ class Rotation(object):
         self.__walk = True
         self.__pattern = "s"
         self.duration = 1 #if duration == -1: run forever
+        self.mode = "pattern" #pattern or speed
+        self.left = 0
+        self.right = 0 #left and right speed
 
         logger.info('Random-Walk OK')
 
@@ -90,53 +93,62 @@ class Rotation(object):
             if self.__stop:
                 # Stop IR and Motor
                 break
-            if self.duration>0 and self.duration!=-1:
-                self.duration-=1
-            elif self.duration==0:
-                self.__walk=False
 
-
-            # Find Wheel Speed for Random-Walk
-            if (self.__pattern == "cw"):
-                left = self.MAX_SPEED / 2
-                right = -self.MAX_SPEED / 2
-            elif (self.__pattern == "ccw"):
-                left = -self.MAX_SPEED / 2
-                right = self.MAX_SPEED / 2
-            elif (self.__pattern == "s"):
-                left = self.MAX_SPEED / 2
-                right = self.MAX_SPEED / 2
+            this_left = 0
+            this_right = 0
+            if self.mode == "pattern":
+                if self.duration > 0 and self.duration != -1:
+                    self.duration -= 1
+                elif self.duration == 0:
+                    self.__walk = False
+                # Find Wheel Speed for Random-Walk
+                if (self.__pattern == "cw"):
+                    this_left = self.MAX_SPEED / 2
+                    this_right = -self.MAX_SPEED / 2
+                elif (self.__pattern == "ccw"):
+                    this_left = -self.MAX_SPEED / 2
+                    this_right  = self.MAX_SPEED / 2
+                elif (self.__pattern == "s"):
+                    this_left = self.MAX_SPEED / 2
+                    this_right = self.MAX_SPEED / 2
+            elif self.mode == "speed":
+                self.__walk = True
+                this_left = self.left
+                this_right = self.right
 
             # Obstacle avoidance
 
             self.ir = [0] * 8
             for i in range(8):
                 self.ir[i] = self.__read_data(IR0_REFLECTED + i)
+                #print("ir reading: ", self.ir[i])
                 if not self.ir[i] or self.ir[i] > 50000:
                     self.ir[i] = 0
 
             # Find Wheel Speed for Obstacle Avoidance
+
             for i, reading in enumerate(self.ir):
+
                 if (reading > self.irDist):
-                    left = self.MAX_SPEED / 2 + weights_left[i] * reading
-                    right = self.MAX_SPEED / 2 + weights_right[i] * reading
+                    this_left  = self.MAX_SPEED / 2 + weights_left[i] * reading
+                    this_right = self.MAX_SPEED / 2 + weights_right[i] * reading
 
             # Saturate Speeds greater than MAX_SPEED
-            if left > self.MAX_SPEED:
-                left = self.MAX_SPEED
-            elif left < -self.MAX_SPEED:
-                left = -self.MAX_SPEED
+            if this_left > self.MAX_SPEED:
+                this_left  = self.MAX_SPEED
+            elif this_left  < -self.MAX_SPEED:
+                this_left  = -self.MAX_SPEED
 
-            if right > self.MAX_SPEED:
-                right = self.MAX_SPEED
-            elif right < -self.MAX_SPEED:
-                right = -self.MAX_SPEED
+            if this_right > self.MAX_SPEED:
+                this_right = self.MAX_SPEED
+            elif this_right < -self.MAX_SPEED:
+                this_right = -self.MAX_SPEED
 
             if self.__walk:
                 # Set wheel speeds
-                self.__write_data(LEFT_MOTOR_SPEED, int(left))
+                self.__write_data(LEFT_MOTOR_SPEED, int(this_left))
                 time.sleep(0.01)
-                self.__write_data(RIGHT_MOTOR_SPEED, int(right))
+                self.__write_data(RIGHT_MOTOR_SPEED, int(this_right))
                 time.sleep(0.01)
             else:
                 # Set wheel speeds
@@ -194,7 +206,11 @@ class Rotation(object):
         self.duration=duration
         if self.__walk == False:
             self.__walk = True
-
+    def setDrivingSpeed(self, left, right):
+        self.left = left
+        self.right = right
+    def setDrivingMode(self, mode):
+        self.mode=mode
     def setWheels(self, left, right):
         """ This method is called set each wheel speed """
         # Set wheel speeds

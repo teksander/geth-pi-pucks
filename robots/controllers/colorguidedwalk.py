@@ -134,6 +134,22 @@ def get_contours(image_hsv, ground_truth_hsv, color_hsv_threshold):
         return 0, -1
 
 
+#PID controller for drive to color
+class PID:
+    def __init__(self, kp, ki, kd):
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        self.previous_error = 0
+        self.integral = 0
+
+    def compute(self, error, dt):
+        self.integral += error * dt
+        derivative = (error - self.previous_error) / dt
+        output = self.kp * error + self.ki * self.integral + self.kd * derivative
+        self.previous_error = error
+        return output
+
 class ColorWalkEngine(object):
     def __init__(self, MAX_SPEED):
         """ Constructor
@@ -149,8 +165,10 @@ class ColorWalkEngine(object):
         self.gs = GroundSensor(gsFreq)
         self.gs.start()
         self.april = apriltag.Detector()
-        if exists('calibration/' + robotID + '.csv'):
-            with open('calibration/' + robotID + '.csv', 'r') as color_gt:
+        self.pid_controller = PID(0.1, 0.01, 0.5)
+        self.max_speed= MAX_SPEED
+        if exists('../calibration/' + robotID + '.csv'):
+            with open('../calibration/' + robotID + '.csv', 'r') as color_gt:
                 for line in color_gt:
                     elements = line.strip().split(' ')
                     self.colors.append(elements[0])
@@ -159,8 +177,8 @@ class ColorWalkEngine(object):
             print("color calibration file not found, use hard coded colors")
             self.colors = ["red", "blue", "purple"]
             self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 138]]  # bgr
-        if exists('calibration/' + robotID + '_hsv.csv'):
-            with open('calibration/' + robotID + '_hsv.csv', 'r') as color_gt:
+        if exists('../calibration/' + robotID + '_hsv.csv'):
+            with open('../calibration/' + robotID + '_hsv.csv', 'r') as color_gt:
                 for line in color_gt:
                     elements = line.strip().split(' ')
                     self.ground_truth_hsv.append([int(x) for x in elements[1:]])
@@ -203,7 +221,7 @@ class ColorWalkEngine(object):
             newValues = self.gs.getAvg()
             if newValues:
                 #print(np.mean(newValues), newValues)
-                if np.mean(newValues) > 700 and detect_color:  # see color and white board at once
+                if np.mean(newValues) < 500 and detect_color:  # see color and white board at once
                     self.rot.setWalk(False)
                     arrived_count += 1
                 else:
@@ -223,20 +241,38 @@ class ColorWalkEngine(object):
             else:
                 isTracking = False
 
-            if isTracking:
-                self.rot.setPattern("s", 5)
-            elif dir_ang <= -1 and self.rot.isWalking() == False:
-                # object not found, random walk
-                walk_dir = random.choice(["s", "cw", "ccw"])
-                self.rot.setPattern(walk_dir, 3)
-            elif dir_ang > 0:
-                #print("cur angle: ", dir_ang)
-                walk_time = np.ceil(1 + int(dir_ang))
-                self.rot.setPattern("cw", walk_time)
-            elif dir_ang < 0:
-                #print("cur angle: ", dir_ang)
-                walk_time = np.ceil(1 - int(abs(dir_ang)))
-                self.rot.setPattern("ccw", walk_time)
+            if detect_color:
+                self.rot.setDrivingMode("speed")
+                error = 480 // 2 - cen
+                dt = 1  # You can calculate the actual time difference between the frames for a more accurate control
+                speed_adjustment = self.pid_controller.compute(error, dt)
+
+                base_speed = self.max_speed*0.8
+                left_speed = base_speed - speed_adjustment
+                right_speed = base_speed + speed_adjustment
+                print("error: ", error, "set speeds: ", left_speed, right_speed)
+                self.rot.setDrivingSpeed(left_speed,right_speed)
+            else:
+                self.rot.setDrivingMode("pattern")
+                if self.rot.isWalking() == False:
+                    #object not found, random walk
+                    walk_dir = random.choice(["s", "cw", "ccw"])
+                    self.rot.setPattern(walk_dir, 3)
+                #     self.rot.setPattern("s", 5)
+                # elif dir_ang <= -1 and self.rot.isWalking() == False:
+                #     # object not found, random walk
+                #     walk_dir = random.choice(["s", "cw", "ccw"])
+                #     self.rot.setPattern(walk_dir, 3)
+                # elif dir_ang > 0:
+                #     #print("cur angle: ", dir_ang)
+                #     walk_time = np.ceil(1 + int(dir_ang))
+                #     self.rot.setPattern("cw", walk_time)
+                # elif dir_ang < 0:
+                #     #print("cur angle: ", dir_ang)
+                #     walk_time = np.ceil(1 - int(abs(dir_ang)))
+                #     self.rot.setPattern("ccw", walk_time)
+        self.rot.setDrivingMode("pattern")
+
         self.rot.setWalk(False)
         if arrived_count == 5:
             return True
@@ -324,10 +360,11 @@ class ColorWalkEngine(object):
 
 if __name__ == "__main__":
     cwe = ColorWalkEngine(500)
-    print(cwe.discover_color(60)[1])
-    print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
-    tag_id = cwe.check_apriltag()
-    print(tag_id)
-    while tag_id == -1:
-       tag_id = cwe.check_apriltag()
-       print(tag_id)
+    cwe.check_all_color()
+    # print(cwe.discover_color(60)[1])
+    # print(cwe.drive_to_color(cwe.discover_color(60)[1], duration=300))
+    # tag_id = cwe.check_apriltag()
+    # print(tag_id)
+    # while tag_id == -1:
+    #    tag_id = cwe.check_apriltag()
+    #    print(tag_id)

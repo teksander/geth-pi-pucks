@@ -73,9 +73,9 @@ image = cam.get_reading()
 height1, width1 = image.shape[:2]
 
 
-colors = ["red", "blue", "purple"]
-ground_truth_bgr = [[0,0,255], [255,0,0], [226, 43, 138]] #bgr
-ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0]] #hsv
+colors = ["red", "yellow", "purple", "green"]
+ground_truth_bgr = [[0,0,255], [255,0,0], [226, 43, 138],[0,255,0]] #bgr
+ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0], [0,0,0]] #hsv
 
 if ask_yesno("calibrate color ground truth?"):
     for idx, name in enumerate(colors):
