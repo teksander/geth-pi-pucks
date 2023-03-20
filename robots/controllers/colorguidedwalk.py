@@ -22,11 +22,12 @@ logger = logging.getLogger(__name__)
 
 robotID = open("/boot/pi-puck_id", "r").read().strip()
 cam_int_reg_h = 100
+cam_int_reg_offest = 50
 cam_rot = True
 cam_sample_lgh = 50
 cam_sample_interval = 40
 color_ce_threshold = 0.15  # cross entropy threshold, if a color is present
-color_hsv_threshold = np.array([20, 60, 100])  # threshold for each dimension of the HSV
+color_hsv_threshold = np.array([10, 50, 80])  # threshold for each dimension of the HSV
 gsFreq = 20
 
 
@@ -159,7 +160,7 @@ class ColorWalkEngine(object):
         self.colors = []
         self.ground_truth_bgr = []  # bgr
         self.ground_truth_hsv = []  # bgr
-        self.cam = UpCamera(cam_int_reg_h, cam_rot)
+        self.cam = UpCamera(cam_int_reg_h, cam_int_reg_offest, cam_rot)
         self.rot = Rotation(MAX_SPEED)
         self.rot.start()
         self.gs = GroundSensor(gsFreq)
@@ -216,7 +217,19 @@ class ColorWalkEngine(object):
     def drive_to_hsv(self, this_color_hsv, duration=30):
         arrived_count = 0
         detect_color = False
+        in_free_zone = 0
         startTime = time.time()
+        #check if the robot is in white free zone
+        while in_free_zone <5 and time.time() - startTime < duration:
+            newValues = self.gs.getAvg()
+            if newValues:
+                # print(np.mean(newValues), newValues)
+                if np.mean(newValues) >= 500:  # see color and white board at once
+                    self.rot.setWalk(False)
+                    in_free_zone += 1
+                else:
+                    in_free_zone = 0
+
         while arrived_count < 5 and time.time() - startTime < duration:
             newValues = self.gs.getAvg()
             if newValues:

@@ -16,7 +16,10 @@ read -p "Press Enter when robots finish collecting data"
 
 
 for ID in $(cat "$IDS_FILE"); do
-	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_test_capture.jpg $MAIN_DIR/monitor/calibration
+	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_test_capture.jpg $MAIN_DIR/monitor/calibration &
+	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_one_time_test.jpg $MAIN_DIR/monitor/calibration &
+	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_raw_reading_test.jpg $MAIN_DIR/monitor/calibration &
+	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_raw_reading_test_of.jpg $MAIN_DIR/monitor/calibration
 done
 
 wait

@@ -1,0 +1,12 @@
+#!/bin/bash
+# Short script to perform calibration of the ground sensors from all robots listed
+# Assumptions:
+# - The Pi-puck IDs are listed in pi-pucks.txt
+# - The robots are randomely placed in an arena with binary floor data
+
+source ../../globalconfig
+
+
+for ID in $(cat "$IDS_FILE"); do
+	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_one_time_test.jpg $MAIN_DIR/monitor/calibration
+done

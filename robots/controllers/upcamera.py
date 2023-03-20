@@ -23,7 +23,7 @@ def __laplacian(img):
 
 def calculation(camera):
     rawCapture = PiRGBArray(camera)
-    camera.capture(rawCapture, format="bgr", use_video_port=True)
+    camera.capture(rawCapture, format="bgr", use_video_port=False)
     image = rawCapture.array
     rawCapture.truncate(0)
     return __laplacian(image)
@@ -31,7 +31,7 @@ def calculation(camera):
 class UpCamera(object):
     """ set up an camera object for the R0176 Arducam camera.
     """
-    def __init__(self, interesting_reg_h = 100, interesting_reg_offset = 50, rot = True):
+    def __init__(self, interesting_reg_h = 200, interesting_reg_offset = 50, rot = True):
         """ Constructor
         :type freq: str
         :param freq: frequency of measurements in Hz (tip: 20Hz)
@@ -39,6 +39,7 @@ class UpCamera(object):
         self.__stop = 1
         self.id = open("/boot/pi-puck_id", "r").read().strip()
         self.camera = picamera.PiCamera()
+        self.camera.exposure_mode = 'off'
         # set camera resolution to 640x480(Small resolution for faster speeds.)
         self.camera.resolution = (640, 480)
         self.interesting_region_h = interesting_reg_h
@@ -88,7 +89,7 @@ class UpCamera(object):
 
     def get_reading(self):
         rawCapture = PiRGBArray(self.camera)
-        self.camera.capture(rawCapture, format="bgr", use_video_port=True)
+        self.camera.capture(rawCapture, format="bgr", use_video_port=False)
         image = rawCapture.array
         rawCapture.truncate(0)
         
@@ -98,9 +99,10 @@ class UpCamera(object):
 
         # Crop image according to user-defined region
         centre = image.shape
-        cx = centre[1]/2 - 480/2
+        #cx = centre[0]/2 - 480/2
         cy = centre[0]/2- self.interesting_region_h/2 + self.interesting_region_o
-        crop_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
+        #crop_img = image[int(cy):int(cy+self.interesting_region_h), int(cx):int(cx+480)]
+        crop_img = image[int(cy):int(cy + self.interesting_region_h),:]
         return crop_img
 
     def get_reading_raw(self):
@@ -124,15 +126,27 @@ class UpCamera(object):
 
     def get_image_raw(self,filename = 'test'):
         # File to store image:
-        filename = '../calibration/cam/images/%s-%s.jpg' % (filename, self.id)
-        rawCapture = PiRGBArray(self.camera)
-        self.camera.capture(filename)
+        # filename = '../calibration/cam/images/%s-%s.jpg' % (filename, self.id)
+        # rawCapture = PiRGBArray(self.camera)
+        # self.camera.capture(filename)
+
+        #capture again using cv
+        image = self.get_reading()
+        image_sz = image.shape
+        idx = int(image_sz[1] / 2)
+        length= 60
+        hist_img = image[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0).astype(int)
+        print(hist_img)
+        cv2.imwrite('../calibration/cam/images/test_cv_capture.jpg' , image)
+        centre = image.shape
+        cy = centre[0] / 2 - self.interesting_region_h / 2 + self.interesting_region_o
+        cv2.imwrite('../calibration/cam/images/test_cv_capture_cropped.jpg', image[:, idx - int(length / 2):idx + int(length / 2)])
 
     def stop(self):
         """ This method is called before a clean exit """
         self.camera.close()
 
 if __name__ == "__main__":
-    cam = UpCamera(500)
+    cam = UpCamera(200, 50)
     cam.get_image_raw()
     cam.stop()
