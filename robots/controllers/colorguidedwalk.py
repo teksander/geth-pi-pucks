@@ -168,6 +168,7 @@ class ColorWalkEngine(object):
         self.gs.start()
         self.april = apriltag.Detector()
         self.max_speed= MAX_SPEED
+        self.actual_rw_dir = "s"
         if exists('../calibration/' + robotID + '.csv'):
             with open('../calibration/' + robotID + '.csv', 'r') as color_gt:
                 for line in color_gt:
@@ -188,19 +189,30 @@ class ColorWalkEngine(object):
             self.colors = ["red", "blue", "purple"]
             self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [157, 157, 144]]  # bgr
         logger.info('Color walk OK')
+    def random_walk_engine(self, mylambda= 5, turn = 4):
+        self.rot.setDrivingMode("pattern")
+        if self.rot.isWalking() == False:
+            if self.actual_rw_dir == "s":
+                self.actual_rw_dir = random.choice(["s", "cw", "ccw"])
+                time_to_walk = math.floor(random.uniform(0, 1) * turn)
+            else:
+                time_to_walk = math.ceil(random.expovariate(1 / (mylambda * 4)))
+                self.actual_rw_dir = "s"
+            print("drivign pattern set to: ", self.actual_rw_dir, time_to_walk)
+            self.rot.setPattern(self.actual_rw_dir, time_to_walk)
 
     def discover_color(self, duration=10):
         startTime = time.time()
-        self.rot.setDrivingMode("pattern")
+
         self.rot.setWalk(False)
+        self.actual_rw_dir = "s"
         while time.time() - startTime < duration:
             if self.rot.isWalking() == False:
                 color_idx, color_name, color_rgb = self.check_all_color()
                 if color_idx != -1 and self.check_free_ground():
                     self.rot.setWalk(False)
                     return color_idx, color_name, color_rgb
-                walk_dir = random.choice(["s", "cw", "ccw"])
-                self.rot.setPattern(walk_dir, 5)
+                self.random_walk_engine()
 
         self.rot.setWalk(False)
         return -1, -1, -1
@@ -222,12 +234,10 @@ class ColorWalkEngine(object):
         in_free_zone = 0
         startTime = time.time()
         pid_controller = PID(0.1, 0.01, 0.5)
+        self.actual_rw_dir = "s"
         #check if the robot is in white free zone
         while in_free_zone <5 and time.time() - startTime < duration:
-            self.rot.setDrivingMode("pattern")
-            if self.rot.isWalking() == False:
-                walk_dir = random.choice(["s", "cw", "ccw"])
-                self.rot.setPattern(walk_dir, 3)
+            self.random_walk_engine()
             newValues = self.gs.getAvg()
             if newValues:
                 # print(np.mean(newValues), newValues)
@@ -278,10 +288,7 @@ class ColorWalkEngine(object):
             elif arrived_count == 0:
                 self.rot.setDrivingMode("pattern")
                 pid_controller = PID(0.1, 0.01, 0.5) #reset controller
-                if self.rot.isWalking() == False:
-                    #object not found, random walk
-                    walk_dir = random.choice(["s", "cw", "ccw"])
-                    self.rot.setPattern(walk_dir, 3)
+                self.random_walk_engine()
                 #     self.rot.setPattern("s", 5)
                 # elif dir_ang <= -1 and self.rot.isWalking() == False:
                 #     # object not found, random walk
