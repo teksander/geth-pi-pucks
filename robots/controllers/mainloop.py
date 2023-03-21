@@ -379,7 +379,7 @@ def Main(rate = eventRate):
 					print('no color found, pass')
 		elif fsm.query(Scout.PrepReport):
 			print("Drive to the color to be reported: ", color_to_report)
-			arrived = cwe.drive_to_rgb(color_to_report, duration=60)  # drive to the color that has been found during scout
+			arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
 			if arrived:
 				vote_support = getBalance()/DEPOSITFACTOR
 				tag_id = cwe.check_apriltag() #id = 0 no tag,

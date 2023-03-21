@@ -39,7 +39,7 @@ class UpCamera(object):
         self.__stop = 1
         self.id = open("/boot/pi-puck_id", "r").read().strip()
         self.camera = picamera.PiCamera()
-        self.camera.exposure_mode = 'off'
+        self.camera.awb_mode = 'tungsten'
         # set camera resolution to 640x480(Small resolution for faster speeds.)
         self.camera.resolution = (640, 480)
         self.interesting_region_h = interesting_reg_h

@@ -62,17 +62,13 @@ def set_color():
     image_r = cam.get_reading_raw()
     cv2.imwrite(robotID + '_raw_reading_test.jpg', image_r)
     readings = []
-
-    image = cam.get_reading()
-    image_sz = image.shape
-    idx = int(image_sz[1] / 2)
-    length = 60
-    hist_img = image[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0).astype(int)
-    # mean_rgb, _ = get_rgb_center(image, 60)
-    # readings.append(mean_rgb)
-    print("color ground truth bgr set to: ", hist_img)
-    #_, cropped_image = get_rgb_center(image, 60)
-    #return np.mean(readings, axis=0).astype(int), cropped_image
+    for idx in range(10):
+        image = cam.get_reading()
+        mean_rgb, _ = get_rgb_center(image, 60)
+        readings.append(mean_rgb)
+    print("color ground truth bgr set to: ", np.mean(readings, axis=0).astype(int))
+    _, cropped_image = get_rgb_center(image, 60)
+    return np.mean(readings, axis=0).astype(int), cropped_image
 
 
 def set_color_hsv():
@@ -96,51 +92,35 @@ def single_time_test():
 
 
 if __name__ == "__main__":
-    import time
-    import random
     cam = UpCamera(200, 50)
-    print(cam.camera.
-    img_init = cam.get_reading_raw()
-    cv2.imwrite(robotID + '_raw_reading_test_of.jpg', img_init)
-    while True:
-        print(cam.camera.exposure_speed)
-        set_color()
-        cam.get_image_raw()
-        #time.sleep(random.random())
-    # image = cam.get_reading_raw()
-    # cv2.imwrite(robotID + '_raw_reading_test.jpg', image_r)
-    #
-    # image = cam.get_reading()
-    #
-    # height1, width1 = image.shape[:2]
-    for att in dir(cam.camera):
-        if !hasattr(att, '__call__') and !isinstance(att, 'object')
-        print(att, getattr(cam.camera, att))
-    #
-    # colors = ["red", "blue", "purple", "green"]
-    # ground_truth_bgr = [[0,0,255], [255,0,0], [226, 43, 138],[0,255,0]] #bgr
-    # ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0], [0,0,0]] #hsv
-    #
-    # if ask_yesno("calibrate color ground truth?"):
-    #     for idx, name in enumerate(colors):
-    #         print("Present " + name +" color")
-    #         input("Press Enter to continue...")
-    #         ground_truth_bgr[idx], cropped_image = set_color()
-    #         ground_truth_hsv[idx] = set_color_hsv()
-    #         h2, w2 = cropped_image.shape[:2]
-    #         cropped_image = cv2.resize(cropped_image, (w2, height1))
-    #         print(image.shape, cropped_image.shape)
-    #         image = cv2.hconcat([image, cropped_image])
-    #
-    # cv2.imwrite(robotID+'_test_capture.jpg', image)
-    # #write color ground truth result
-    # color_gt = open(robotID+'.csv','w+')
-    # color_hsv_gt = open(robotID+'_hsv.csv','w+')
-    # for idx, name in enumerate(colors):
-    #     color_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
-    #     color_hsv_gt.write(name + ' ' + ' '.join([str(x) for x in ground_truth_hsv[idx]]) + '\n')
-    # color_gt.close()
-    # color_hsv_gt.close()
+    image = cam.get_reading_raw()
+
+    height1, width1 = image.shape[:2]
+
+
+    colors = ["red", "blue", "purple", "green"]
+    ground_truth_bgr = [[0,0,255], [255,0,0], [226, 43, 138],[0,255,0]] #bgr
+    ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0], [0,0,0]] #hsv
+
+    if ask_yesno("calibrate color ground truth?"):
+        for idx, name in enumerate(colors):
+            print("Present " + name +" color")
+            input("Press Enter to continue...")
+            ground_truth_bgr[idx], cropped_image = set_color()
+            ground_truth_hsv[idx] = set_color_hsv()
+            h2, w2 = cropped_image.shape[:2]
+            cropped_image = cv2.resize(cropped_image, (w2, height1))
+            image = cv2.hconcat([image, cropped_image])
+
+    cv2.imwrite(robotID+'_test_capture.jpg', image)
+    #write color ground truth result
+    color_gt = open(robotID+'.csv','w+')
+    color_hsv_gt = open(robotID+'_hsv.csv','w+')
+    for idx, name in enumerate(colors):
+        color_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
+        color_hsv_gt.write(name + ' ' + ' '.join([str(x) for x in ground_truth_hsv[idx]]) + '\n')
+    color_gt.close()
+    color_hsv_gt.close()
     #single_time_test()
 
 
