@@ -28,7 +28,7 @@ ageLimit = 2
 
 timeLimit = 1800
 
-DECIMAL_FACTOR =  1e6
+DECIMAL_FACTOR =  1e5
 DEPOSITFACTOR = 4 #portion of assets deposted to support each vote
 # /* Global Variables */
 #######################################################################
@@ -168,11 +168,11 @@ mainlogger.info('Initialising walking controller...')
 #color walk engine without .start()
 cwe = ColorWalkEngine(rwSpeed)
 #cwe=None
-global color_idx, verified_colors, verified_idx
-color_idx = cwe.get_color_list()
-verified_colors=[0 for x in range(len(color_idx))]
+global verified_colors, verified_idx, recent_colors
+color_names = cwe.get_color_list()
+verified_colors=[0 for x in range(len(color_names))]
 verified_idx=[]
-
+recent_colors=[]
 # /* Init LEDs */
 rgb = RGBLEDs()
 
@@ -341,30 +341,30 @@ def Main(rate = eventRate):
 			# check reported color.
 			verify_unseen = 0
 			#check if any cluster avaiting verification on chain
-			if clocks['query_sc'].query():
-				source_list = sc.functions.getSourceList().call()
-				points_list = sc.functions.getPointListInfo().call()
-				print("get source list: ", source_list)
-				if len(source_list) > 0:
-					candidate_cluster = []
-					for idx, cluster in enumerate(source_list):
-						verified_by_me = False
-						for point_rec in points_list:
-							if point_rec[5] == me.key and int(point_rec[4]) == idx:
-								verified_by_me = True
-						if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
-							candidate_cluster.append((cluster, idx))
-					if len(candidate_cluster) > 0:
-						# randomly select a cluster to verify
-						# no longer needed to maintain the verified index list, as we used the verified_by_me check above
-						# idx_to_verity = random.randrange(len(candidate_cluster))
-						select_idx = candidate_cluster[random.randrange(len(candidate_cluster))]
-						cluster = candidate_cluster[select_idx][0]
-						fsm.setState(Verify.DriveTo, message="Go to unverified source")
-						color_to_verify[0] = float(cluster[0]) / DECIMAL_FACTOR
-						color_to_verify[1] = float(cluster[1]) / DECIMAL_FACTOR
-						color_to_verify[2] = float(cluster[2]) / DECIMAL_FACTOR
-						verify_unseen = 1
+
+			source_list = sc.functions.getSourceList().call()
+			points_list = sc.functions.getPointListInfo().call()
+			print("get source list: ", source_list)
+			if len(source_list) > 0:
+				candidate_cluster = []
+				for idx, cluster in enumerate(source_list):
+					verified_by_me = False
+					for point_rec in points_list:
+						if point_rec[5] == me.key and int(point_rec[4]) == idx:
+							verified_by_me = True
+					if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
+						candidate_cluster.append((cluster, idx))
+				if len(candidate_cluster) > 0:
+					# randomly select a cluster to verify
+					# no longer needed to maintain the verified index list, as we used the verified_by_me check above
+					# idx_to_verity = random.randrange(len(candidate_cluster))
+					select_idx = random.randrange(len(candidate_cluster))
+					cluster = candidate_cluster[select_idx][0]
+					fsm.setState(Verify.DriveTo, message="Go to unverified source")
+					color_to_verify[0] = float(cluster[0][0]) / DECIMAL_FACTOR
+					color_to_verify[1] = float(cluster[0][1]) / DECIMAL_FACTOR
+					color_to_verify[2] = float(cluster[0][2]) / DECIMAL_FACTOR
+					verify_unseen = 1
 			if verify_unseen == 0:
 				print("try to discover color: ")
 				found_color_idx, found_color_name, found_color_bgr = cwe.discover_color(10)
@@ -386,13 +386,13 @@ def Main(rate = eventRate):
 				if voteHash !=0 and tag_id !=0:
 					#repeat sampling of the color to report
 					print("found color, start repeat sampling...")
-					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=5)
+					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=3)
 					if repeat_sampled_color[0] !=-1:
 						color_to_report = repeat_sampled_color
 					else:
 						print("color repeat sampling failed, report one time measure")
 
-					if int(tag_id)>10:
+					if int(tag_id)==1:
 						is_useful = 1
 					else:
 						is_useful = 0
@@ -421,24 +421,25 @@ def Main(rate = eventRate):
 			else:
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 		elif fsm.query(Verify.DriveTo):
+			print("try to drive to the color for verification")
 			arrived = cwe.drive_to_closest_color(color_to_verify, duration=120) #try to find and drive to the closest color according to the agent's understanding for 120 sec
 			if arrived:
-				tag_id = cwe.check_apriltag()
+				tag_id,_ = cwe.check_apriltag()
 				_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
 
 				vote_support = getBalance() / DEPOSITFACTOR
 				if vote_support > 0 and found_color_bgr[0]!=-1:
 					print("found color, start repeat sampling...")
-					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=5)
+					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=3)
 					if repeat_sampled_color[0]!=-1:
-						for idx in range(3):
+						for idx in range(1):
 							color_to_report[idx] = repeat_sampled_color[idx]
 					else:
 						print("repeat sampling failed, report one-time measure")
 						for idx in range(3):
 							color_to_report[idx] = found_color_bgr[idx]
 					print("verified and report bgr color: ", color_to_report)
-					if int(tag_id)>10:
+					if int(tag_id)==1:
 						is_useful = 1
 					else:
 						is_useful = 0

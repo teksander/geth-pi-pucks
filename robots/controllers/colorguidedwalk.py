@@ -198,7 +198,7 @@ class ColorWalkEngine(object):
             else:
                 time_to_walk = math.ceil(random.expovariate(1 / mylambda))
                 self.actual_rw_dir = "s"
-            print("drivign pattern set to: ", self.actual_rw_dir, time_to_walk)
+            #print("drivign pattern set to: ", self.actual_rw_dir, time_to_walk)
             self.rot.setPattern(self.actual_rw_dir, time_to_walk)
 
     def discover_color(self, duration=10):
@@ -253,7 +253,7 @@ class ColorWalkEngine(object):
             #newValues = self.gs.getAvg()
             _, tag_height = self.check_apriltag()
             if tag_height>0:
-                print(tag_height)
+                #print(tag_height)
                 if tag_height >= 130 and detect_color:  # see color and white board at once
                     self.rot.setDrivingMode("pattern")
                     self.rot.setWalk(False)

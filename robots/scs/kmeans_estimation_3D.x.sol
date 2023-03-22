@@ -66,10 +66,10 @@ contract ForagingPtManagement{
         uint256 curtime = block.timestamp;
 
         // Assign point a cluster
-        info.minDistance = 1e10;
-        info.minClusterIdx = 0;
-        info.foundCluster = 0;
-        unverfied_clusters = 0;
+//        info.minDistance = 1e10;
+//        info.minClusterIdx = 0;
+//        info.foundCluster = 0;
+//        unverfied_clusters = 0;
 
         int256[space_size] memory position_avg;
         //average of all supportive votes
@@ -79,61 +79,61 @@ contract ForagingPtManagement{
 
         // Recluster all points k // can be skipped in certain task configurations
 
-        for (uint k=0; k<pointList.length; k++){
-            for (uint i=0; i<clusterList.length; i++){
-
-                // Process cluster expiration amount
-                if (clusterList[i].verified==1 && clusterList[i].life<curtime){
-                    // verified cluster where credit is already redistributed
-                    clusterList[i].verified=2;
-                }
-                if (unverfied_clusters>=max_unverified_cluster){
-                    clusterList[i].verified=3;
-                }
-                // Check if the newly reported pt belongs to any cluster
-                if (clusterList[i].verified==0){ // Awaiting verification, only check clusters that are awaiting verification
-                    unverfied_clusters+=1;
-                    for (uint j=0; j<space_size; j++){
-                        position_avg[j] = (int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
-                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit+amount);
-                    }
-                    if(category==1){
-                        for (uint j=0; j<space_size; j++){
-                        position_sup_avg[j] = (int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
-                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit_food+amount);
-                        }
-                    }
-                    this_distance = getDistance(position_avg, pointList[k].position);
-
-                    if (this_distance<info.minDistance){
-                        info.minDistance = this_distance;
-                        info.minClusterIdx = i;
-                        info.foundCluster = 1;
-                        info.position  = position_avg;
-                        info.positiono = position_sup_avg;
-                        info.minClusterStatus = clusterList[i].verified;
-                    }
-                }
-            }
-            // Update the membership to the nearest cluster of point[k]
-            if (info.minClusterIdx != uint(pointList[k].cluster)){
-                clusterList[uint(pointList[k].cluster)].num_rep-=1;
-                clusterList[uint(pointList[k].cluster)].total_credit-=pointList[k].credit;
-                if (pointList[k].category==1){
-                    clusterList[uint(pointList[k].cluster)].total_credit_food-=pointList[k].credit;
-                }
-                clusterList[info.minClusterIdx].num_rep+=1;
-                clusterList[info.minClusterIdx].total_credit+=pointList[k].credit;
-                clusterList[info.minClusterIdx].position = info.position;
-                if (pointList[k].category==1){
-                    clusterList[info.minClusterIdx].total_credit_food+=pointList[k].credit;
-                    clusterList[info.minClusterIdx].sup_position = info.positiono;
-                }
-                pointList[k].cluster = int256(info.minClusterIdx);
-            }
-
-        }
-
+//        for (uint k=0; k<pointList.length; k++){
+//            for (uint i=0; i<clusterList.length; i++){
+//
+//                // Process cluster expiration amount
+//                if (clusterList[i].verified==1 && clusterList[i].life<curtime){
+//                    // verified cluster where credit is already redistributed
+//                    clusterList[i].verified=2;
+//                }
+//                if (unverfied_clusters>=max_unverified_cluster){
+//                    clusterList[i].verified=3;
+//                }
+//                // Check if the newly reported pt belongs to any cluster
+//                if (clusterList[i].verified==0){ // Awaiting verification, only check clusters that are awaiting verification
+//                    unverfied_clusters+=1;
+//                    for (uint j=0; j<space_size; j++){
+//                        position_avg[j] = (int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
+//                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit+amount);
+//                    }
+//                    if(pointList[k].category==1){
+//                        for (uint j=0; j<space_size; j++){
+//                        position_sup_avg[j] = (int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
+//                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit_food+amount);
+//                        }
+//                    }
+//                    this_distance = getDistance(position_avg, pointList[k].position);
+//
+//                    if (this_distance<info.minDistance){
+//                        info.minDistance = this_distance;
+//                        info.minClusterIdx = i;
+//                        info.foundCluster = 1;
+//                        info.position  = position_avg;
+//                        info.positiono = position_sup_avg;
+//                        info.minClusterStatus = clusterList[i].verified;
+//                    }
+//                }
+//            }
+//            // Update the membership to the nearest cluster of point[k]
+//            if (info.minClusterIdx != uint(pointList[k].cluster)){
+//                clusterList[uint(pointList[k].cluster)].num_rep-=1;
+//                clusterList[uint(pointList[k].cluster)].total_credit-=pointList[k].credit;
+//                if (pointList[k].category==1){
+//                    clusterList[uint(pointList[k].cluster)].total_credit_food-=pointList[k].credit;
+//                }
+//                clusterList[info.minClusterIdx].num_rep+=1;
+//                clusterList[info.minClusterIdx].total_credit+=pointList[k].credit;
+//                clusterList[info.minClusterIdx].position = info.position;
+//                if (pointList[k].category==1){
+//                    clusterList[info.minClusterIdx].total_credit_food+=pointList[k].credit;
+//                    clusterList[info.minClusterIdx].sup_position = info.positiono;
+//                }
+//                pointList[k].cluster = int256(info.minClusterIdx);
+//            }
+//
+//        }
+//
         // Unique report
         for (uint i=0; i<clusterList.length; i++){
             if (clusterList[i].verified==0){
@@ -159,7 +159,7 @@ contract ForagingPtManagement{
         info.minClusterIdx = 0;
         info.foundCluster = 0;
         unverfied_clusters = 0;
-        this_distance = 0;
+        // this_distance = 0;
 
         // Does it need to go back to zeros?
         // int256[space_size] position_avg;
