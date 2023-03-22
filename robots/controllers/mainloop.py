@@ -13,7 +13,7 @@ logtofile = False
 # /* Experiment Parameters */
 #######################################################################
 tcpPort = 40421
-erbDist = 175
+erbDist = 50
 erbtFreq = 10
 gsFreq = 20
 rwSpeed = 600
@@ -382,7 +382,7 @@ def Main(rate = eventRate):
 			arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
 			if arrived:
 				vote_support = getBalance()/DEPOSITFACTOR
-				tag_id = cwe.check_apriltag() #id = 0 no tag,
+				tag_id, _ = cwe.check_apriltag() #id = 0 no tag,
 				if voteHash !=0 and tag_id !=0:
 					#repeat sampling of the color to report
 					print("found color, start repeat sampling...")

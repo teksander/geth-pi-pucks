@@ -164,8 +164,8 @@ class ColorWalkEngine(object):
         self.cam = UpCamera(cam_int_reg_h, cam_int_reg_offest, cam_rot)
         self.rot = Rotation(MAX_SPEED)
         self.rot.start()
-        self.gs = GroundSensor(gsFreq)
-        self.gs.start()
+        #self.gs = GroundSensor(gsFreq)
+        #self.gs.start()
         self.april = apriltag.Detector()
         self.max_speed= MAX_SPEED
         self.actual_rw_dir = "s"
@@ -189,14 +189,14 @@ class ColorWalkEngine(object):
             self.colors = ["red", "blue", "purple"]
             self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [157, 157, 144]]  # bgr
         logger.info('Color walk OK')
-    def random_walk_engine(self, mylambda= 5, turn = 4):
+    def random_walk_engine(self, mylambda= 10, turn = 4):
         self.rot.setDrivingMode("pattern")
         if self.rot.isWalking() == False:
             if self.actual_rw_dir == "s":
                 self.actual_rw_dir = random.choice(["s", "cw", "ccw"])
-                time_to_walk = math.floor(random.uniform(0, 1) * turn)
+                time_to_walk = math.ceil(random.uniform(0, 1) * turn)
             else:
-                time_to_walk = math.ceil(random.expovariate(1 / (mylambda * 4)))
+                time_to_walk = math.ceil(random.expovariate(1 / mylambda))
                 self.actual_rw_dir = "s"
             print("drivign pattern set to: ", self.actual_rw_dir, time_to_walk)
             self.rot.setPattern(self.actual_rw_dir, time_to_walk)
@@ -209,7 +209,7 @@ class ColorWalkEngine(object):
         while time.time() - startTime < duration:
             if self.rot.isWalking() == False:
                 color_idx, color_name, color_rgb = self.check_all_color()
-                if color_idx != -1 and self.check_free_ground():
+                if color_idx != -1 and self.check_free_zone():
                     self.rot.setWalk(False)
                     return color_idx, color_name, color_rgb
                 self.random_walk_engine()
@@ -236,22 +236,25 @@ class ColorWalkEngine(object):
         pid_controller = PID(0.1, 0.01, 0.5)
         self.actual_rw_dir = "s"
         #check if the robot is in white free zone
-        while in_free_zone <5 and time.time() - startTime < duration:
+        while in_free_zone <3 and time.time() - startTime < duration:
             self.random_walk_engine()
-            newValues = self.gs.getAvg()
-            if newValues:
+            _, tag_height = self.check_apriltag()
+            if tag_height>0:
                 # print(np.mean(newValues), newValues)
-                if np.mean(newValues) >= 500:  # see white board ground
+                if tag_height < 130:  # see white board ground
                     in_free_zone += 1
                 else:
                     in_free_zone = 0
+            else:
+                in_free_zone += 1
 
 
         while arrived_count < 2 and time.time() - startTime < duration:
-            newValues = self.gs.getAvg()
-            if newValues:
-                print(np.mean(newValues), newValues)
-                if np.mean(newValues) < 500 and detect_color:  # see color and white board at once
+            #newValues = self.gs.getAvg()
+            _, tag_height = self.check_apriltag()
+            if tag_height>0:
+                print(tag_height)
+                if tag_height >= 130 and detect_color:  # see color and white board at once
                     self.rot.setDrivingMode("pattern")
                     self.rot.setWalk(False)
                     arrived_count += 1
@@ -322,12 +325,16 @@ class ColorWalkEngine(object):
         image = self.cam.get_reading_raw()
         image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         result = self.april.detect(image_grey)
+        maximum_h = 0
         this_id = 0
+
         if result:
-            this_id = result[0].tag_id
-        else:
-            print("Apriltag not found")
-        return this_id
+            for this_tag in result:
+                this_h = max(abs(this_tag.corners[0][1]- this_tag.corners[1][1]), abs(this_tag.corners[2][1]- this_tag.corners[3][1]))
+                if this_h>maximum_h:
+                    maximum_h = this_h
+                    this_id = this_tag.tag_id
+        return this_id, maximum_h
 
     def check_all_color(self, max_area = 5000):
         # for all hard coded colors
@@ -354,12 +361,15 @@ class ColorWalkEngine(object):
             print("max area: ", this_area, max_color, mean_color_rgb)
             return max_color_idx, max_color, mean_color_rgb
         return -1, -1, [-1,-1,-1]
-    def check_free_ground(self):
-        newValues = self.gs.getAvg()
-        if newValues:
-            if np.mean(newValues) >= 500:
+    def check_free_zone(self):
+        _, tag_height = self.check_apriltag()
+        if tag_height>0:
+            if tag_height < 130:
                 return True #in free ground
-        return False
+            else:
+                return False
+        else:
+            return True
     def check_rgb_color(self, bgr_feature):
         # check specific bgr array
         this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
@@ -393,7 +403,7 @@ class ColorWalkEngine(object):
 
     def stop(self):
         self.rot.setWalk(False)
-        self.gs.stop()
+        #self.gs.stop()
 
 
 if __name__ == "__main__":

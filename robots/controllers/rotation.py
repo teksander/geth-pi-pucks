@@ -111,7 +111,7 @@ class Rotation(object):
                 elif (self.__pattern == "s"):
                     this_left = self.MAX_SPEED / 2
                     this_right = self.MAX_SPEED / 2
-                print(self.__pattern, " set wheel speed to: ", this_left, this_right)
+                #print(self.__pattern, " set wheel speed to: ", this_left, this_right)
             elif self.mode == "speed":
                 self.__walk = True
                 this_left = self.left
@@ -144,7 +144,7 @@ class Rotation(object):
                 this_right = self.MAX_SPEED
             elif this_right < -self.MAX_SPEED:
                 this_right = -self.MAX_SPEED
-            print(self.__pattern, " final wheel speed: ", this_left, this_right)
+            #print(self.__pattern, " final wheel speed: ", this_left, this_right)
             if self.__walk:
                 # Set wheel speeds
                 self.__write_data(LEFT_MOTOR_SPEED, int(this_left))
