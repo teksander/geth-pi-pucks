@@ -76,6 +76,8 @@ if [[ $opt == "--start" || $opt == "-s" ]]; then
 fi
 done
 
+
+
 # read -p "Press Enter when experiment is concluded"
 
 # for opt in "$@"

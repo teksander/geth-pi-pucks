@@ -97,7 +97,7 @@ contract ForagingPtManagement{
 //                        position_avg[j] = (int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
 //                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit+amount);
 //                    }
-//                    if(category==1){
+//                    if(pointList[k].category==1){
 //                        for (uint j=0; j<space_size; j++){
 //                        position_sup_avg[j] = (int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
 //                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit_food+amount);
@@ -194,7 +194,7 @@ contract ForagingPtManagement{
                                          + int256(position[j])*int256(amount))/int256(clusterList[i].total_credit_food+amount);
                         }
                     }
-                    this_distance = getDistance(position_avg, position);
+                    this_distance = colourBGRDistance(position_avg, position);
 
 
                     if (this_distance<=radius && this_distance<info.minDistance){
@@ -398,6 +398,15 @@ contract ForagingPtManagement{
         }
         return sqrt(sqsum);
     }
+    function colourBGRDistance(int256[space_size] memory _p1, int256[space_size] memory _p2) public pure returns (int256) {
+        int256 rMean = (int256(_p1[2]) + int256(_p2[2])) / 2;
+        int256 r = int256(_p1[2]) - int256(_p2[2]);
+        int256 g = int256(_p1[1]) - int256(_p2[1]);
+        int256 b = int256(_p1[0]) - int256(_p2[0]);
+        int256 distance = ((((512 + rMean) * r * r) >> 8) + 4 * g * g + (((767 - rMean) * b * b) >> 8));
+        return sqrt(distance);
+    }
+
 
     function sqrt(int256 _kx) private pure returns (int256 _ky) {
         // Return an approximation of the sqrt

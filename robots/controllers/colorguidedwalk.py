@@ -27,7 +27,7 @@ cam_rot = True
 cam_sample_lgh = 50
 cam_sample_interval = 40
 color_ce_threshold = 0.15  # cross entropy threshold, if a color is present
-color_hsv_threshold = np.array([10, 65, 70])  # threshold for each dimension of the HSV
+color_hsv_threshold = np.array([12, 70, 70])  # threshold for each dimension of the HSV
 gsFreq = 20
 
 
@@ -189,9 +189,9 @@ class ColorWalkEngine(object):
             self.colors = ["red", "blue", "purple"]
             self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [157, 157, 144]]  # bgr
         logger.info('Color walk OK')
-    def random_walk_engine(self, mylambda= 10, turn = 4):
+    def random_walk_engine(self, mylambda= 15, turn = 7):
         self.rot.setDrivingMode("pattern")
-        if self.rot.isWalking() == False:
+        if self.rot.duration <= 0:
             if self.actual_rw_dir == "s":
                 self.actual_rw_dir = random.choice(["s", "cw", "ccw"])
                 time_to_walk = math.ceil(random.uniform(0, 1) * turn)
@@ -203,11 +203,10 @@ class ColorWalkEngine(object):
 
     def discover_color(self, duration=10):
         startTime = time.time()
-
-        self.rot.setWalk(False)
+        #self.random_walk_engine() #walk a bit first
         self.actual_rw_dir = "s"
         while time.time() - startTime < duration:
-            if self.rot.isWalking() == False:
+            if self.rot.duration <= 0:
                 color_idx, color_name, color_rgb = self.check_all_color()
                 if color_idx != -1 and self.check_free_zone():
                     self.rot.setWalk(False)
@@ -229,32 +228,36 @@ class ColorWalkEngine(object):
         else:
             return [-1,-1,-1]
     def drive_to_hsv(self, this_color_hsv, duration=30):
+        self.rot.setWalk(False)
         arrived_count = 0
         detect_color = False
         in_free_zone = 0
         startTime = time.time()
         pid_controller = PID(0.1, 0.01, 0.5)
         self.actual_rw_dir = "s"
+
         #check if the robot is in white free zone
         while in_free_zone <3 and time.time() - startTime < duration:
-            self.random_walk_engine()
+
             _, tag_height = self.check_apriltag()
             if tag_height>0:
                 # print(np.mean(newValues), newValues)
-                if tag_height < 130:  # see white board ground
+                if tag_height < 100:  # see white board ground
                     in_free_zone += 1
+
                 else:
                     in_free_zone = 0
             else:
+                self.random_walk_engine(3, 1)
                 in_free_zone += 1
 
-
+        lose_track_count = 0
         while arrived_count < 2 and time.time() - startTime < duration:
             #newValues = self.gs.getAvg()
             _, tag_height = self.check_apriltag()
             if tag_height>0:
                 #print(tag_height)
-                if tag_height >= 130 and detect_color:  # see color and white board at once
+                if tag_height >= 100 and detect_color:  # see color and white board at once
                     self.rot.setDrivingMode("pattern")
                     self.rot.setWalk(False)
                     arrived_count += 1
@@ -263,21 +266,15 @@ class ColorWalkEngine(object):
             image = self.cam.get_reading()
             image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
-            dir_ang = -1
             if cen != -1 and cv2.contourArea(cnt) < 1000:
                 cen = -1
             if cen != -1:
                 detect_color = True
-                dir_ang = (cen - 240) / 480
             else:
                 detect_color = False
-            #print("angular direction: ", dir_ang)
-            if abs(dir_ang) < 0.15:
-                isTracking = True
-            else:
-                isTracking = False
 
             if detect_color:
+                lose_track_count=0
                 self.rot.setDrivingMode("speed")
                 error = 480 // 2 - cen
                 dt = 1  # You can calculate the actual time difference between the frames for a more accurate control
@@ -288,7 +285,9 @@ class ColorWalkEngine(object):
                 right_speed = base_speed + speed_adjustment
                 print("error: ", error, "set speeds: ", left_speed, right_speed)
                 self.rot.setDrivingSpeed(left_speed,right_speed)
-            elif arrived_count == 0:
+            elif arrived_count == 0 and lose_track_count<5:
+                lose_track_count+=1
+            elif arrived_count == 0 and lose_track_count>=5:
                 self.rot.setDrivingMode("pattern")
                 pid_controller = PID(0.1, 0.01, 0.5) #reset controller
                 self.random_walk_engine()
@@ -364,7 +363,7 @@ class ColorWalkEngine(object):
     def check_free_zone(self):
         _, tag_height = self.check_apriltag()
         if tag_height>0:
-            if tag_height < 130:
+            if tag_height < 100:
                 return True #in free ground
             else:
                 return False
@@ -394,7 +393,17 @@ class ColorWalkEngine(object):
                 colsest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])
                 closest_color =  this_color
         return self.drive_to_color(closest_color, duration)
-
+    def drive_to_closest_color_byz(self, bgr_feature, confusing_set, duration=30):
+        this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+        closest_color = self.colors[0]
+        colsest_color_dist = hue_distance(self.ground_truth_hsv[0][0], this_color_hsv[0])
+        for idx, this_color in enumerate(self.colors):
+            if hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0]) < colsest_color_dist:
+                colsest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])
+                closest_color = this_color
+        if closest_color in confusing_set:
+            target_color = random.choice(confusing_set)
+        return self.drive_to_color(target_color, duration)
     def get_color_list(self):
         return self.colors
 

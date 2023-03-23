@@ -36,6 +36,9 @@ global startFlag, isByz
 startFlag = False
 isByz = False
 
+if len(sys.argv)==2:
+	if sys.argv[1] == '--byz':
+		isByz = False
 global gasLimit, gasprice, gas
 gasLimit = 0x9000000
 gasprice = 0x000000 #no gas fee in our configuration
@@ -43,6 +46,8 @@ gas = 0x00000
 
 global txList, startTime
 txList = []
+
+
 
 
 # /* Import Packages */
@@ -60,6 +65,7 @@ import signal
 import threading
 import subprocess
 import random
+import sys
 from console import init_web3, registerSC
 from erandb import ERANDB
 from groundsensor import GroundSensor
@@ -325,7 +331,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 		tic.toc()
 
 def Main(rate = eventRate):
-	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report
+	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors
 	blockFilter = w3.eth.filter('latest')
 	voteHashes = []
 	voteHash = None
@@ -373,17 +379,26 @@ def Main(rate = eventRate):
 					for idx in range(3):
 						color_to_report[idx] =  found_color_bgr[idx]
 					color_name_to_report = found_color_name
-					if found_color_idx > -1:
+					if found_color_idx > -1 and color_name_to_report not in recent_colors:
 						fsm.setState(Scout.PrepReport, message="Prepare proposal")
+					elif color_name_to_report in recent_colors:
+						print("Found recently seen color, skept")
+						cwe.random_walk_engine(10, 10)
+
 				else:
 					print('no color found, pass')
 		elif fsm.query(Scout.PrepReport):
 			print("Drive to the color to be reported: ", color_to_report)
 			arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
+
 			if arrived:
 				vote_support = getBalance()/DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag() #id = 0 no tag,
+				#two recently discovered colord are recorded in recent_colors
 				if voteHash !=0 and tag_id !=0:
+					recent_colors.append(color_name_to_report)
+					if len(recent_colors)>2:
+						recent_colors = recent_colors[1:]
 					#repeat sampling of the color to report
 					print("found color, start repeat sampling...")
 					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=3)
@@ -422,7 +437,7 @@ def Main(rate = eventRate):
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 		elif fsm.query(Verify.DriveTo):
 			print("try to drive to the color for verification")
-			arrived = cwe.drive_to_closest_color(color_to_verify, duration=120) #try to find and drive to the closest color according to the agent's understanding for 120 sec
+			arrived = cwe.drive_to_closest_color(color_to_verify, duration=200) #try to find and drive to the closest color according to the agent's understanding for 120 sec
 			if arrived:
 				tag_id,_ = cwe.check_apriltag()
 				_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
