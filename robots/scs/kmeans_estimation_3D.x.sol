@@ -37,8 +37,10 @@ contract ForagingPtManagement{
         uint256 total_credit_food; //Sum of deposited credit that report this point as food
         uint256 realType; //real food/non food type of the Initially reported Point of the cluster, for experimental purpose only
         address init_reporter;
-        uint256 intention; //intention = 0 initial report, intention = 1 verification, avoid verification req to be listed as init report
+        uint256 intention; //intention = 0 initial report, intention > 0 verification of existing cluster No. intention-1
         int[space_size] sup_position;
+        uint256 total_credit_outlier;
+        address[] outlier_senders;
     }
 
     struct clusterInfo{
@@ -166,7 +168,7 @@ contract ForagingPtManagement{
         // int256 this_distance = 0;
 
         if (category==1 && clusterList.length == 0){
-            clusterList.push(Cluster(position, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention, position));
+            clusterList.push(Cluster(position, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention, position, 0, new address[](0)));
             pointList.push(Point(position, amount, category, 0, msg.sender, realType));
         }
         else{
@@ -225,9 +227,13 @@ contract ForagingPtManagement{
                 }
             }
 
-
+            //check if the matched cluster is the cluster that the robot intended to verify:
+            if(intention>0 && info.minClusterIdx != intention-1){
+                clusterList[intention-1].total_credit_outlier+=amount;
+                clusterList[intention-1].outlier_senders.push(msg.sender);
+            }
             //if exists non-verified cluster that the new point belongs
-            if (info.minClusterStatus == 0 && info.foundCluster==1 && clusterList[info.minClusterIdx].init_reporter != msg.sender && intention !=3){
+            if (info.minClusterStatus == 0 && info.foundCluster==1 && clusterList[info.minClusterIdx].init_reporter != msg.sender){
                 clusterList[info.minClusterIdx].num_rep+=1;
                 clusterList[info.minClusterIdx].total_credit+=amount;
                 //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
@@ -257,9 +263,9 @@ contract ForagingPtManagement{
                     }
                 }
             }
-            else if (category==1 && info.foundCluster==0 && clusterList[info.minClusterIdx].init_reporter != msg.sender && unverfied_clusters<max_unverified_cluster && intention !=3){
+            else if (category==1 && info.foundCluster==0 && clusterList[info.minClusterIdx].init_reporter != msg.sender && unverfied_clusters<max_unverified_cluster){
                 //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster, this is only for experimental purpose
-                clusterList.push(Cluster(position,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,position));
+                clusterList.push(Cluster(position,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,position, 0, new address[](0)));
                 pointList.push(Point(position,amount, category, int256(clusterList.length-1), msg.sender, realType));
             }
             else{
@@ -354,18 +360,25 @@ contract ForagingPtManagement{
                  }
                 }
                 //remove points
-            uint c = 0;
-            uint curLength = pointList.length;
-                while(c<curLength){
-                    if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
-                        pointList[c] = pointList[pointList.length-1];
-                        pointList.pop();
-                        curLength = pointList.length;
+                uint c = 0;
+                uint curLength = pointList.length;
+                    while(c<curLength){
+                        if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
+                            pointList[c] = pointList[pointList.length-1];
+                            pointList.pop();
+                            curLength = pointList.length;
+                        }
+                        else{
+                            c+=1;
+                        }
                     }
-                    else{
-                        c+=1;
-                    }
+            }
+            else if (clusterList[i].verified==0 && clusterList[i].outlier_senders.length>=min_rep && clusterList[i].total_credit_outlier>=min_balance){
+                for (uint j=0; j<clusterList[i].outlier_senders.length; j++){
+                    bonus_credit = clusterList[i].total_credit/clusterList[i].outlier_senders.length;
+                    payable(clusterList[i].outlier_senders[j]).transfer(bonus_credit);
                 }
+                clusterList[i].verified==4; //cluster rejected due to most of reports that intended to verify it have been classified as outliers
             }
         }
 

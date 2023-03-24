@@ -116,8 +116,8 @@ logging.getLogger('rgbleds').setLevel(loglevel)
 
 # Experiment data logs (recorded to file)
 
-header = ['ESTIMATE','W','B','S1','S2','S3']
-estimatelog = Logger('../logs/estimate.csv', header, 10)
+# header = ['ESTIMATE','W','B','S1','S2','S3']
+# estimatelog = Logger('../logs/estimate.csv', header, 10)
 
 # header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
 # bufferlog = Logger('../logs/buffer.csv', header, 2)
@@ -128,7 +128,7 @@ estimatelog = Logger('../logs/estimate.csv', header, 10)
 header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
 blocklog = Logger('../logs/block.csv', header)
 
-header = ['BLOCK', 'BALANCE']
+header = ['BLOCK', 'BALANCE', 'SOURCES']
 sclog = Logger('../logs/sc.csv', header)
 
 # header = ['#BLOCKS']
@@ -141,7 +141,7 @@ header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
 txlog = Logger('../logs/tx.csv', header)
 
 # List of logmodules --> iterate .start() to start all; remove from list to ignore
-logmodules = [estimatelog, blocklog, sclog, extralog, txlog]
+logmodules = [blocklog, sclog, extralog, txlog]
 
 # /* Initialize Sub-modules */
 #######################################################################
@@ -194,7 +194,8 @@ fsm = FiniteStateMachine(start=Idle.IDLE)
 # List of submodules --> iterate .start() to start all
 submodules = [w3.geth.miner, tcp, erb]
 
-
+global cluster_idx_to_verify
+cluster_idx_to_verify=0
 # /* Define Main-modules */
 #######################################################################
 
@@ -331,10 +332,9 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 	for enode in gethEnodes:
 		w3.provider.make_request("admin_removePeer",[enode])
 
-	
 def Main(rate = mainRate):
 	""" Main control routine """
-	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors
+	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors, cluster_idx_to_verify
 
 	tic = TicToc(rate, 'Main')
 
@@ -370,6 +370,7 @@ def Main(rate = mainRate):
 					# idx_to_verity = random.randrange(len(candidate_cluster))
 					select_idx = random.randrange(len(candidate_cluster))
 					cluster = candidate_cluster[select_idx][0]
+					cluster_idx_to_verify = candidate_cluster[select_idx][1]+1
 					fsm.setState(Verify.DriveTo, message="Go to unverified source")
 					color_to_verify[0] = float(cluster[0][0]) / DECIMAL_FACTOR
 					color_to_verify[1] = float(cluster[0][1]) / DECIMAL_FACTOR
@@ -411,11 +412,16 @@ def Main(rate = mainRate):
 						color_to_report = repeat_sampled_color
 					else:
 						print("color repeat sampling failed, report one time measure")
-
-					if int(tag_id)==1:
-						is_useful = 1
+					if isByz==False:
+						if int(tag_id)==1:
+							is_useful = 1
+						else:
+							is_useful = 0
 					else:
-						is_useful = 0
+						if int(tag_id)==1:
+							is_useful = 0
+						else:
+							is_useful = 1
 					print("vote: ", color_to_report, "support: ", vote_support, "tagid: ", tag_id, "vote: ", is_useful)
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															int(color_to_report[1] * DECIMAL_FACTOR),
@@ -426,17 +432,7 @@ def Main(rate = mainRate):
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
 
-				else:
-					#send an empty trasnaction with intention ==3, help updating the SC
-					voteHash = sc.functions.reportNewPt([int(0),
-														int(0),
-														int(0)],
-														int(0),
-														w3.toWei(0.01, 'ether'),
-														0, #this is realType, for debugging
-														int(3)).transact(
-						{'from': me.key, 'value': w3.toWei(0.01, 'ether'), 'gas': gasLimit,
-						 'gasPrice': gasprice})
+
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 			else:
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
@@ -446,7 +442,7 @@ def Main(rate = mainRate):
 			arrived = cwe.drive_to_closest_color(color_to_verify, duration=200) #try to find and drive to the closest color according to the agent's understanding for 120 sec
 			if arrived:
 				tag_id,_ = cwe.check_apriltag()
-				_,_,found_color_bgr = cwe.check_all_color() #averaged color of the biggest contour
+				_,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
 
 				vote_support = getBalance() / DEPOSITFACTOR
 				if vote_support > 0 and found_color_bgr[0]!=-1:
@@ -460,29 +456,25 @@ def Main(rate = mainRate):
 						for idx in range(3):
 							color_to_report[idx] = found_color_bgr[idx]
 					print("verified and report bgr color: ", color_to_report)
-					if int(tag_id)==1:
-						is_useful = 1
+					if isByz == False:
+						if int(tag_id) == 1:
+							is_useful = 1
+						else:
+							is_useful = 0
 					else:
-						is_useful = 0
+						if int(tag_id) == 1:
+							is_useful = 0
+						else:
+							is_useful = 1
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															   int(color_to_report[1] * DECIMAL_FACTOR),
 															   int(color_to_report[2] * DECIMAL_FACTOR)],
 															   is_useful,
 															   w3.toWei(vote_support, 'ether'),
-															is_useful, 0).transact(
+															is_useful, int(cluster_idx_to_verify)).transact(
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
-				# else:
-				# 	vote_support = getBalance() / DEPOSITFACTOR
-				# 	# send a transaction that reject the proposal
-				# 	voteHash = sc.functions.reportNewPt([int(color_to_verify[0] * DECIMAL_FACTOR),
-				# 										 int(color_to_verify[1] * DECIMAL_FACTOR),
-				# 										 int(color_to_verify[2] * DECIMAL_FACTOR)],
-				# 										0,
-				# 										w3.toWei(vote_support, 'ether'),
-				# 										0, 0).transact(
-				# 		{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
-				# 		 'gasPrice': gasprice})
+
 			fsm.setState(Scout.Query, message="Resume scout")
 
 		if voteHash:
@@ -537,8 +529,8 @@ def Event(rate = eventRate):
 		# Log relevant smart contract details
 		blockNr = w3.eth.blockNumber
 		balance = getBalance()
-		# sources  = w3.sc.functions.getSourceList().call()
-		sclog.log([blockNr, balance])
+		sources  = sc.functions.getSourceList().call()
+		sclog.log([blockNr, balance, str(sources)])
 	
 	blockFilter = w3.eth.filter('latest')
 	

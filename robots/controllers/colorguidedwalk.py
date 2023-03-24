@@ -27,7 +27,7 @@ cam_rot = True
 cam_sample_lgh = 50
 cam_sample_interval = 40
 color_ce_threshold = 0.15  # cross entropy threshold, if a color is present
-color_hsv_threshold = np.array([12, 70, 70])  # threshold for each dimension of the HSV
+color_hsv_threshold = np.array([12, 70, 100])  # threshold for each dimension of the HSV
 gsFreq = 20
 
 
@@ -169,6 +169,7 @@ class ColorWalkEngine(object):
         self.april = apriltag.Detector()
         self.max_speed= MAX_SPEED
         self.actual_rw_dir = "s"
+        self.last_speed = []
         if exists('../calibration/' + robotID + '.csv'):
             with open('../calibration/' + robotID + '.csv', 'r') as color_gt:
                 for line in color_gt:
@@ -207,7 +208,7 @@ class ColorWalkEngine(object):
         self.actual_rw_dir = "s"
         while time.time() - startTime < duration:
             if self.rot.duration <= 0:
-                color_idx, color_name, color_rgb = self.check_all_color()
+                color_idx, color_name, color_rgb,_ = self.check_all_color()
                 if color_idx != -1 and self.check_free_zone():
                     self.rot.setWalk(False)
                     return color_idx, color_name, color_rgb
@@ -218,10 +219,14 @@ class ColorWalkEngine(object):
     def repeat_sampling(self, color_name, repeat_times = 5):
         measure_list = []
         for idx in range(repeat_times):
-            found_color_idx, found_color_name, found_color_rgb = self.check_all_color()
+            found_color_center = 0
+            found_color_idx, found_color_name, found_color_rgb, found_color_center = self.check_all_color()
             if color_name == found_color_name:
                 measure_list.append(found_color_rgb)
-            walk_dir = ["cw", "ccw"][idx % 2]
+            if 480 // 2 - found_color_center>0: #if target on your right
+                walk_dir = ["cw", "ccw"][idx % 2]
+            else:
+                walk_dir = ["ccw", "cw"][idx % 2]
             self.rot.setPattern(walk_dir, 1)
         if measure_list:
             return np.mean(measure_list,axis=0)
@@ -233,7 +238,7 @@ class ColorWalkEngine(object):
         detect_color = False
         in_free_zone = 0
         startTime = time.time()
-        pid_controller = PID(0.1, 0.01, 0.5)
+        pid_controller = PID(0.01, 0.01, 0.5)
         self.actual_rw_dir = "s"
 
         #check if the robot is in white free zone
@@ -265,14 +270,16 @@ class ColorWalkEngine(object):
                     arrived_count = 0
             image = self.cam.get_reading()
             image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-            cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
+            tracking_color_threshold = color_hsv_threshold.copy()
+            tracking_color_threshold[0]=15 #use wider threshold when tracking color
+            cnt, cen = get_contours(image_hsv, this_color_hsv, tracking_color_threshold)
             if cen != -1 and cv2.contourArea(cnt) < 1000:
                 cen = -1
             if cen != -1:
                 detect_color = True
             else:
                 detect_color = False
-
+            self.last_speed = [0,0]
             if detect_color:
                 lose_track_count=0
                 self.rot.setDrivingMode("speed")
@@ -281,15 +288,18 @@ class ColorWalkEngine(object):
                 speed_adjustment = pid_controller.compute(error, dt)
 
                 base_speed = self.max_speed*0.8
+
                 left_speed = base_speed - speed_adjustment
                 right_speed = base_speed + speed_adjustment
+                self.last_speed = [left_speed, right_speed]
                 print("error: ", error, "set speeds: ", left_speed, right_speed)
                 self.rot.setDrivingSpeed(left_speed,right_speed)
             elif arrived_count == 0 and lose_track_count<5:
                 lose_track_count+=1
+                self.rot.setDrivingSpeed(self.last_speed[1], self.last_speed[0]) #reverse last PID action, try to recover the color
             elif arrived_count == 0 and lose_track_count>=5:
                 self.rot.setDrivingMode("pattern")
-                pid_controller = PID(0.1, 0.01, 0.5) #reset controller
+                pid_controller = PID(0.01, 0.01, 0.5) #reset controller
                 self.random_walk_engine()
                 #     self.rot.setPattern("s", 5)
                 # elif dir_ang <= -1 and self.rot.isWalking() == False:
@@ -341,6 +351,7 @@ class ColorWalkEngine(object):
         max_color = ''
         max_color_idx = -1
         this_area = max_area
+        cen = -1
         for color_idx, color_name in enumerate(self.colors):
             this_color_hsv = np.array(self.ground_truth_hsv[color_idx])
             image = self.cam.get_reading()
@@ -358,8 +369,8 @@ class ColorWalkEngine(object):
             cv2.drawContours(avg_color_mask, [max_contour], -1, 255, -1)
             mean_color_rgb = cv2.mean(image, mask=avg_color_mask)[:3]
             print("max area: ", this_area, max_color, mean_color_rgb)
-            return max_color_idx, max_color, mean_color_rgb
-        return -1, -1, [-1,-1,-1]
+            return max_color_idx, max_color, mean_color_rgb, cen
+        return -1, -1, [-1,-1,-1], -1
     def check_free_zone(self):
         _, tag_height = self.check_apriltag()
         if tag_height>0:
