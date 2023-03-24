@@ -335,15 +335,20 @@ class PeerBuffer(object):
 class Logger(object):
     """ Logging Class to Record Data to a File
     """
-    def __init__(self, logfile, header, rate = 0, buffering = 1):
+    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None):
 
         self.file = open(logfile, 'w+', buffering = buffering)
         self.rate = rate
         self.tStamp = 0
         self.tStart = 0
+        self.latest = time.time()
         pHeader = ' '.join([str(x) for x in header])
         self.file.write('{} {} {}\n'.format('ID', 'TIME', pHeader))
-        self.id = open("/boot/pi-puck_id", "r").read().strip()
+        
+        if ID:
+            self.id = ID
+        else:
+            self.id = open("/boot/pi-puck_id", "r").read().strip()
 
     def log(self, data):
         """ Method to log row of data
@@ -351,17 +356,18 @@ class Logger(object):
         :type data: list
         """ 
         
-        if self.isReady():
+        if self.query():
             self.tStamp = time.time()
             try:
                 tString = str(round(self.tStamp-self.tStart, 3))
                 pData = ' '.join([str(x) for x in data])
                 self.file.write('{} {} {}\n'.format(self.id, tString, pData))
+                self.latest = self.tStamp
             except:
                 pass
                 logger.warning('Failed to log data to file')
 
-    def isReady(self):
+    def query(self):
         return time.time()-self.tStamp > self.rate
 
     def start(self):
@@ -369,6 +375,20 @@ class Logger(object):
 
     def close(self):
         self.file.close()
+
+def readEnode(enode, output = 'id'):
+    # Read IP or ID from an enode
+    ip_ = enode.split('@',2)[1].split(':',2)[0]
+
+    if output == 'ip':
+        return ip_
+    elif output == 'id':
+        return ip_.split('.')[-1] 
+
+
+
+
+
 
 def readEnode(enode, output = 'id'):
     # Read IP or ID from an enode

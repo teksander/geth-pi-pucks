@@ -22,6 +22,7 @@ pcID = '100'
 estimateRate = 1
 voteRate = 45
 bufferRate = 0.33
+mainRate = 1
 eventRate = 1
 globalPeers = 0
 ageLimit = 2
@@ -36,9 +37,10 @@ global startFlag, isByz
 startFlag = False
 isByz = False
 
-if len(sys.argv)==2:
-	if sys.argv[1] == '--byz':
-		isByz = False
+# if len(sys.argv)==2:
+# 	if sys.argv[1] == '--byz':
+# 		isByz = False
+
 global gasLimit, gasprice, gas
 gasLimit = 0x9000000
 gasprice = 0x000000 #no gas fee in our configuration
@@ -46,8 +48,6 @@ gas = 0x00000
 
 global txList, startTime
 txList = []
-
-
 
 
 # /* Import Packages */
@@ -92,20 +92,20 @@ clocks['query_sc'] = Timer(1)
 header = ['ESTIMATE','W','B','S1','S2','S3']
 estimatelog = Logger('../logs/estimate.csv', header, 10)
 
-header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
-bufferlog = Logger('../logs/buffer.csv', header, 2)
+# header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
+# bufferlog = Logger('../logs/buffer.csv', header, 2)
 
-header = ['VOTE']
-votelog = Logger('../logs/vote.csv', header)
+# header = ['VOTE']
+# votelog = Logger('../logs/vote.csv', header)
 
 header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
 blocklog = Logger('../logs/block.csv', header)
 
-header = ['BLOCK', 'BALANCE', 'UBI', 'PAY','#ROBOT', 'MEAN', '#VOTES','#OKVOTES', '#MYVOTES','#MYOKVOTES', 'R?','C?']
+header = ['BLOCK', 'BALANCE']
 sclog = Logger('../logs/sc.csv', header)
 
-header = ['#BLOCKS']
-synclog = Logger('../logs/sync.csv', header)
+# header = ['#BLOCKS']
+# synclog = Logger('../logs/sync.csv', header)
 
 header = ['CHAINDATASIZE', '%CPU']
 extralog = Logger('../logs/extra.csv', header, 5)
@@ -191,11 +191,14 @@ global color_to_verify, color_to_report
 color_to_verify = [0, 0, 0]
 color_to_report = [0, 0, 0]
 color_name_to_report = ''
+
 # /* Define Main-modules */
 #######################################################################
+
 # The 4 Main-modules: 
 # "Buffer"    (Rate 1Hz) queries RandB to get neighbor identities and add/remove on Geth
-# "Event"  (Every block) when a new block is detected make blockchain queries/sends/log block data 
+# "Main""     (Rate 1Hz) performs the main control loop
+# "Event"     (Rate 1Hz) when a new block is detected make blockchain queries for logging
 
 def Buffer(rate = bufferRate, ageLimit = ageLimit):
 	""" Control routine for robot-to-robot dynamic peering """
@@ -310,7 +313,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 			chainSize = getFolderSize('/home/pi/geth-pi-pucks/blockchain/geth')
 			cpuPercent= getCPUPercent()
 			extralog.log([chainSize,cpuPercent])
-			bufferlog.log([len(gethIds), len(erbIds), len(tcp.allowed), ';'.join(erbIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
+			# bufferlog.log([len(gethIds), len(erbIds), len(tcp.allowed), ';'.join(erbIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
 
 	while True:
 		if not startFlag:
@@ -330,19 +333,25 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 		tic.toc()
 
-def Main(rate = eventRate):
+def Main(rate = mainRate):
+	""" Main control routine """
 	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors
 	blockFilter = w3.eth.filter('latest')
 	voteHashes = []
 	voteHash = None
+
 	while True:
+
 		if not startFlag:
-			mainlogger.info('Stopped Events')
+			mainlogger.info('Stopped Main module')
 			break
+
 		tic = TicToc(rate, 'Event')
 		newBlocks = blockFilter.get_new_entries()
+
 		if fsm.query(Idle.IDLE):
 			fsm.setState(Scout.Query, message="Start exploration")
+
 		elif fsm.query(Scout.Query):
 			# check reported color.
 			verify_unseen = 0
@@ -499,48 +508,95 @@ def Main(rate = eventRate):
 
 		tic.toc()
 
+def Event(rate = eventRate)
+	""" Control routine executed each time new blocks are synchronized """
+
+	def blockHandle():
+		""" Execute when new blocks are synchronized """
+
+		# Log relevant block details 
+		block = w3.eth.getBlock(blockHex)
+		blocklog.log([
+			time.time()-block.timestamp, 
+			round(block.timestamp-blocklog.tStart, 3), 
+			block.number, 
+			block.hash.hex(), 
+			block.parentHash.hex(), 
+			block.difficulty, 
+			block.totalDifficulty, 
+			block.size, 
+			len(block.transactions), 
+			len(block.uncles), 
+			str(eval(w3.geth.txpool.status()['pending'])), 
+			str(eval(w3.geth.txpool.status()['queued']))
+			])
+
+	def scHandle():
+		""" Execute when new blocks are synchronized """
+		global ubi, payout, newRound, balance
+
+		# Log relevant smart contract details
+		blockNr = w3.eth.blockNumber
+		balance = getBalance()
+		# sources  = w3.sc.functions.getSourceList().call()
+		sclog.log([blockNr, balance])
+		
+	while startFlag:
+
+		tic = TicToc(rate, 'Event')
+
+		newBlocks = blockFilter.get_new_entries()
+			if newBlocks:
+				for blockHex in newBlocks:
+					blockHandle()
+					scHandle()
+
+	mainlogger.info('Stopped Event Module')
+
 # /* Initialize background daemon threads for the Main-Modules*/
 #######################################################################
 bufferTh = threading.Thread(target=Buffer, args=())
 bufferTh.daemon = True
 
-eventTh = threading.Thread(target=Main, args=())
+mainTh = threading.Thread(target=Main, args=())
+mainTh.daemon = True
+
+eventTh = threading.Thread(target=Event, args=())
 eventTh.daemon = True
 
 # Ignore mainmodules by removing from list:
-mainmodules = [bufferTh, eventTh]
-# mainmodules = [estimateTh]
+mainmodules = [bufferTh, mainTh, eventTh]
 
 def START(modules = submodules + mainmodules, logs = logmodules):
-	mainlogger.info('Starting Experiment')
 	global startFlag, startTime
-	startTime = time.time()
 
+	mainlogger.info('Starting Experiment')
+
+	startTime = time.time()
 	for log in logs:
 		try:
 			log.start()
 		except:
 			mainlogger.critical('Error Starting Log')
 
-	startFlag = 1
+	startFlag = True
 	for module in modules:
 		try:
 			module.start()
 		except:
 			mainlogger.critical('Error Starting Module')
-	#Main(eventRate)
-
 
 
 def STOP(modules = submodules, logs = logmodules):
-	mainlogger.info('Stopping Experiment')
 	global startFlag
 
+	mainlogger.info('Stopping Experiment')
 
 	mainlogger.info('--/-- Stopping Main-modules --/--')
-	startFlag = 0
+	startFlag = False
 	time.sleep(1.5)
 	cwe.stop()
+
 	mainlogger.info('--/-- Stopping Sub-modules --/--')
 	for submodule in modules:
 		try:
@@ -555,34 +611,32 @@ def STOP(modules = submodules, logs = logmodules):
 			mainlogger.warning('Error Closing Logfile')
 
 	if isByz:
-		pass
 		mainlogger.info('This Robot was BYZANTINE')
 
-	txlog.start()
+	# txlog.start()
+	# for txHash in txList:
 
-	for txHash in txList:
-
-		try:
-			tx = w3.eth.getTransaction(txHash)
-		except:
-			txlog.log(['Lost'])
-		else:
-			try:
-				txRecpt = w3.eth.getTransactionReceipt(txHash)
-				mined = 'Yes'
-				txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
-			except:
-				mined = 'No'
-				txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
-
-	txlog.close()
+	# 	try:
+	# 		tx = w3.eth.getTransaction(txHash)
+	# 	except:
+	# 		txlog.log(['Lost'])
+	# 	else:
+	# 		try:
+	# 			txRecpt = w3.eth.getTransactionReceipt(txHash)
+	# 			mined = 'Yes'
+	# 			txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
+	# 		except:
+	# 			mined = 'No'
+	# 			txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
+	# txlog.close()
 
 def signal_handler(sig, frame):
+
 	if not startFlag:
 		mainlogger.info('Experiment has not started. Exiting')
 		sys.exit()
 
-	elif startFlag:
+	else startFlag:
 		STOP()
 		print('Experiment is stopped. Exiting')
 		sys.exit()
@@ -626,8 +680,6 @@ def getEnodeById(__id, gethEnodes = None):
     for enode in gethEnodes:
         if readEnode(enode, output = 'id') == __id:
             return enode
-
-
 def getIds(__enodes = None):
     if __enodes:
         return [enode.split('@',2)[1].split(':',2)[0].split('.')[-1] for enode in __enodes]
@@ -649,7 +701,7 @@ if len(sys.argv) == 1:
 
 elif len(sys.argv) == 2:
 	if sys.argv[1] == '--byz':
-		isByz = 1
+		isByz = True
 
 		START()
 		mainlogger.info('Robot ID: %s (Byzantine)', me.id)
@@ -662,6 +714,6 @@ elif len(sys.argv) == 2:
 
 	elif sys.argv[1] == '--sandbox':
 		print('---//--- SANDBOX-MODE ---//---')
-		startFlag = 1
+		startFlag = True
 
 mainlogger.info('Type Ctrl+C to stop experiment')
