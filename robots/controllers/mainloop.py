@@ -49,6 +49,13 @@ gas = 0x00000
 global txList, startTime
 txList = []
 
+global color_to_verify, color_to_report
+color_to_verify = [0, 0, 0]
+color_to_report = [0, 0, 0]
+color_name_to_report = ''
+
+global clocks
+clocks = dict()
 
 # /* Import Packages */
 #######################################################################
@@ -74,10 +81,6 @@ from rgbleds import RGBLEDs
 from statemachine import *
 from aux import *
 
-
-global clocks
-clocks = dict()
-clocks['query_sc'] = Timer(1)
 # Global parameters
 # subprocess.call("source ../../globalconfig")
 
@@ -85,10 +88,34 @@ clocks['query_sc'] = Timer(1)
 #with open('../calibration/gsThreshes.txt') as calibFile:
 #	gsThresh = list(map(int, calibFile.readline().split()))
 
-# /* Initialize Logging Files and Console Logging*/
+# /* Initialize Console Logging*/
+#######################################################################
+
+# Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
+mainlogger = logging.getLogger('main')
+estimatelogger = logging.getLogger('estimate')
+bufferlogger = logging.getLogger('buffer')
+eventlogger = logging.getLogger('events')
+votelogger = logging.getLogger('voting')
+
+# List of logmodules --> specify submodule loglevel if desired
+logging.getLogger('main').setLevel(loglevel)
+logging.getLogger('estimate').setLevel(loglevel)
+logging.getLogger('buffer').setLevel(50)
+logging.getLogger('events').setLevel(loglevel)
+logging.getLogger('voting').setLevel(loglevel)
+logging.getLogger('console').setLevel(loglevel)
+logging.getLogger('erandb').setLevel(10)
+logging.getLogger('randomwalk').setLevel(loglevel)
+logging.getLogger('groundsensor').setLevel(10)
+logging.getLogger('aux').setLevel(loglevel)
+logging.getLogger('rgbleds').setLevel(loglevel)
+
+# /* Initialize Logging Files */
 #######################################################################
 
 # Experiment data logs (recorded to file)
+
 header = ['ESTIMATE','W','B','S1','S2','S3']
 estimatelog = Logger('../logs/estimate.csv', header, 10)
 
@@ -114,27 +141,7 @@ header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
 txlog = Logger('../logs/tx.csv', header)
 
 # List of logmodules --> iterate .start() to start all; remove from list to ignore
-logmodules = [estimatelog, bufferlog, votelog, blocklog, sclog, synclog, extralog, txlog]
-
-# Console/file logs (Levels: DEBUG, INFO, WARNING, ERROR, CRITICAL)
-mainlogger = logging.getLogger('main')
-estimatelogger = logging.getLogger('estimate')
-bufferlogger = logging.getLogger('buffer')
-eventlogger = logging.getLogger('events')
-votelogger = logging.getLogger('voting')
-
-# List of logmodules --> specify submodule loglevel if desired
-logging.getLogger('main').setLevel(loglevel)
-logging.getLogger('estimate').setLevel(loglevel)
-logging.getLogger('buffer').setLevel(50)
-logging.getLogger('events').setLevel(loglevel)
-logging.getLogger('voting').setLevel(loglevel)
-logging.getLogger('console').setLevel(loglevel)
-logging.getLogger('erandb').setLevel(10)
-logging.getLogger('randomwalk').setLevel(loglevel)
-logging.getLogger('groundsensor').setLevel(10)
-logging.getLogger('aux').setLevel(loglevel)
-logging.getLogger('rgbleds').setLevel(loglevel)
+logmodules = [estimatelog, blocklog, sclog, extralog, txlog]
 
 # /* Initialize Sub-modules */
 #######################################################################
@@ -153,7 +160,6 @@ me = Peer(robotID, w3.enode, w3.key)
 pc = Peer(pcID)
 
 # /* Init an instance of the buffer for peers  */
-mainlogger.info('Initialising peer buffer...')
 pb = PeerBuffer(ageLimit)
 
 # /* Init TCP server, __hosting process and request function */
@@ -164,9 +170,8 @@ tcp = TCP_server(me.enode, me.ip, tcpPort)
 mainlogger.info('Initialising RandB board...')
 erb = ERANDB(erbDist, erbtFreq)
 
-# /* Init Ground-Sensors, __mapping process and vote function */
-mainlogger.info('Initialising ground-sensors...')
-#cwe inits a gs instance as well
+# # /* Init Ground-Sensors, __mapping process and vote function */
+# mainlogger.info('Initialising ground-sensors...')
 #gs = GroundSensor(gsFreq)
 
 # /* Init Random-Walk, __walking process */
@@ -179,18 +184,16 @@ color_names = cwe.get_color_list()
 verified_colors=[0 for x in range(len(color_names))]
 verified_idx=[]
 recent_colors=[]
+
 # /* Init LEDs */
 rgb = RGBLEDs()
 
-# List of submodules --> iterate .start() to start all
-submodules = [w3.geth.miner, tcp, erb]
-global fsm
+# /* Init FSM */
 fsm = FiniteStateMachine(start=Idle.IDLE)
 
-global color_to_verify, color_to_report
-color_to_verify = [0, 0, 0]
-color_to_report = [0, 0, 0]
-color_name_to_report = ''
+# List of submodules --> iterate .start() to start all
+submodules = [w3.geth.miner, tcp, erb]
+
 
 # /* Define Main-modules */
 #######################################################################
@@ -283,7 +286,6 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 			bufferlogger.warning('Removed ilegittimate peer: %s',peerId)
 
 		# Collect new peer IDs from E-RANDB to the buffer
-		# erbIds = erb.getNew()
 		erbIds = set()
 		# Temporary fix to gctronics bug
 		if erbTimeout == 0:
@@ -307,23 +309,13 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 		for erbId in erbIds:
 			tcp.allow(erbId)
 
-		# Logs
-		if bufferlog.isReady():
-			# Low frequency logging of chaindata size and cpu usage
-			chainSize = getFolderSize('/home/pi/geth-pi-pucks/blockchain/geth')
-			cpuPercent= getCPUPercent()
-			extralog.log([chainSize,cpuPercent])
-			# bufferlog.log([len(gethIds), len(erbIds), len(tcp.allowed), ';'.join(erbIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
+		# if bufferlog.query():
+		# 	bufferlog.log([len(gethIds), len(erbIds), len(tcp.allowed), ';'.join(erbIds), ';'.join(gethIds), ';'.join(tcp.allowed)])
+	
+	tic = TicToc(rate, 'Buffer')
 
-	while True:
-		if not startFlag:
-			gethEnodes = getEnodes()
-			for enode in gethEnodes:
-				w3.provider.make_request("admin_removePeer",[enode])
-			mainlogger.info('Stopped Buffering')
-			break
-
-		tic = TicToc(rate, 'Buffer')
+	while startFlag:
+		tic.tic()
 
 		if globalPeers:
 			globalBuffer()
@@ -333,21 +325,24 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 		tic.toc()
 
+	mainlogger.info('Stopped Buffering')
+
+	gethEnodes = getEnodes()
+	for enode in gethEnodes:
+		w3.provider.make_request("admin_removePeer",[enode])
+
+	
 def Main(rate = mainRate):
 	""" Main control routine """
 	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors
-	blockFilter = w3.eth.filter('latest')
+
+	tic = TicToc(rate, 'Main')
+
 	voteHashes = []
 	voteHash = None
 
-	while True:
-
-		if not startFlag:
-			mainlogger.info('Stopped Main module')
-			break
-
-		tic = TicToc(rate, 'Event')
-		newBlocks = blockFilter.get_new_entries()
+	while startFlag:
+		tic.tic()
 
 		if fsm.query(Idle.IDLE):
 			fsm.setState(Scout.Query, message="Start exploration")
@@ -396,6 +391,7 @@ def Main(rate = mainRate):
 
 				else:
 					print('no color found, pass')
+
 		elif fsm.query(Scout.PrepReport):
 			print("Drive to the color to be reported: ", color_to_report)
 			arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
@@ -444,6 +440,7 @@ def Main(rate = mainRate):
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 			else:
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
+
 		elif fsm.query(Verify.DriveTo):
 			print("try to drive to the color for verification")
 			arrived = cwe.drive_to_closest_color(color_to_verify, duration=200) #try to find and drive to the closest color according to the agent's understanding for 120 sec
@@ -501,15 +498,17 @@ def Main(rate = mainRate):
 			try:
 				txRecpt = w3.eth.getTransactionReceipt(voteHash)
 				votelogger.debug('Vote included in block!')
-				# print(txRecpt['blockNumber'], txRecpt['transactionIndex'], txRecpt['status'], txBlock, txIndex, txNonce)
 				voteHash = None
 			except:
 				votelogger.debug('Vote not yet included on block')
 
 		tic.toc()
 
-def Event(rate = eventRate)
+	mainlogger.info('Stopped Main module')
+
+def Event(rate = eventRate):
 	""" Control routine executed each time new blocks are synchronized """
+	tic = TicToc(rate, 'Event')
 
 	def blockHandle():
 		""" Execute when new blocks are synchronized """
@@ -540,20 +539,29 @@ def Event(rate = eventRate)
 		balance = getBalance()
 		# sources  = w3.sc.functions.getSourceList().call()
 		sclog.log([blockNr, balance])
-		
+	
+	blockFilter = w3.eth.filter('latest')
+	
 	while startFlag:
-
-		tic = TicToc(rate, 'Event')
-
+		tic.tic()
+		
 		newBlocks = blockFilter.get_new_entries()
-			if newBlocks:
-				for blockHex in newBlocks:
-					blockHandle()
-					scHandle()
+		if newBlocks:
+			for blockHex in newBlocks:
+				blockHandle()
+				scHandle()
+
+		# Low frequency logging of chaindata size and cpu usage
+		if extralog.query():
+			chainSize = getFolderSize('/home/pi/geth-pi-pucks/blockchain/geth')
+			cpuPercent= getCPUPercent()
+			extralog.log([chainSize,cpuPercent])
+
+		tic.toc()
 
 	mainlogger.info('Stopped Event Module')
 
-# /* Initialize background daemon threads for the Main-Modules*/
+# /* Initialize background threads for the Main-Modules*/
 #######################################################################
 bufferTh = threading.Thread(target=Buffer, args=())
 bufferTh.daemon = True
@@ -590,17 +598,15 @@ def START(modules = submodules + mainmodules, logs = logmodules):
 def STOP(modules = submodules, logs = logmodules):
 	global startFlag
 
-	mainlogger.info('Stopping Experiment')
-
 	mainlogger.info('--/-- Stopping Main-modules --/--')
 	startFlag = False
-	time.sleep(1.5)
-	cwe.stop()
+	for module in mainmodules:
+		module.join()
 
 	mainlogger.info('--/-- Stopping Sub-modules --/--')
-	for submodule in modules:
+	for module in submodules+[cwe]:
 		try:
-			submodule.stop()
+			module.stop()
 		except:
 			mainlogger.warning('Error stopping submodule')
 
@@ -632,13 +638,13 @@ def STOP(modules = submodules, logs = logmodules):
 
 def signal_handler(sig, frame):
 
-	if not startFlag:
-		mainlogger.info('Experiment has not started. Exiting')
-		sys.exit()
-
-	else startFlag:
+	if startFlag:
+		print('--/-- Stopping Experiment --/--')
 		STOP()
 		print('Experiment is stopped. Exiting')
+		sys.exit()
+	else:
+		mainlogger.info('Experiment never started. Exiting')
 		sys.exit()
 		
 

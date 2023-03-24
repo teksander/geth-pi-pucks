@@ -411,6 +411,7 @@ class ColorWalkEngine(object):
         self.rot.setLEDs(state)
 
     def stop(self):
+        self.rot.setWheels(0,0)
         self.rot.setWalk(False)
         #self.gs.stop()
 

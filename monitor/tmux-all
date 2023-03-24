@@ -70,6 +70,7 @@ elif [[ $# -eq 1 ]]; then
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
 		tmux rename-session MAINLOOP
+
 		tmux set-option -w -t MAINLOOP synchronize-panes off
 		for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
 		  if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
@@ -80,6 +81,6 @@ elif [[ $# -eq 1 ]]; then
       fi
 		done
     tmux set-option -w -t MAINLOOP synchronize-panes on
-		#tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py"
+
 	fi
 fi
