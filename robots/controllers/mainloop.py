@@ -49,10 +49,12 @@ gas = 0x00000
 global txList, startTime
 txList = []
 
-global color_to_verify, color_to_report
+global color_to_verify, color_to_report, color_idx_to_report, color_seen_list
+color_seen_list = [0,0,0]
 color_to_verify = [0, 0, 0]
 color_to_report = [0, 0, 0]
 color_name_to_report = ''
+color_idx_to_report=0
 
 global clocks
 clocks = dict()
@@ -128,7 +130,7 @@ logging.getLogger('rgbleds').setLevel(loglevel)
 header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
 blocklog = Logger('../logs/block.csv', header)
 
-header = ['BLOCK', 'BALANCE', 'SOURCES']
+header = ['BLOCK', 'BALANCE', 'SOURCES', 'SEEN_COLORS']
 sclog = Logger('../logs/sc.csv', header)
 
 # header = ['#BLOCKS']
@@ -334,7 +336,7 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 def Main(rate = mainRate):
 	""" Main control routine """
-	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors, cluster_idx_to_verify
+	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors, cluster_idx_to_verify, color_idx_to_report
 
 	tic = TicToc(rate, 'Main')
 
@@ -355,15 +357,19 @@ def Main(rate = mainRate):
 			source_list = sc.functions.getSourceList().call()
 			points_list = sc.functions.getPointListInfo().call()
 			print("get source list: ", source_list)
-			if len(source_list) > 0:
+
+			if len(source_list) > 0 and not voteHash:
 				candidate_cluster = []
 				for idx, cluster in enumerate(source_list):
 					verified_by_me = False
 					for point_rec in points_list:
-						if point_rec[5] == me.key and int(point_rec[4]) == idx:
+						if point_rec[4] == me.key and int(point_rec[3]) == idx:
 							verified_by_me = True
-					if cluster[3] == 0 and not verified_by_me:  # exists cluster needs verification
+						print("checking keys: ", point_rec[4], me.key)
+					print(point_rec[3], verified_by_me)
+					if cluster[2] == 0 and not verified_by_me:  # exists cluster needs verification
 						candidate_cluster.append((cluster, idx))
+					print("my candidates to verify: ", candidate_cluster)
 				if len(candidate_cluster) > 0:
 					# randomly select a cluster to verify
 					# no longer needed to maintain the verified index list, as we used the verified_by_me check above
@@ -384,6 +390,7 @@ def Main(rate = mainRate):
 					for idx in range(3):
 						color_to_report[idx] =  found_color_bgr[idx]
 					color_name_to_report = found_color_name
+					color_idx_to_report = found_color_idx
 					if found_color_idx > -1 and color_name_to_report not in recent_colors:
 						fsm.setState(Scout.PrepReport, message="Prepare proposal")
 					elif color_name_to_report in recent_colors:
@@ -394,14 +401,18 @@ def Main(rate = mainRate):
 					print('no color found, pass')
 
 		elif fsm.query(Scout.PrepReport):
-			print("Drive to the color to be reported: ", color_to_report)
-			arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
+			print("Drive to the color to be reported: ", color_to_report, 'current vote hash: ', voteHash)
+			if not voteHash:
+				arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
+			else:
+				arrived =  False
+				print("EXIT prepare report process, with non-empty voteHash")
 
 			if arrived:
 				vote_support = getBalance()/DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag() #id = 0 no tag,
 				#two recently discovered colord are recorded in recent_colors
-				if voteHash !=0 and tag_id !=0:
+				if not voteHash and tag_id !=0:
 					recent_colors.append(color_name_to_report)
 					if len(recent_colors)>2:
 						recent_colors = recent_colors[1:]
@@ -422,15 +433,17 @@ def Main(rate = mainRate):
 							is_useful = 0
 						else:
 							is_useful = 1
-					print("vote: ", color_to_report, "support: ", vote_support, "tagid: ", tag_id, "vote: ", is_useful)
+					print("vote: ", color_to_report, color_idx_to_report, "support: ", vote_support, "tagid: ", tag_id, "vote: ", is_useful)
+					color_seen_list.append([color_to_report, color_idx_to_report])
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															int(color_to_report[1] * DECIMAL_FACTOR),
 															int(color_to_report[2] * DECIMAL_FACTOR)],
 															is_useful,
 															w3.toWei(vote_support, 'ether'),
-															is_useful, 0).transact(
+															color_idx_to_report, 0).transact(
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
+
 
 
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
@@ -438,8 +451,14 @@ def Main(rate = mainRate):
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 
 		elif fsm.query(Verify.DriveTo):
-			print("try to drive to the color for verification")
-			arrived = cwe.drive_to_closest_color(color_to_verify, duration=200) #try to find and drive to the closest color according to the agent's understanding for 120 sec
+			print("try to drive to the color for verification: ", color_to_verify, 'current vote hash: ', voteHash)
+			if not voteHash:
+				arrived, color_name_to_verify, color_idx_to_verify = cwe.drive_to_closest_color(color_to_verify, duration=100) #try to find and drive to the closest color according to the agent's understanding for 120 sec
+			else:
+				arrived =  False
+				print("EXIT prepare report process, with non-empty voteHash")
+
+
 			if arrived:
 				tag_id,_ = cwe.check_apriltag()
 				_,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
@@ -447,9 +466,9 @@ def Main(rate = mainRate):
 				vote_support = getBalance() / DEPOSITFACTOR
 				if vote_support > 0 and found_color_bgr[0]!=-1:
 					print("found color, start repeat sampling...")
-					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_report, repeat_times=3)
+					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_verify, repeat_times=3)
 					if repeat_sampled_color[0]!=-1:
-						for idx in range(1):
+						for idx in range(3):
 							color_to_report[idx] = repeat_sampled_color[idx]
 					else:
 						print("repeat sampling failed, report one-time measure")
@@ -466,12 +485,13 @@ def Main(rate = mainRate):
 							is_useful = 0
 						else:
 							is_useful = 1
+					color_seen_list.append([color_to_report, color_idx_to_verify])
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															   int(color_to_report[1] * DECIMAL_FACTOR),
 															   int(color_to_report[2] * DECIMAL_FACTOR)],
 															   is_useful,
 															   w3.toWei(vote_support, 'ether'),
-															is_useful, int(cluster_idx_to_verify)).transact(
+															color_idx_to_verify, int(cluster_idx_to_verify)).transact(
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
 
@@ -483,13 +503,17 @@ def Main(rate = mainRate):
 				txIndex = tx['transactionIndex']
 				txBlock = tx['blockNumber']
 				txNonce = tx['nonce']
+				txStatus = tx['status']
+				if tx['status'] == 0:
+					print('ERROR Vote status 0 wtf. Voting again.')
+					voteHash = None
 			except:
-				votelogger.warning('Vote disappered wtf. Voting again.')
+				print('ERROR Vote disappered wtf. Voting again.')
 				voteHash = None
 
 			try:
 				txRecpt = w3.eth.getTransactionReceipt(voteHash)
-				votelogger.debug('Vote included in block!')
+				print('SUCCESS Vote included in block!')
 				voteHash = None
 			except:
 				votelogger.debug('Vote not yet included on block')
@@ -524,13 +548,13 @@ def Event(rate = eventRate):
 
 	def scHandle():
 		""" Execute when new blocks are synchronized """
-		global ubi, payout, newRound, balance
+		global ubi, payout, newRound, balance, color_seen_list
 
 		# Log relevant smart contract details
 		blockNr = w3.eth.blockNumber
 		balance = getBalance()
 		sources  = sc.functions.getSourceList().call()
-		sclog.log([blockNr, balance, str(sources)])
+		sclog.log([blockNr, balance, str(sources), str(color_seen_list)])
 	
 	blockFilter = w3.eth.filter('latest')
 	
@@ -647,11 +671,11 @@ signal.signal(signal.SIGINT, signal_handler)
 
 def getBalance():
 	#check all my balance, including those frozen in unverified clusters.
-	myBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether"))
+	myBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether")) -1
 	points_list = sc.functions.getPointListInfo().call()
 	source_list = sc.functions.getSourceList().call()
 	for idx, cluster in enumerate(source_list):
-		if cluster[3] == 0:
+		if cluster[2] == 0:
 			for point_rec in points_list:
 				if point_rec[5] == me.key and int(point_rec[4]) == idx:
 					myBalance += float(point_rec[2]) / 1e18

@@ -24,7 +24,7 @@ if [ "$#" -eq 1 ]; then
 	# done
 	wait
 	for ID in $(cat "$IDS_FILE"); do
-		scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/logs $MAIN_DIR/results/data/$1/$ID
+		scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/logs $MAIN_DIR/results/data/$1/$ID
 		# scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/$ID-geth.tar.gz $MAIN_DIR/results/data/$1/$ID/
 		# scp -rf pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/$ID-geth.tar.gz $MAIN_DIR/results/data/$1/$ID
 

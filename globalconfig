@@ -28,19 +28,21 @@ export MONITOR_ID="100"
 export PREFIX="${ROBOTS_NAME}@${SUBNET}."
 
 # [EXPERIMENT]
-export NUM_ROB=1
-export NUM_BYZ=0
+export NUM_ROB=12
+export NUM_BYZ=1
 
 # [SC Parameters]
 export DIMS=3
 export NUMPT=100
 export MAXLIFE=5
 export MINREP=0 #minimum balance control only
-export RADIUS=20000000 # 200 in read mean distance
+export RADIUS=15000000 # 150 in red mean distance
+
 export DECIMAL_FACTOR=100000 # 1e5
-export MAXUNVCLUSTER=3
+export MAXUNVCLUSTER=4
 # shellcheck disable=SC2155
 #export TOTALASSETS="200000000000000000000"
 #export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER | bc)
 #No bc on the robots, temp solution
-export MINBALANCE=66666666666666666666
+export TOTALASSETS=$(echo $NUM_ROB*20000000000000000000 | bc)
+export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER*2/3 | bc)

@@ -219,11 +219,10 @@ class ColorWalkEngine(object):
     def repeat_sampling(self, color_name, repeat_times = 5):
         measure_list = []
         for idx in range(repeat_times):
-            found_color_center = 0
             found_color_idx, found_color_name, found_color_rgb, found_color_center = self.check_all_color()
             if color_name == found_color_name:
                 measure_list.append(found_color_rgb)
-            if 480 // 2 - found_color_center>0: #if target on your right
+            if (480 // 2 - found_color_center)>0: #if target on your right
                 walk_dir = ["cw", "ccw"][idx % 2]
             else:
                 walk_dir = ["ccw", "cw"][idx % 2]
@@ -252,8 +251,9 @@ class ColorWalkEngine(object):
 
                 else:
                     in_free_zone = 0
+                    self.random_walk_engine(10, 7)
             else:
-                self.random_walk_engine(3, 1)
+                self.random_walk_engine(10, 7)
                 in_free_zone += 1
 
         lose_track_count = 0
@@ -398,12 +398,14 @@ class ColorWalkEngine(object):
     def drive_to_closest_color(self, bgr_feature, duration=30):
         this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
         closest_color = self.colors[0]
+        closest_color_idx = 0
         colsest_color_dist = hue_distance(self.ground_truth_hsv[0][0], this_color_hsv[0])
         for idx, this_color in enumerate(self.colors):
             if hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])<colsest_color_dist:
                 colsest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])
                 closest_color =  this_color
-        return self.drive_to_color(closest_color, duration)
+                closest_color_idx = idx
+        return self.drive_to_color(closest_color, duration), closest_color, closest_color_idx
     def drive_to_closest_color_byz(self, bgr_feature, confusing_set, duration=30):
         this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
         closest_color = self.colors[0]
