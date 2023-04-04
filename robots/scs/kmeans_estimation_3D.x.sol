@@ -90,7 +90,7 @@ contract ForagingPtManagement{
             info.minDistance = 1e10;
             info.minClusterIdx = 0;
             info.foundCluster = 0;
-            if (clusterList[uint(pointList[k].cluster)].verified == 0){
+            if (pointList[k].cluster >= 0 && clusterList[uint(pointList[k].cluster)].verified == 0){ //point[k].cluster may == -1
                     for (uint i=0; i<clusterList.length; i++){
                 // Check if the newly reported pt belongs to any cluster
                 if (clusterList[i].verified==0){ // Awaiting verification, only check clusters that are awaiting verification
