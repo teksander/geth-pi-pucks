@@ -68,7 +68,6 @@ contract ForagingPtManagement{
     function reportNewPt(int256[space_size] memory position, uint category, uint256 amount, uint256 realType, uint256 intention) public payable{
         require(msg.value == amount);
         uint256 curtime = block.timestamp;
-        int verificationOK = 0;
 
 
         int256[space_size] memory position_avg;
