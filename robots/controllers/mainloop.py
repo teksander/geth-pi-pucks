@@ -677,8 +677,8 @@ def getBalance():
 	for idx, cluster in enumerate(source_list):
 		if cluster[2] == 0:
 			for point_rec in points_list:
-				if point_rec[5] == me.key and int(point_rec[4]) == idx:
-					myBalance += float(point_rec[2]) / 1e18
+				if point_rec[4] == me.key and int(point_rec[3]) == idx:
+					myBalance += float(point_rec[1]) / 1e18
 	return round(myBalance, 2)
 
 def getDiffEnodes(gethEnodes = None):
