@@ -409,10 +409,11 @@ def Main(rate = mainRate):
 				print("EXIT prepare report process, with non-empty voteHash")
 
 			if arrived:
-				vote_support = getBalance()/DEPOSITFACTOR
+				vote_support, address_balance = getBalance()
+				vote_support /= DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag() #id = 0 no tag,
 				#two recently discovered colord are recorded in recent_colors
-				if not voteHash and tag_id !=0:
+				if not voteHash and tag_id !=0 and vote_support>=address_balance:
 					recent_colors.append(color_name_to_report)
 					if len(recent_colors)>2:
 						recent_colors = recent_colors[1:]
@@ -463,8 +464,9 @@ def Main(rate = mainRate):
 				tag_id,_ = cwe.check_apriltag()
 				_,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
 
-				vote_support = getBalance() / DEPOSITFACTOR
-				if vote_support > 0 and found_color_bgr[0]!=-1:
+				vote_support, address_balance = getBalance()
+				vote_support /= DEPOSITFACTOR
+				if vote_support > 0 and found_color_bgr[0]!=-1 and vote_support>=address_balance:
 					print("found color, start repeat sampling...")
 					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_verify, repeat_times=3)
 					if repeat_sampled_color[0]!=-1:
@@ -552,7 +554,7 @@ def Event(rate = eventRate):
 
 		# Log relevant smart contract details
 		blockNr = w3.eth.blockNumber
-		balance = getBalance()
+		balance, spendable_balance = getBalance()
 		sources  = sc.functions.getSourceList().call()
 		sclog.log([blockNr, balance, str(sources), str(color_seen_list)])
 	
@@ -671,7 +673,8 @@ signal.signal(signal.SIGINT, signal_handler)
 
 def getBalance():
 	#check all my balance, including those frozen in unverified clusters.
-	myBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether")) -1
+	myUsableBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether")) -1
+	myBalance =  myUsableBalance
 	points_list = sc.functions.getPointListInfo().call()
 	source_list = sc.functions.getSourceList().call()
 	for idx, cluster in enumerate(source_list):
@@ -679,7 +682,7 @@ def getBalance():
 			for point_rec in points_list:
 				if point_rec[4] == me.key and int(point_rec[3]) == idx:
 					myBalance += float(point_rec[1]) / 1e18
-	return round(myBalance, 2)
+	return round(myBalance, 2), myUsableBalance
 
 def getDiffEnodes(gethEnodes = None):
 	if gethEnodes:
