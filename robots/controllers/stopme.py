@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
-# This script obtains calibration data for the ground sensors
-# Place robots randomely in an arena with binary floor data
 
-import time
-import signal
-import sys
-sys.path.append('..')
+import time, signal
 from randomwalk import RandomWalk
 from groundsensor import GroundSensor
+from rgbleds import RGBLEDs
 
 gsFreq = 0
 rwSpeed = 0
@@ -15,6 +11,7 @@ robotID = open("/boot/pi-puck_id", "r").read().strip()
 
 gs = GroundSensor(gsFreq)
 rw = RandomWalk(rwSpeed)
+rgb = RGBLEDs()
 
 rw.start()
 gs.start()
@@ -22,13 +19,12 @@ gs.start()
 def STOP():
 	gs.stop()
 	rw.stop()
-	calibData.close()
+	rgb.stop()
 
 def signal_handler(sig, frame):
 	STOP()
 
 signal.signal(signal.SIGINT, signal_handler)	
-
 
 STOP()
 

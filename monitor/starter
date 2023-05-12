@@ -71,7 +71,7 @@ if [[ $opt == "--start" || $opt == "-s" ]]; then
 	echo "+-----------------------------------------------------------+"
 	echo "Starting Experiment"
 
-	./tmux-all "geth + main"
+	./tmux-all "start"
 	
 fi
 done

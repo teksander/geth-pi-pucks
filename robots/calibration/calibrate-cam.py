@@ -24,7 +24,6 @@ def cross_entropy(dist_x, dist_y):
     loss = -np.sum(np.array(dist_x)*np.log(dist_y))
     return loss/float(np.array(dist_y).shape[0])
 
-
 def ask_yesno(question):
     """
     Helper to get yes / no answer from user.
@@ -43,6 +42,12 @@ def ask_yesno(question):
         else:
             print("Please respond by yes or no.")
 
+def print_color(*args, bgr):
+    b, g, r = bgr
+    color_code = f"\033[38;2;{r};{g};{b}m"
+    reset_code = "\033[0m"
+    text = " ".join(str(arg) for arg in args)
+    print(f"{color_code}{text}{reset_code}")
 
 def get_rgb_center(image, length=30):
     image_sz = image.shape
@@ -50,6 +55,7 @@ def get_rgb_center(image, length=30):
     hist_img= image[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0).astype(int)
     cropped_image_tmp = image[:, idx - int(length / 2):idx + int(length / 2)].copy()
     return hist_img, cropped_image_tmp
+
 def get_hsv_center(image, length=30):
     image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     image_sz = image_hsv.shape
@@ -66,10 +72,10 @@ def set_color():
         image = cam.get_reading()
         mean_rgb, _ = get_rgb_center(image, 60)
         readings.append(mean_rgb)
-    print("color ground truth bgr set to: ", np.mean(readings, axis=0).astype(int))
+    bgr = np.mean(readings, axis=0).astype(int)
+    print_color("color ground truth bgr set to: ", bgr, bgr = list(bgr))
     _, cropped_image = get_rgb_center(image, 60)
     return np.mean(readings, axis=0).astype(int), cropped_image
-
 
 def set_color_hsv():
     cam.get_reading()
@@ -98,9 +104,9 @@ if __name__ == "__main__":
     height1, width1 = image.shape[:2]
 
 
-    colors = ["red", "blue", "purple", "green"]
-    ground_truth_bgr = [[0,0,255], [255,0,0], [226, 43, 138],[0,255,0]] #bgr
-    ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0], [0,0,0]] #hsv
+    colors = ["red", "blue", "green"]
+    ground_truth_bgr = [[0,0,255], [255,0,0],[0,255,0]] #bgr
+    ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0]] #hsv
 
     if ask_yesno("calibrate color ground truth?"):
         for idx, name in enumerate(colors):
@@ -116,6 +122,7 @@ if __name__ == "__main__":
     #write color ground truth result
     color_gt = open(robotID+'.csv','w+')
     color_hsv_gt = open(robotID+'_hsv.csv','w+')
+
     for idx, name in enumerate(colors):
         color_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
         color_hsv_gt.write(name + ' ' + ' '.join([str(x) for x in ground_truth_hsv[idx]]) + '\n')

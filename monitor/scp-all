@@ -11,8 +11,16 @@
 # 'scp-all control'  (uploads the full robot control folder)
 # 'scp-all all'      (deletes and restores the main directory)
 
-
 source ../globalconfig
+
+# Send files to every IP
+scp_ALL() {
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/$1 "$IP:$MAIN_DIR_ROBOTS/$2" &
+	done
+	wait
+}
 
 if [ $# -eq 2 ]; then 
 	for ID in $(cat "$IDS_FILE"); do
@@ -45,11 +53,7 @@ if [ $1 == "genesis" ]; then
 fi
 
 if [ $1 == "abi" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/scs/build/$CONTRACT_NAME.abi "$IP:$MAIN_DIR_ROBOTS/robots/scs/build"  &
-	done
-	wait
+		scp_ALL robots/scs/build/$CONTRACT_NAME.abi robots/scs/build
 fi
 
 if [ $1 == "contractaddr" ]; then
@@ -86,28 +90,18 @@ if [ $1 == "setup-adhoc" ]; then
 fi
 
 
-if [ $1 == "calibration-py" ]; then
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/calibration/calibrate-cam.py "$IP:$MAIN_DIR_ROBOTS/robots/calibration/"  &
-		scp -r $MAIN_DIR/robots/calibration/calibrate-gs.py "$IP:$MAIN_DIR_ROBOTS/robots/calibration/"  &
-	done
-	wait
+if [ $1 == "calibrate-cam" ]; then
+ 	scp_ALL robots/calibration/calibrate-cam.py robots/calibration/calibrate-cam.py
 fi
 
+if [ $1 == "calibrate-gs" ]; then
+ 	scp_ALL robots/calibration/calibrate-gs.py robots/calibration/calibrate-gs.py
+fi
 
 if [ $1 == "sshkeys" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
 		ssh-copy-id -i ~/.ssh/pi-pucks.pub $IP
-	done
-	wait
-fi
-
-if [ $1 == "upcamera" ]; then 
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/controllers/upcamera.py "$IP:$MAIN_DIR_ROBOTS/robots/controllers"  &
 	done
 	wait
 fi
@@ -121,77 +115,51 @@ if [ $1 == "calib" ]; then
 	wait
 fi
 
- if [ $1 == "mainloop" ]; then
- 	for ID in $(cat "$IDS_FILE"); do
- 		IP="${PREFIX}${ID}"
- 		scp -r $MAIN_DIR/robots/controllers/ "$IP:$MAIN_DIR_ROBOTS/robots/"  &
- 	done
- 	wait
- fi
+if [ $1 == "arducam" ]; then
+	for ID in $(cat "$IDS_FILE"); do
+		IP="${PREFIX}${ID}"
+		scp -r $MAIN_DIR/robots/arducam/ "$IP:$MAIN_DIR_ROBOTS/robots/"  &
+	done
+	wait
+fi
 
- if [ $1 == "control" ]; then
- 	for ID in $(cat "$IDS_FILE"); do
- 		IP="${PREFIX}${ID}"
- 		scp -r $MAIN_DIR/robots/controllers/ "$IP:$MAIN_DIR_ROBOTS/robots/"  &
- 	done
- 	wait
- fi
+if [ $1 == "control" ]; then
+	scp_ALL robots/controllers/ robots/
+fi
 
+if [ $1 == "mainloop" ]; then
+	scp_ALL robots/controllers/mainloop.py robots/controllers/mainloop.py
+fi
 
- if [ $1 == "arducam" ]; then
- 	for ID in $(cat "$IDS_FILE"); do
- 		IP="${PREFIX}${ID}"
- 		scp -r $MAIN_DIR/robots/arducam/ "$IP:$MAIN_DIR_ROBOTS/robots/"  &
- 	done
- 	wait
- fi
+if [ $1 == "colorguidedwalk" ]; then
+	scp_ALL robots/controllers/colorguidedwalk.py robots/controllers/colorguidedwalk.py
+fi
 
+if [ $1 == "console" ]; then 
+	scp_ALL robots/controllers/console.py robots/controllers/console.py
+fi
 
+if [ $1 == "aux" ]; then 
+	scp_ALL robots/controllers/aux.py robots/controllers/aux.py
+fi
 
-# if [ $1 == "gs" ]; then 
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots/groundsensor.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-# 	done
+if [ $1 == "upcamera" ]; then 
+	scp_ALL robots/controllers/upcamera.py robots/controllers/upcamera.py 
+fi
+
+# if [ $1 == "all" ]; then 
+# 	./ssh-all "rm -r $MAIN_DIR_ROBOTS > /dev/null 2>&1" &
 # 	wait
-# fi
-
-# if [ $1 == "erb" ]; then 
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots/erandb.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-# 	done
+# 	./ssh-all "mkdir $MAIN_DIR_ROBOTS; mkdir $MAIN_DIR_ROBOTS/control; mkdir $MAIN_DIR_ROBOTS/keystore; mkdir $MAIN_DIR_ROBOTS/genesis" &
 # 	wait
-# fi
-
-# if [ $1 == "rgb" ]; then 
 # 	for ID in $(cat "$IDS_FILE"); do
 # 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots/rgbleds.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-# 	done
-# 	wait
-# fi
-
-# if [ $1 == "aux" ]; then 
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots/aux.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-# 	done
-# 	wait
-# fi
-
-# if [ $1 == "rw" ]; then 
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots/randomwalk.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
-# 	done
-# 	wait
-# fi
-
-# if [ $1 == "console" ]; then 
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots/console.py "$IP:$MAIN_DIR_ROBOTS/control/robots/"  &
+# 		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control" &
+# 		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS" &
+# 		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS" &
+# 		scp -r $MAIN_DIR/setup-router "$IP:$MAIN_DIR_ROBOTS" &
+# 		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS" &
+# 		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS" &
 # 	done
 # 	wait
 # fi
@@ -211,25 +179,6 @@ fi
 # 	done
 # 	wait
 # fi
-
-
-# if [ $1 == "all" ]; then 
-# 	./ssh-all "rm -r $MAIN_DIR_ROBOTS > /dev/null 2>&1" &
-# 	wait
-# 	./ssh-all "mkdir $MAIN_DIR_ROBOTS; mkdir $MAIN_DIR_ROBOTS/control; mkdir $MAIN_DIR_ROBOTS/keystore; mkdir $MAIN_DIR_ROBOTS/genesis" &
-# 	wait
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		IP="${PREFIX}${ID}"
-# 		scp -r $MAIN_DIR/control/robots "$IP:$MAIN_DIR_ROBOTS/control" &
-# 		scp -r $MAIN_DIR/setup-adhoc "$IP:$MAIN_DIR_ROBOTS" &
-# 		scp -r $MAIN_DIR/setup-geth "$IP:$MAIN_DIR_ROBOTS" &
-# 		scp -r $MAIN_DIR/setup-router "$IP:$MAIN_DIR_ROBOTS" &
-# 		scp -r $MAIN_DIR/globalconfig "$IP:$MAIN_DIR_ROBOTS" &
-# 		scp -r $MAIN_DIR/README.md "$IP:$MAIN_DIR_ROBOTS" &
-# 	done
-# 	wait
-# fi
-
 
 # if [ $1 == "pb" ]; then 
 # 	for ID in $(cat "$IDS_FILE"); do
