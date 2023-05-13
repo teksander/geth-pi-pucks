@@ -249,6 +249,19 @@ contract ForagingPtManagement{
                 payable(msg.sender).transfer(amount);
             }
         }
+        //remove all points with cluster = -1
+        uint c = 0;
+        uint curLength = pointList.length;
+        while(c<curLength){
+            if (pointList[c].cluster==-1){
+                pointList[c] = pointList[pointList.length-1];
+                pointList.pop();
+                curLength = pointList.length;
+            }
+            else{
+                c+=1;
+            }
+        }
 
         //If cluster receives enough samples, verified.
         uint256 total_non_food_credit = 0;

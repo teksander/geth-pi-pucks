@@ -435,7 +435,7 @@ def Main(rate = mainRate):
 						else:
 							is_useful = 1
 					print("vote: ", color_to_report, color_idx_to_report, "support: ", vote_support, "tagid: ", tag_id, "vote: ", is_useful)
-					color_seen_list.append([color_to_report, color_idx_to_report])
+					color_seen_list.append([color_to_report, color_idx_to_report, 's'])
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															int(color_to_report[1] * DECIMAL_FACTOR),
 															int(color_to_report[2] * DECIMAL_FACTOR)],
@@ -462,11 +462,11 @@ def Main(rate = mainRate):
 
 			if arrived:
 				tag_id,_ = cwe.check_apriltag()
-				_,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
+				found_color_idx,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
 
 				vote_support, address_balance = getBalance()
 				vote_support /= DEPOSITFACTOR
-				if vote_support > 0 and found_color_bgr[0]!=-1 and vote_support>=address_balance:
+				if vote_support > 0 and found_color_idx == color_idx_to_verify and vote_support>=address_balance:
 					print("found color, start repeat sampling...")
 					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_verify, repeat_times=3)
 					if repeat_sampled_color[0]!=-1:
@@ -487,7 +487,7 @@ def Main(rate = mainRate):
 							is_useful = 0
 						else:
 							is_useful = 1
-					color_seen_list.append([color_to_report, color_idx_to_verify])
+					color_seen_list.append([color_to_report, color_idx_to_verify, 'v'])
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															   int(color_to_report[1] * DECIMAL_FACTOR),
 															   int(color_to_report[2] * DECIMAL_FACTOR)],
