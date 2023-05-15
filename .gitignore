@@ -6,7 +6,7 @@ results/plots/
 results/data/
 results/videos/
 backup/
-
+blockchain/genesis/*
 
 .DS_Store
 .idea

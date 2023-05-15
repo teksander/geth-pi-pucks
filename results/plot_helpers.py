@@ -110,9 +110,7 @@ def perform_corrections(df):
         
     if 'MB' in df.columns:
         df['MB'] = df['MB']*10e-6
-        
-    df['CONTROLLER'] = df['CFG'].str.split('_').str[-1]
-    
+            
     return df
 
 
