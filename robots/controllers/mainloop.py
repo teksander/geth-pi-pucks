@@ -426,27 +426,26 @@ def Main(rate = mainRate):
 						color_to_report = repeat_sampled_color
 					else:
 						print("color repeat sampling failed, report one time measure")
-					if isByz==False:
-						if int(tag_id)==1:
-							is_useful = 1
-						else:
-							is_useful = 0
-					else:
-						if int(tag_id)==1:
-							is_useful = 0
-						else:
-							is_useful = 1
+
+					is_useful=False
+					if int(tag_id)==2: # red color apriltag = 2
+						is_useful = True
+					if isByz:
+						is_useful = not is_useful 
+
 					print("vote: ", color_to_report, color_idx_to_report, "support: ", vote_support, "tagid: ", tag_id, "vote: ", is_useful)
 
 					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'scout'])
+
+					value = w3.toWei(vote_support, 'ether')
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
-															int(color_to_report[1] * DECIMAL_FACTOR),
-															int(color_to_report[2] * DECIMAL_FACTOR)],
-															is_useful,
-															w3.toWei(vote_support, 'ether'),
-															color_idx_to_report, 0).transact(
-						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
-						 'gasPrice': gasprice})
+														 int(color_to_report[1] * DECIMAL_FACTOR),
+														 int(color_to_report[2] * DECIMAL_FACTOR)],
+														 int(is_useful),
+														 int(value),
+														 color_idx_to_report, 
+														 0).transact(
+						{'from': me.key, 'value': value, 'gas': gasLimit,'gasPrice': gasprice})
 					txList.append(voteHash)
 
 
@@ -483,25 +482,24 @@ def Main(rate = mainRate):
 						for idx in range(3):
 							color_to_report[idx] = found_color_bgr[idx]
 					print("verified and report bgr color: ", color_to_report)
-					if isByz == False:
-						if int(tag_id) == 1:
-							is_useful = 1
-						else:
-							is_useful = 0
-					else:
-						if int(tag_id) == 1:
-							is_useful = 0
-						else:
-							is_useful = 1
+
+					is_useful=False
+					if int(tag_id)==2: # red color apriltag = 2
+						is_useful = True
+					if isByz:
+						is_useful = is_useful 
+
 					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
+
+					value = w3.toWei(vote_support, 'ether')
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
-															   int(color_to_report[1] * DECIMAL_FACTOR),
-															   int(color_to_report[2] * DECIMAL_FACTOR)],
-															   is_useful,
-															   w3.toWei(vote_support, 'ether'),
-															color_idx_to_verify, int(cluster_idx_to_verify)).transact(
-						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
-						 'gasPrice': gasprice})
+														 int(color_to_report[1] * DECIMAL_FACTOR),
+														 int(color_to_report[2] * DECIMAL_FACTOR)],
+														 int(is_useful),
+														 int(value),
+														 color_idx_to_verify, 
+														 int(cluster_idx_to_verify)).transact(
+						{'from': me.key, 'value': value, 'gas': gasLimit, 'gasPrice': gasprice})
 					txList.append(voteHash)
 
 			fsm.setState(Scout.Query, message="Resume scout")
