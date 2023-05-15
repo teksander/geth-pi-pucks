@@ -38,8 +38,8 @@ export MAXUNVCLUSTER=3
 export DIMS=3
 export NUMPT=100
 export MAXLIFE=5
-export MINREP=0 #minimum balance control only
-export RADIUS=12500000 # 150 in red mean distance
+export MINREP=0
+export RADIUS=$(echo 100*$DECIMAL_FACTOR | bc)
 
 export TOTALASSETS=$(echo $NUM_ROB*20000000000000000000 | bc)
 export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER*1/2 | bc)

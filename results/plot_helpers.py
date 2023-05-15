@@ -191,3 +191,34 @@ def LinearRegression(group, x, y):
     group['COEFS'] = repr(coefs)
     group['LREG'] = model(group[x], *coefs)
     return group
+
+######## Random stuff
+def bgr_to_hsv(b, g, r):
+    r_norm = r / 255.0
+    g_norm = g / 255.0
+    b_norm = b / 255.0
+    
+    cmax = max(r_norm, g_norm, b_norm)
+    cmin = min(r_norm, g_norm, b_norm)
+    delta = cmax - cmin
+    
+    # Calculate hue
+    if delta == 0:
+        h = 0
+    elif cmax == r_norm:
+        h = 60 * (((g_norm - b_norm) / delta) % 6)
+    elif cmax == g_norm:
+        h = 60 * (((b_norm - r_norm) / delta) + 2)
+    elif cmax == b_norm:
+        h = 60 * (((r_norm - g_norm) / delta) + 4)
+    
+    # Calculate saturation
+    if cmax == 0:
+        s = 0
+    else:
+        s = delta / cmax
+    
+    # Calculate value
+    v = cmax
+    
+    return h, s, v

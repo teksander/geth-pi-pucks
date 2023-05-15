@@ -16,8 +16,6 @@ contract ForagingPtManagement{
     mapping (address => uint) public balances;
 
     struct Point{
-        // int x;
-        // int y;
         int[space_size] position;
         uint credit;   // deposited money in WEI
         uint category; // 0:non-food, 1:food
@@ -27,8 +25,6 @@ contract ForagingPtManagement{
     }
 
     struct Cluster{
-        // int x;
-        // int y;
         int[space_size] position;
         uint life;
         uint verified;
@@ -384,6 +380,32 @@ contract ForagingPtManagement{
 
     //----- setters and getters ------
 
+    function getClusters() public view returns(Cluster[] memory) { return clusterList; }
+    function getClusterKeys() public pure returns (string[12] memory){
+        return ["position", 
+            "life", 
+            "verified", 
+            "num_rep", 
+            "total_credit", 
+            "total_credit_food", 
+            "realType", 
+            "init_reporter", 
+            "intention", 
+            "sup_position", 
+            "total_credit_outlier",
+            "outlier_senders"];
+        }
+
+    function getPoints() public view returns(Point[] memory) { return pointList; }
+    function getPointKeys() public pure returns (string[6] memory){
+        return ["position", 
+            "credit", 
+            "category", 
+            "cluster", 
+            "sender", 
+            "realType"];
+        }
+
     function getSourceList() public view returns(Cluster[] memory){
         return clusterList;
     }
@@ -393,6 +415,7 @@ contract ForagingPtManagement{
     function getPointListInfo() public view returns(Point[]  memory){
         return pointList;
     }
+    
 
     //------ pure functions (math) ------
 

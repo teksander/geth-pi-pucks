@@ -6,18 +6,21 @@
 
 source ../globalconfig
 
+EXP=$1
+CFG=$2
+
 LOGSFOLDER="$MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/logs"
-DATAFOLDER="$MAIN_DIR/results/data/$1"
-PLOTFOLDER="$MAIN_DIR/results/plots/$1"
+DATAFOLDER="$MAIN_DIR/results/data/$EXP/$CFG"
+PLOTFOLDER="$MAIN_DIR/results/plots/$EXP/$CFG"
 
 # Create the experiment directory
 mkdir -p $DATAFOLDER $PLOTFOLDER
 
 # Find the latest repetition in that folder
-last_rep=$(ls $DATAFOLDER -v | tail -1 | sed 's/^0*//')
-new_rep=$(printf "%03d\n" $(($last_rep+1)))
+LAST=$(ls -d  ${DATAFOLDER}/*/ | tail -1 |xargs basename)
+REP=$(printf "%03d" $((10#$LAST+1)))
 
-mkdir -p $DATAFOLDER/$new_rep
+mkdir -p $DATAFOLDER/$REP
 
 # # Collect experiment configuration into /logs/
 # python3 << END
@@ -53,8 +56,8 @@ cp ../globalconfig $DATAFOLDER
 
 # Collect geth related logs from docker folder into /logs/
 for ID in $(cat "$IDS_FILE"); do
-  scp -r $ROBOTS_NAME@$SUBNET.$ID:$LOGSFOLDER $DATAFOLDER/$new_rep/$ID
+  scp -r $ROBOTS_NAME@$SUBNET.$ID:$LOGSFOLDER $DATAFOLDER/$REP/$ID
 done
 
-echo "Stored data to: /results/data/$1/$new_rep"
+echo "Stored data to: $DATAFOLDER/$REP"
 

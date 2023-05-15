@@ -376,19 +376,26 @@ class Logger(object):
     def close(self):
         self.file.close()
 
-def readEnode(enode, output = 'id'):
-    # Read IP or ID from an enode
-    ip_ = enode.split('@',2)[1].split(':',2)[0]
 
-    if output == 'ip':
-        return ip_
-    elif output == 'id':
-        return ip_.split('.')[-1] 
+def list2dict(values, keys):
+    
+    if not values:
+        return {}
+
+    if len(values) != len(keys):
+        raise ValueError("Values and keys should be equal length")
+
+    return {k: values[i] for i, k in enumerate(keys)}
 
 
-
-
-
+def print_dict(d, indent=0):
+    for key, value in d.items():
+        print('\t' * indent + str(key) + ': ', end='')
+        if isinstance(value, dict):
+            print('')
+            print_dict(value, indent+1)
+        else:
+            print(str(value))
 
 def readEnode(enode, output = 'id'):
     # Read IP or ID from an enode
@@ -400,8 +407,12 @@ def readEnode(enode, output = 'id'):
         return ip_.split('.')[-1] 
 
 def getCPUPercent():
-    return str(round(float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline()),2))
-
+    try:
+        cpu = str(round(float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline()),2))
+    except:
+        cpu = 0
+    return cpu
+    
 def getFolderSize(folder):
     # Return the size of a folder
     total_size = os.path.getsize(folder)

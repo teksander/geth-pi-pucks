@@ -30,16 +30,13 @@ ageLimit = 2
 timeLimit = 1800
 
 DECIMAL_FACTOR =  1e5
-DEPOSITFACTOR = 4 #portion of assets deposted to support each vote
+DEPOSITFACTOR = 3 #portion of assets deposted to support each vote
+
 # /* Global Variables */
 #######################################################################
 global startFlag, isByz
 startFlag = False
 isByz = False
-
-# if len(sys.argv)==2:
-# 	if sys.argv[1] == '--byz':
-# 		isByz = False
 
 global gasLimit, gasprice, gas
 gasLimit = 0x9000000
@@ -49,8 +46,7 @@ gas = 0x00000
 global txList, startTime
 txList = []
 
-global color_to_verify, color_to_report, color_idx_to_report, color_seen_list
-color_seen_list = [0,0,0]
+global color_to_verify, color_to_report, color_idx_to_report
 color_to_verify = [0, 0, 0]
 color_to_report = [0, 0, 0]
 color_name_to_report = ''
@@ -75,7 +71,7 @@ import threading
 import subprocess
 import random
 import sys
-from console import init_web3, registerSC
+from console import init_web3, registerSC, call
 from erandb import ERANDB
 from groundsensor import GroundSensor
 from colorguidedwalk import ColorWalkEngine
@@ -130,27 +126,24 @@ logging.getLogger('rgbleds').setLevel(loglevel)
 header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
 blocklog = Logger('../logs/block.csv', header)
 
-header = ['BLOCK', 'BALANCE', 'SOURCES', 'SEEN_COLORS']
+header = ['BLOCK', 'WALLET', 'BALANCE', 'CLUSTERS']
 sclog = Logger('../logs/sc.csv', header)
 
-# header = ['#BLOCKS']
-# synclog = Logger('../logs/sync.csv', header)
+header = ['B','G','R', 'NAME', 'IDX', 'FSM']
+colorlog = Logger('../logs/color.csv', header)
 
 header = ['CHAINDATASIZE', '%CPU']
 extralog = Logger('../logs/extra.csv', header, 5)
 
-header = ['MINED?', 'BLOCK', 'NONCE', 'VALUE', 'STATUS', 'HASH']
-txlog = Logger('../logs/tx.csv', header)
-
 # List of logmodules --> iterate .start() to start all; remove from list to ignore
-logmodules = [blocklog, sclog, extralog, txlog]
+logmodules = [blocklog, sclog, colorlog, extralog]
 
 # /* Initialize Sub-modules */
 #######################################################################
 
 robotID = open("/boot/pi-puck_id", "r").read().strip()
 
-# /* Init web3.py */
+# /* Init web3.py and the smart contract */
 mainlogger.info('Initialising Python Geth Console...')
 w3 = init_web3()
 sc = registerSC(w3)
@@ -172,20 +165,9 @@ tcp = TCP_server(me.enode, me.ip, tcpPort)
 mainlogger.info('Initialising RandB board...')
 erb = ERANDB(erbDist, erbtFreq)
 
-# # /* Init Ground-Sensors, __mapping process and vote function */
-# mainlogger.info('Initialising ground-sensors...')
-#gs = GroundSensor(gsFreq)
-
-# /* Init Random-Walk, __walking process */
-mainlogger.info('Initialising walking controller...')
-#color walk engine without .start()
+# /* Init Color-Guided walk, __walking process */
+mainlogger.info('Initialising movement controller...')
 cwe = ColorWalkEngine(rwSpeed)
-#cwe=None
-global verified_colors, verified_idx, recent_colors
-color_names = cwe.get_color_list()
-verified_colors=[0 for x in range(len(color_names))]
-verified_idx=[]
-recent_colors=[]
 
 # /* Init LEDs */
 rgb = RGBLEDs()
@@ -196,8 +178,16 @@ fsm = FiniteStateMachine(start=Idle.IDLE)
 # List of submodules --> iterate .start() to start all
 submodules = [w3.geth.miner, tcp, erb]
 
+global verified_colors, verified_idx, recent_colors
+color_names = cwe.get_color_list()
+print("Calibrated colors:", color_names)
+verified_colors=[0 for x in range(len(color_names))]
+verified_idx=[]
+recent_colors=[]
+
 global cluster_idx_to_verify
 cluster_idx_to_verify=0
+
 # /* Define Main-modules */
 #######################################################################
 
@@ -336,13 +326,23 @@ def Buffer(rate = bufferRate, ageLimit = ageLimit):
 
 def Main(rate = mainRate):
 	""" Main control routine """
-	global fsm, voteHashes, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors, cluster_idx_to_verify, color_idx_to_report
+	global fsm, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors, cluster_idx_to_verify, color_idx_to_report
 
 	tic = TicToc(rate, 'Main')
 
-	voteHashes = []
 	voteHash = None
 
+	def vote(position, is_useful, support, color_idx, cluster_idx):
+		value = w3.toWei(support, 'ether')
+
+		return sc.functions.reportNewPt(
+			[int(p)*DECIMAL_FACTOR for p in position],
+			is_useful,
+			value,
+			color_idx,  
+			int(cluster_idx)
+			).transact({'from': me.key, 'value':value, 'gas': gasLimit, 'gasPrice': gasprice})
+		 
 	while startFlag:
 		tic.tic()
 
@@ -352,24 +352,25 @@ def Main(rate = mainRate):
 		elif fsm.query(Scout.Query):
 			# check reported color.
 			verify_unseen = 0
-			#check if any cluster avaiting verification on chain
 
-			source_list = sc.functions.getSourceList().call()
-			points_list = sc.functions.getPointListInfo().call()
-			print("get source list: ", source_list)
+			# query the Smart Contract
+			cluster_list = sc.functions.getClusters().call()
+			points_list = sc.functions.getPoints().call()
 
-			if len(source_list) > 0 and not voteHash:
+			# check if any cluster avaiting verification on chain
+			if len(cluster_list) > 0 and not voteHash:
 				candidate_cluster = []
-				for idx, cluster in enumerate(source_list):
+				for idx, cluster in enumerate(cluster_list):
 					verified_by_me = False
 					for point_rec in points_list:
 						if point_rec[4] == me.key and int(point_rec[3]) == idx:
 							verified_by_me = True
-						print("checking keys: ", point_rec[4], me.key)
-					print(point_rec[3], verified_by_me)
+						# print("checking keys: ", point_rec[4], me.key)
+					# print(point_rec[3], verified_by_me)
 					if cluster[2] == 0 and not verified_by_me:  # exists cluster needs verification
 						candidate_cluster.append((cluster, idx))
-					print("my candidates to verify: ", candidate_cluster)
+				print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
+
 				if len(candidate_cluster) > 0:
 					# randomly select a cluster to verify
 					# no longer needed to maintain the verified index list, as we used the verified_by_me check above
@@ -377,15 +378,16 @@ def Main(rate = mainRate):
 					select_idx = random.randrange(len(candidate_cluster))
 					cluster = candidate_cluster[select_idx][0]
 					cluster_idx_to_verify = candidate_cluster[select_idx][1]+1
-					fsm.setState(Verify.DriveTo, message="Go to unverified source")
+					fsm.setState(Verify.DriveTo, message="Go to unverified cluster")
 					color_to_verify[0] = float(cluster[0][0]) / DECIMAL_FACTOR
 					color_to_verify[1] = float(cluster[0][1]) / DECIMAL_FACTOR
 					color_to_verify[2] = float(cluster[0][2]) / DECIMAL_FACTOR
 					verify_unseen = 1
+
 			if verify_unseen == 0:
 				print("try to discover color: ")
 				found_color_idx, found_color_name, found_color_bgr = cwe.discover_color(10)
-				print("found color: ", found_color_name, ' ', found_color_bgr)
+				print("found color: ", found_color_name)
 				if found_color_bgr != -1:
 					for idx in range(3):
 						color_to_report[idx] =  found_color_bgr[idx]
@@ -394,14 +396,14 @@ def Main(rate = mainRate):
 					if found_color_idx > -1 and color_name_to_report not in recent_colors:
 						fsm.setState(Scout.PrepReport, message="Prepare proposal")
 					elif color_name_to_report in recent_colors:
-						print("Found recently seen color, skept")
+						print("found recently seen color, skept")
 						cwe.random_walk_engine(10, 10)
 
 				else:
 					print('no color found, pass')
 
 		elif fsm.query(Scout.PrepReport):
-			print("Drive to the color to be reported: ", color_to_report, 'current vote hash: ', voteHash)
+			print("Drive to the color to be reported: ", [int(a) for a in color_to_report], 'current vote hash: ', voteHash)
 			if not voteHash:
 				arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
 			else:
@@ -409,10 +411,11 @@ def Main(rate = mainRate):
 				print("EXIT prepare report process, with non-empty voteHash")
 
 			if arrived:
-				vote_support = getBalance()/DEPOSITFACTOR
+				vote_support, address_balance = getBalance()
+				vote_support /= DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag() #id = 0 no tag,
 				#two recently discovered colord are recorded in recent_colors
-				if not voteHash and tag_id !=0:
+				if not voteHash and tag_id !=0 and vote_support < address_balance:
 					recent_colors.append(color_name_to_report)
 					if len(recent_colors)>2:
 						recent_colors = recent_colors[1:]
@@ -434,7 +437,8 @@ def Main(rate = mainRate):
 						else:
 							is_useful = 1
 					print("vote: ", color_to_report, color_idx_to_report, "support: ", vote_support, "tagid: ", tag_id, "vote: ", is_useful)
-					color_seen_list.append([color_to_report, color_idx_to_report])
+
+					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'scout'])
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															int(color_to_report[1] * DECIMAL_FACTOR),
 															int(color_to_report[2] * DECIMAL_FACTOR)],
@@ -443,7 +447,7 @@ def Main(rate = mainRate):
 															color_idx_to_report, 0).transact(
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
-
+					txList.append(voteHash)
 
 
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
@@ -451,9 +455,11 @@ def Main(rate = mainRate):
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 
 		elif fsm.query(Verify.DriveTo):
-			print("try to drive to the color for verification: ", color_to_verify, 'current vote hash: ', voteHash)
+			print("Drive to verify: ", [int(a) for a in color_to_verify], 'Current vote: ', voteHash)
+
 			if not voteHash:
-				arrived, color_name_to_verify, color_idx_to_verify = cwe.drive_to_closest_color(color_to_verify, duration=100) #try to find and drive to the closest color according to the agent's understanding for 120 sec
+				# Try to find and drive to the closest color according to the agent's understanding for 120 sec
+				arrived, color_name_to_verify, color_idx_to_verify = cwe.drive_to_closest_color(color_to_verify, duration=100) 
 			else:
 				arrived =  False
 				print("EXIT prepare report process, with non-empty voteHash")
@@ -461,10 +467,12 @@ def Main(rate = mainRate):
 
 			if arrived:
 				tag_id,_ = cwe.check_apriltag()
-				_,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
+				found_color_idx,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
 
-				vote_support = getBalance() / DEPOSITFACTOR
-				if vote_support > 0 and found_color_bgr[0]!=-1:
+				vote_support, address_balance = getBalance()
+				vote_support /= DEPOSITFACTOR
+				# if vote_support > 0 and found_color_bgr[0]!=-1 and vote_support<address_balance:
+				if 0<vote_support<address_balance and found_color_idx == color_idx_to_verify:
 					print("found color, start repeat sampling...")
 					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_verify, repeat_times=3)
 					if repeat_sampled_color[0]!=-1:
@@ -485,7 +493,7 @@ def Main(rate = mainRate):
 							is_useful = 0
 						else:
 							is_useful = 1
-					color_seen_list.append([color_to_report, color_idx_to_verify])
+					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															   int(color_to_report[1] * DECIMAL_FACTOR),
 															   int(color_to_report[2] * DECIMAL_FACTOR)],
@@ -494,30 +502,30 @@ def Main(rate = mainRate):
 															color_idx_to_verify, int(cluster_idx_to_verify)).transact(
 						{'from': me.key, 'value': w3.toWei(vote_support, 'ether'), 'gas': gasLimit,
 						 'gasPrice': gasprice})
+					txList.append(voteHash)
 
 			fsm.setState(Scout.Query, message="Resume scout")
-
+			
 		if voteHash:
+			tx = None
 			try:
 				tx = w3.eth.getTransaction(voteHash)
-				txIndex = tx['transactionIndex']
-				txBlock = tx['blockNumber']
-				txNonce = tx['nonce']
-				txStatus = tx['status']
-				if tx['status'] == 0:
-					print('ERROR Vote status 0 wtf. Voting again.')
-					voteHash = None
-			except:
-				print('ERROR Vote disappered wtf. Voting again.')
+			except Exception as e:
+				print(f'ERROR Vote disappered. {str(e)}')
 				voteHash = None
-
+				
 			try:
 				txRecpt = w3.eth.getTransactionReceipt(voteHash)
 				print('SUCCESS Vote included in block!')
-				voteHash = None
-			except:
-				votelogger.debug('Vote not yet included on block')
 
+				if txRecpt['status'] == 0:
+					print('ERROR Vote status 0.')
+
+				voteHash = None
+
+			except Exception as e:
+				votelogger.debug(f'Vote not yet included on block. {str(e)}')
+		
 		tic.toc()
 
 	mainlogger.info('Stopped Main module')
@@ -548,13 +556,13 @@ def Event(rate = eventRate):
 
 	def scHandle():
 		""" Execute when new blocks are synchronized """
-		global ubi, payout, newRound, balance, color_seen_list
+		global ubi, payout, newRound, balance
 
 		# Log relevant smart contract details
 		blockNr = w3.eth.blockNumber
-		balance = getBalance()
+		balance, spendable_balance = getBalance()
 		sources  = sc.functions.getSourceList().call()
-		sclog.log([blockNr, balance, str(sources), str(color_seen_list)])
+		sclog.log([blockNr, balance, spendable_balance, str(sources).replace(" ", "")])
 	
 	blockFilter = w3.eth.filter('latest')
 	
@@ -635,22 +643,31 @@ def STOP(modules = submodules, logs = logmodules):
 	if isByz:
 		mainlogger.info('This Robot was BYZANTINE')
 
-	# txlog.start()
-	# for txHash in txList:
 
-	# 	try:
-	# 		tx = w3.eth.getTransaction(txHash)
-	# 	except:
-	# 		txlog.log(['Lost'])
-	# 	else:
-	# 		try:
-	# 			txRecpt = w3.eth.getTransactionReceipt(txHash)
-	# 			mined = 'Yes'
-	# 			txlog.log([mined, txRecpt['blockNumber'], tx['nonce'], tx['value'], txRecpt['status'], txHash.hex()])
-	# 		except:
-	# 			mined = 'No'
-	# 			txlog.log([mined, mined, tx['nonce'], tx['value'], 'No', txHash.hex()])
-	# txlog.close()
+	clusterlog = Logger('../logs/cluster.csv', cluster_keys)
+	clusterlog.start()
+
+	for cluster in sc.functions.getClusters().call():
+		cluster = [str(i).replace(', ', ',') for i in cluster]
+		clusterlog.log(cluster)
+	clusterlog.close()
+
+	header = ['HASH','MINED?', 'STATUS', 'BLOCK', 'NONCE', 'VALUE', ]
+	txlog = Logger('../logs/tx.csv', header)
+
+	txlog.start()
+	for txHash in txList:
+		try:
+			tx = w3.eth.getTransaction(txHash)
+		except:
+			txlog.log(['Lost'])
+		else:
+			try:
+				txRecpt = w3.eth.getTransactionReceipt(txHash)
+				txlog.log([txHash.hex(), 'Yes', txRecpt['status'], txRecpt['blockNumber'], tx['nonce'], tx['value']])
+			except:
+				txlog.log([txHash.hex(), 'No', 'No', 'No', tx['nonce'], tx['value']])
+	txlog.close()
 
 def signal_handler(sig, frame):
 
@@ -669,17 +686,26 @@ signal.signal(signal.SIGINT, signal_handler)
 # /* Some useful functions */
 #######################################################################
 
+cluster_keys = sc.functions.getClusterKeys().call()
+def getClusters():
+	return [list2dict(c, cluster_keys) for c in sc.functions.getClusters().call()]
+
+point_keys = sc.functions.getPointKeys().call()
+def getPoints():
+	return [list2dict(c, point_keys) for c in sc.functions.getPoints().call()]
+
 def getBalance():
 	#check all my balance, including those frozen in unverified clusters.
-	myBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether")) -1
-	points_list = sc.functions.getPointListInfo().call()
-	source_list = sc.functions.getSourceList().call()
-	for idx, cluster in enumerate(source_list):
-		if cluster[2] == 0:
-			for point_rec in points_list:
-				if point_rec[5] == me.key and int(point_rec[4]) == idx:
-					myBalance += float(point_rec[2]) / 1e18
-	return round(myBalance, 2)
+	myUsableBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether")) -1
+	myBalance = myUsableBalance
+	points_list = getPoints()
+	cluster_list = getClusters()
+	for idx, cluster in enumerate(cluster_list):
+		if cluster['verified'] == 0:
+			for point in points_list:
+				if point['sender'] == me.key and int(point['cluster']) == idx:
+					myBalance += float(point['credit']) / 1e18
+	return round(myBalance, 2), myUsableBalance
 
 def getDiffEnodes(gethEnodes = None):
 	if gethEnodes:

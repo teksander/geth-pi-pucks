@@ -7,17 +7,15 @@ contract ForagingPtManagement{
     uint constant num_pt      = 100;
     uint constant max_life    = 5;
     uint constant min_rep     = 0;     //Minimum number of reported points that make contract verified
-    int256 constant radius    = 15000000;
-    uint constant min_balance = 40000000000000000000; //Minimum number of balance to confirm a cluster
-    int256 constant max_unverified_cluster =  4;
+    int256 constant radius    = 10000000;
+    uint constant min_balance = 23333333333333333333; //Minimum number of balance to confirm a cluster
+    int256 constant max_unverified_cluster =  3;
 
 
     address public minter;
     mapping (address => uint) public balances;
 
     struct Point{
-        // int x;
-        // int y;
         int[space_size] position;
         uint credit;   // deposited money in WEI
         uint category; // 0:non-food, 1:food
@@ -27,8 +25,6 @@ contract ForagingPtManagement{
     }
 
     struct Cluster{
-        // int x;
-        // int y;
         int[space_size] position;
         uint life;
         uint verified;
@@ -56,6 +52,8 @@ contract ForagingPtManagement{
         uint minClusterStatus;
     }
 
+
+
     int[space_size] position_zeros;
     Point[] pointList;
     Cluster[] clusterList;
@@ -66,8 +64,6 @@ contract ForagingPtManagement{
     function reportNewPt(int256[space_size] memory position, uint category, uint256 amount, uint256 realType, uint256 intention) public payable{
         require(msg.value == amount);
         uint256 curtime = block.timestamp;
-
-
 
 
         int256[space_size] memory position_avg;
@@ -90,18 +86,18 @@ contract ForagingPtManagement{
             info.minDistance = 1e10;
             info.minClusterIdx = 0;
             info.foundCluster = 0;
-            if (clusterList[uint(pointList[k].cluster)].verified == 0){
+            if (pointList[k].cluster >= 0 && clusterList[uint(pointList[k].cluster)].verified == 0){ //point[k].cluster may == -1
                     for (uint i=0; i<clusterList.length; i++){
                 // Check if the newly reported pt belongs to any cluster
                 if (clusterList[i].verified==0){ // Awaiting verification, only check clusters that are awaiting verification
                     for (uint j=0; j<space_size; j++){
-                        position_avg[j] = (int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
-                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit+amount);
+                        position_avg[j] = ((int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
+                                         + int256(pointList[k].position[j])*int256(amount)))/int256(clusterList[i].total_credit+amount);
                     }
                     if(pointList[k].category==1){
                         for (uint j=0; j<space_size; j++){
-                        position_sup_avg[j] = (int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
-                                         + int256(pointList[k].position[j])*int256(amount))/int256(clusterList[i].total_credit_food+amount);
+                        position_sup_avg[j] = ((int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
+                                         + int256(pointList[k].position[j])*int256(amount)))/int256(clusterList[i].total_credit_food+amount);
                         }
                     }
                     this_distance = colourBGRDistance(position_avg, pointList[k].position);
@@ -135,32 +131,13 @@ contract ForagingPtManagement{
             }
         }
 //
-        // Unique report
-        for (uint i=0; i<clusterList.length; i++){
-            if (clusterList[i].verified==0){
-                for (uint k=0; k<pointList.length-1; k++){
-                    for (uint l=k+1; l<pointList.length; l++){
-                        if (pointList[k].cluster == int256(i) && pointList[l].cluster == int256(i) && pointList[k].sender == pointList[l].sender){
-                            payable(pointList[l].sender).transfer(pointList[l].credit);
-                            clusterList[i].num_rep-=1;
-                            clusterList[i].total_credit-=pointList[l].credit;
-                            if (pointList[l].category==1){
-                                clusterList[i].total_credit_food-=pointList[l].credit;
-                            }
-                            pointList[l].cluster=-1;
-                         }
-                    }
-                }
-            }
 
-        }
 
         // Assign new point a cluster
         info.minDistance = 1e10;
         info.minClusterIdx = 0;
         info.foundCluster = 0;
         // this_distance = 0;
-
         // Does it need to go back to zeros?
         // int256[space_size] position_avg;
         // int256 this_distance = 0;
@@ -180,17 +157,16 @@ contract ForagingPtManagement{
                 //Check if the newly reported pt belongs to any cluster
                 if (clusterList[i].verified==0){ //Cluster awaiting verification
                     for (uint j=0; j<space_size; j++){
-                        position_avg[j] = (int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
-                                         + int256(position[j])*int256(amount))/int256(clusterList[i].total_credit+amount);
+                        position_avg[j] = ((int256(clusterList[i].position[j])*int256(clusterList[i].total_credit)
+                                         + int256(position[j])*int256(amount)))/int256(clusterList[i].total_credit+amount);
                     }
                     if(category==1){
                         for (uint j=0; j<space_size; j++){
-                        position_sup_avg[j] = (int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
-                                         + int256(position[j])*int256(amount))/int256(clusterList[i].total_credit_food+amount);
+                        position_sup_avg[j] = ((int256(clusterList[i].sup_position[j])*int256(clusterList[i].total_credit_food)
+                                         + int256(position[j])*int256(amount)))/int256(clusterList[i].total_credit_food+amount);
                         }
                     }
                     this_distance = colourBGRDistance(position_avg, position);
-
 
                     if (this_distance<=radius && this_distance<info.minDistance){
                         info.minDistance = this_distance;
@@ -204,29 +180,31 @@ contract ForagingPtManagement{
                         info.positiono = position_sup_avg;
                         info.minClusterStatus = clusterList[i].verified;
                     }
-                    else if (info.foundCluster == 0){
-                        //only for debugging purpose
-                        info.minDistance = this_distance;
-                        info.minClusterIdx = i;
-                        info.foundCluster = 0;
-                        // info.x=x_avg;
-                        // info.y=y_avg;
-                        // info.xo = x;
-                        // info.yo = y;
-                        info.position  = position_avg;
-                        info.positiono = position_sup_avg;
-                        info.minClusterStatus = clusterList[i].verified;
-                    }
                 }
             }
 
-            //check if the matched cluster is the cluster that the robot intended to verify:
-            if(intention>0 && info.minClusterIdx != intention-1){
-                clusterList[intention-1].total_credit_outlier+=amount;
-                clusterList[intention-1].outlier_senders.push(msg.sender);
+            //check if the report is close enough to the cluster center that the robot intends to verify:
+            if(intention>0 && info.foundCluster==1 && info.minClusterIdx==intention-1 &&clusterList[intention-1].verified==0){
+                bool senderExists = false;
+                for (uint j = 0; j < clusterList[intention-1].outlier_senders.length; j++) {
+                    if (clusterList[intention-1].outlier_senders[j] == msg.sender) {
+                        senderExists = true;
+                    }
+                }
+                //has successful verification to this cluster before
+                for (uint j = 0; j < pointList.length; j++) {
+                    if (pointList[j].cluster == int256(intention-1) && pointList[j].sender == msg.sender) {
+                        senderExists = true;
+                    }
+                }
+
+                if (!senderExists){
+                    clusterList[intention-1].total_credit_outlier+=amount;
+                    clusterList[intention-1].outlier_senders.push(msg.sender);
+                }
             }
             //if exists non-verified cluster that the new point belongs
-            if (info.minClusterStatus == 0 && info.foundCluster==1 && clusterList[info.minClusterIdx].init_reporter != msg.sender){
+            if (info.foundCluster==1 && info.minClusterStatus == 0 && clusterList[info.minClusterIdx].init_reporter != msg.sender){
                 clusterList[info.minClusterIdx].num_rep+=1;
                 clusterList[info.minClusterIdx].total_credit+=amount;
                 //clusterList[info.minClusterIdx].total_uncertainty+=uncertainty;
@@ -256,10 +234,11 @@ contract ForagingPtManagement{
                     }
                 }
             }
-            else if (category==1 && info.foundCluster==0 && clusterList[info.minClusterIdx].init_reporter != msg.sender && unverfied_clusters<max_unverified_cluster){
+            else if (category==1 && info.foundCluster==0 && unverfied_clusters<max_unverified_cluster){
                 //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster, this is only for experimental purpose
                 clusterList.push(Cluster(position,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,position, 0, new address[](0)));
                 pointList.push(Point(position,amount, category, int256(clusterList.length-1), msg.sender, realType));
+
             }
             else{
                 //Do nothing and transfer back, if anything else
@@ -346,12 +325,12 @@ contract ForagingPtManagement{
                     }
                 }
             }
-            else if (clusterList[i].verified==0 && clusterList[i].outlier_senders.length>=min_rep && clusterList[i].total_credit_outlier>=min_balance){
+            else if (clusterList[i].verified==0 && clusterList[i].total_credit_outlier>=min_balance){
                 for (uint j=0; j<clusterList[i].outlier_senders.length; j++){
                     bonus_credit = clusterList[i].total_credit/clusterList[i].outlier_senders.length;
                     payable(clusterList[i].outlier_senders[j]).transfer(bonus_credit);
                 }
-                clusterList[i].verified==4; //cluster rejected due to most of reports that intended to verify it have been classified as outliers
+                clusterList[i].verified=4; //cluster rejected due to most of reports that intended to verify it have been classified as outliers
             }
             //remove points that correspond to redundant or rejected clusters
             if (clusterList[i].verified==3 || clusterList[i].verified==4){
@@ -376,9 +355,56 @@ contract ForagingPtManagement{
             }
         }
 
+        // Unique report
+        for (uint i=0; i<clusterList.length; i++){
+            if (clusterList[i].verified==0){
+                for (uint k=0; k<pointList.length-1; k++){
+                    for (uint l=k+1; l<pointList.length; l++){
+                        if (pointList[k].cluster == int256(i) && pointList[l].cluster == int256(i) && pointList[k].sender == pointList[l].sender){
+                            payable(pointList[l].sender).transfer(pointList[l].credit);
+                            clusterList[i].num_rep-=1;
+                            clusterList[i].total_credit-=pointList[l].credit;
+                            if (pointList[l].category==1){
+                                clusterList[i].total_credit_food-=pointList[l].credit;
+                            }
+                            pointList[l] = pointList[pointList.length-1];
+                            pointList.pop();
+                         }
+                    }
+                }
+            }
+
+        }
+
     }
 
     //----- setters and getters ------
+
+    function getClusters() public view returns(Cluster[] memory) { return clusterList; }
+    function getClusterKeys() public pure returns (string[12] memory){
+        return ["position", 
+            "life", 
+            "verified", 
+            "num_rep", 
+            "total_credit", 
+            "total_credit_food", 
+            "realType", 
+            "init_reporter", 
+            "intention", 
+            "sup_position", 
+            "total_credit_outlier",
+            "outlier_senders"];
+        }
+
+    function getPoints() public view returns(Point[] memory) { return pointList; }
+    function getPointKeys() public pure returns (string[6] memory){
+        return ["position", 
+            "credit", 
+            "category", 
+            "cluster", 
+            "sender", 
+            "realType"];
+        }
 
     function getSourceList() public view returns(Cluster[] memory){
         return clusterList;
@@ -389,6 +415,7 @@ contract ForagingPtManagement{
     function getPointListInfo() public view returns(Point[]  memory){
         return pointList;
     }
+    
 
     //------ pure functions (math) ------
 
@@ -406,12 +433,31 @@ contract ForagingPtManagement{
         return sqrt(sqsum);
     }
     function colourBGRDistance(int256[space_size] memory _p1, int256[space_size] memory _p2) public pure returns (int256) {
-        int256 rMean = (int256(_p1[2]) + int256(_p2[2])) / 2;
-        int256 r = int256(_p1[2]) - int256(_p2[2]);
-        int256 g = int256(_p1[1]) - int256(_p2[1]);
-        int256 b = int256(_p1[0]) - int256(_p2[0]);
+
+        int256 divisor = 100000;
+        int256[space_size] memory _rp1;
+        int256[space_size] memory _rp2;
+        for (uint256 i = 0; i < space_size; i++) {
+            int256 rounded = _p1[i]/ divisor;
+
+            if (rounded < 0) {
+                rounded = 0;
+            }
+            _rp1[i] = rounded;
+            rounded = _p2[i]/ divisor;
+            if (rounded < 0) {
+                rounded = 0;
+            }
+            _rp2[i] = rounded;
+        }
+
+        int256 rMean = (int256(_rp1[2]) + int256(_rp2[2])) / 2;
+        int256 r = int256(_rp1[2]) - int256(_rp2[2]);
+        int256 g = int256(_rp1[1]) - int256(_rp2[1]);
+        int256 b = int256(_rp1[0]) - int256(_rp2[0]);
         int256 distance = ((((512 + rMean) * r * r) >> 8) + 4 * g * g + (((767 - rMean) * b * b) >> 8));
-        return sqrt(distance);
+        distance=sqrt(distance)*100000;
+        return distance;
     }
 
 
