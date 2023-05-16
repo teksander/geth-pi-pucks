@@ -403,7 +403,7 @@ def Main(rate = mainRate):
 		elif fsm.query(Scout.PrepReport):
 			print("Drive to the color to be reported: ", color_to_report, 'current vote hash: ', voteHash)
 			if not voteHash:
-				arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
+				arrived,_ ,_ = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
 			else:
 				arrived =  False
 				print("EXIT prepare report process, with non-empty voteHash")
@@ -413,7 +413,7 @@ def Main(rate = mainRate):
 				vote_support /= DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag() #id = 0 no tag,
 				#two recently discovered colord are recorded in recent_colors
-				if not voteHash and tag_id !=0 and vote_support>=address_balance:
+				if not voteHash and tag_id !=0 and vote_support<=address_balance:
 					recent_colors.append(color_name_to_report)
 					if len(recent_colors)>2:
 						recent_colors = recent_colors[1:]
@@ -462,20 +462,22 @@ def Main(rate = mainRate):
 
 			if arrived:
 				tag_id,_ = cwe.check_apriltag()
-				found_color_idx,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
+				found_color_idx,found_color_name,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
 
 				vote_support, address_balance = getBalance()
 				vote_support /= DEPOSITFACTOR
-				if vote_support > 0 and found_color_idx == color_idx_to_verify and vote_support>=address_balance:
+				if vote_support > 0 and found_color_idx == color_idx_to_verify and vote_support<=address_balance:
 					print("found color, start repeat sampling...")
-					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_verify, repeat_times=3)
+					repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
 					if repeat_sampled_color[0]!=-1:
 						for idx in range(3):
 							color_to_report[idx] = repeat_sampled_color[idx]
+						color_seen_list.append([color_to_report, color_idx_to_verify, 'v_rs', found_color_name])
 					else:
 						print("repeat sampling failed, report one-time measure")
 						for idx in range(3):
 							color_to_report[idx] = found_color_bgr[idx]
+						color_seen_list.append([color_to_report, color_idx_to_verify, 'v_f', found_color_name])
 					print("verified and report bgr color: ", color_to_report)
 					if isByz == False:
 						if int(tag_id) == 1:
@@ -487,7 +489,7 @@ def Main(rate = mainRate):
 							is_useful = 0
 						else:
 							is_useful = 1
-					color_seen_list.append([color_to_report, color_idx_to_verify, 'v'])
+
 					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
 															   int(color_to_report[1] * DECIMAL_FACTOR),
 															   int(color_to_report[2] * DECIMAL_FACTOR)],
