@@ -4,6 +4,7 @@ import time
 
 class Idle():
     IDLE   = 1
+    RandomWalk = 6
 
 class Scout():
     Query    = 2

@@ -437,7 +437,8 @@ def Main(rate = mainRate):
 								"vote: ", is_useful, 
 								color_rgb=list(color_to_report))
 
-				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
+					print('Send report vote and now doing randomwalk')
+					fsm.setState(Idle.RandomWalk, message="Random-walk waiting for vote")
 			else:
 				print("Exit from reporting stage, discover again")
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
@@ -492,13 +493,18 @@ def Main(rate = mainRate):
 								"vote: ", is_useful, 
 								color_rgb=list(color_to_report))
 
-			print('Send verify vote and now resuming scout')
-			fsm.setState(Scout.Query, message="Resume scout")
-			
+			print('Send verify vote and now doing randomwalk')
+			fsm.setState(Idle.RandomWalk, message="Random-walk waiting for vote")
+
+		elif fsm.query(Idle.RandomWalk):
+			cwe.random_walk_engine(10, 10)
+
+			if not voteHash:
+				fsm.setState(Scout.Query, message="Resume scout")
+
 		if voteHash:
-			tx = None
 			try:
-				tx = w3.eth.getTransaction(voteHash)
+				w3.eth.getTransaction(voteHash)
 			except Exception as e:
 				print(f'ERROR Vote disappered. {str(e)}')
 				voteHash = None
@@ -513,8 +519,8 @@ def Main(rate = mainRate):
 				voteHash = None
 
 			except Exception as e:
-				votelogger.debug(f'Vote not yet included on block. {str(e)}')
-		
+				pass
+
 		tic.toc()
 
 	mainlogger.info('Stopped Main module')
