@@ -388,6 +388,17 @@ def list2dict(values, keys):
     return {k: values[i] for i, k in enumerate(keys)}
 
 
+def print_color(*variables, color_rgb):
+    # Convert variables to strings
+    strings = [str(var) for var in variables]
+    
+    # Generate the ANSI escape sequence for the specified RGB color
+    color_code = f"\033[38;2;{color_rgb[0]};{color_rgb[1]};{color_rgb[2]}m"
+    
+    # Concatenate the strings and print them with the specified color
+    print(color_code + " ".join(strings) + "\033[0m")
+
+
 def print_dict(d, indent=0):
     for key, value in d.items():
         print('\t' * indent + str(key) + ': ', end='')

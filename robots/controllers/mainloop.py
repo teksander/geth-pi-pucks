@@ -129,7 +129,7 @@ blocklog = Logger('../logs/block.csv', header)
 header = ['BLOCK', 'WALLET', 'BALANCE', 'CLUSTERS']
 sclog = Logger('../logs/sc.csv', header)
 
-header = ['B','G','R', 'NAME', 'IDX', 'FSM']
+header = ['B','G','R', 'NAME', 'IDX', 'FOOD', 'SUPPORT','STATE']
 colorlog = Logger('../logs/color.csv', header)
 
 header = ['CHAINDATASIZE', '%CPU']
@@ -331,17 +331,6 @@ def Main(rate = mainRate):
 	tic = TicToc(rate, 'Main')
 
 	voteHash = None
-
-	def vote(position, is_useful, support, color_idx, cluster_idx):
-		value = w3.toWei(support, 'ether')
-
-		return sc.functions.reportNewPt(
-			[int(p)*DECIMAL_FACTOR for p in position],
-			is_useful,
-			value,
-			color_idx,  
-			int(cluster_idx)
-			).transact({'from': me.key, 'value':value, 'gas': gasLimit, 'gasPrice': gasprice})
 		 
 	while startFlag:
 		tic.tic()
@@ -403,9 +392,14 @@ def Main(rate = mainRate):
 					print('no color found, pass')
 
 		elif fsm.query(Scout.PrepReport):
-			print("Drive to the color to be reported: ", [int(a) for a in color_to_report], 'current vote hash: ', voteHash)
+			
+			if voteHash:
+				print("Drive to the color to be reported: ", [int(a) for a in color_to_report], 'Current vote: ', voteHash.hex()[0:8])
+			else:
+				print("Drive to the color to be reported: ", [int(a) for a in color_to_report], 'Current vote: ', voteHash)
+
 			if not voteHash:
-				arrived = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
+				arrived,_ ,_ = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
 			else:
 				arrived =  False
 				print("EXIT prepare report process, with non-empty voteHash")
@@ -415,7 +409,7 @@ def Main(rate = mainRate):
 				vote_support /= DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag() #id = 0 no tag,
 				#two recently discovered colord are recorded in recent_colors
-				if not voteHash and tag_id !=0 and vote_support < address_balance:
+				if not voteHash and tag_id != 0 and vote_support <= address_balance:
 					recent_colors.append(color_name_to_report)
 					if len(recent_colors)>2:
 						recent_colors = recent_colors[1:]
@@ -433,75 +427,72 @@ def Main(rate = mainRate):
 					if isByz:
 						is_useful = not is_useful 
 
-					print("vote: ", color_to_report, color_idx_to_report, "support: ", vote_support, "tagid: ", tag_id, "vote: ", is_useful)
+					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
-					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'scout'])
-
-					value = w3.toWei(vote_support, 'ether')
-					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
-														 int(color_to_report[1] * DECIMAL_FACTOR),
-														 int(color_to_report[2] * DECIMAL_FACTOR)],
-														 int(is_useful),
-														 int(value),
-														 color_idx_to_report, 
-														 0).transact(
-						{'from': me.key, 'value': value, 'gas': gasLimit,'gasPrice': gasprice})
-					txList.append(voteHash)
-
+					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
+					print_color("Report vote: ", voteHash.hex()[0:8], 
+								"color: ", list(color_to_report), color_idx_to_report, 
+								"support: ", vote_support, 
+								"tagid: ", tag_id, 
+								"vote: ", is_useful, 
+								color_rgb=list(color_to_report))
 
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 			else:
+				print("Exit from reporting stage, discover again")
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 
 		elif fsm.query(Verify.DriveTo):
-			print("Drive to verify: ", [int(a) for a in color_to_verify], 'Current vote: ', voteHash)
+
+			if voteHash:
+				print("Drive to verify: ", [int(a) for a in color_to_verify], 'Current vote: ', voteHash.hex()[0:8])
+			else:
+				print("Drive to verify: ", [int(a) for a in color_to_verify], 'Current vote: ', voteHash)
 
 			if not voteHash:
-				# Try to find and drive to the closest color according to the agent's understanding for 120 sec
+				# Try to find and drive to the closest color according to the agent's understanding for 100 sec
 				arrived, color_name_to_verify, color_idx_to_verify = cwe.drive_to_closest_color(color_to_verify, duration=100) 
 			else:
 				arrived =  False
 				print("EXIT prepare report process, with non-empty voteHash")
 
-
 			if arrived:
 				tag_id,_ = cwe.check_apriltag()
-				found_color_idx,_,found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
+				found_color_idx, found_color_name, found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
+
+				is_useful=False
+				if int(tag_id)==2: # red color apriltag = 2
+					is_useful = True
 
 				vote_support, address_balance = getBalance()
 				vote_support /= DEPOSITFACTOR
 				# if vote_support > 0 and found_color_bgr[0]!=-1 and vote_support<address_balance:
-				if 0<vote_support<address_balance and found_color_idx == color_idx_to_verify:
+				if found_color_idx == color_idx_to_verify and 0 < vote_support <= address_balance:
 					print("found color, start repeat sampling...")
-					repeat_sampled_color = cwe.repeat_sampling(color_name=color_name_to_verify, repeat_times=3)
+					repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
 					if repeat_sampled_color[0]!=-1:
 						for idx in range(3):
 							color_to_report[idx] = repeat_sampled_color[idx]
+						colorlog.log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_rs'])
+						# color_seen_list.append([color_to_report, color_idx_to_verify, 'v_rs', found_color_name])
 					else:
 						print("repeat sampling failed, report one-time measure")
 						for idx in range(3):
 							color_to_report[idx] = found_color_bgr[idx]
+						# color_seen_list.append([color_to_report, color_idx_to_verify, 'v_f', found_color_name])
+						colorlog.log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_f'])
 					print("verified and report bgr color: ", color_to_report)
 
-					is_useful=False
-					if int(tag_id)==2: # red color apriltag = 2
-						is_useful = True
-					if isByz:
-						is_useful = is_useful 
+					# colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
+					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
+					print_color("Verify vote: ", voteHash.hex()[0:8], 
+		 						"color: ", list(color_to_report), color_idx_to_verify, 
+								"support: ", vote_support, 
+								"tagid: ", tag_id, 
+								"vote: ", is_useful, 
+								color_rgb=list(color_to_report))
 
-					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
-
-					value = w3.toWei(vote_support, 'ether')
-					voteHash = sc.functions.reportNewPt([int(color_to_report[0] * DECIMAL_FACTOR),
-														 int(color_to_report[1] * DECIMAL_FACTOR),
-														 int(color_to_report[2] * DECIMAL_FACTOR)],
-														 int(is_useful),
-														 int(value),
-														 color_idx_to_verify, 
-														 int(cluster_idx_to_verify)).transact(
-						{'from': me.key, 'value': value, 'gas': gasLimit, 'gasPrice': gasprice})
-					txList.append(voteHash)
-
+			print('Send verify vote and now resuming scout')
 			fsm.setState(Scout.Query, message="Resume scout")
 			
 		if voteHash:
@@ -683,6 +674,21 @@ signal.signal(signal.SIGINT, signal_handler)
 
 # /* Some useful functions */
 #######################################################################
+
+def sendVote(color_to_report, is_useful, support, color_idx, cluster_idx):
+	global txList
+	value = w3.toWei(support, 'ether')
+
+	voteHash = sc.functions.reportNewPt(
+		[int(a*DECIMAL_FACTOR) for a in color_to_report],
+		int(is_useful),
+		int(value),
+		color_idx,  
+		int(cluster_idx)
+		).transact({'from': me.key, 'value':value, 'gas': gasLimit, 'gasPrice': gasprice})
+	
+	txList.append(voteHash)
+	return voteHash
 
 cluster_keys = sc.functions.getClusterKeys().call()
 def getClusters():

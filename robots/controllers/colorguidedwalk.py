@@ -311,7 +311,8 @@ class ColorWalkEngine(object):
                 closest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])
                 closest_color =  this_color
                 closest_color_idx = idx
-        return self.drive_to_color(closest_color, duration), closest_color, closest_color_idx
+        isArrived = self.drive_to_color(closest_color, duration)
+        return isArrived , closest_color, closest_color_idx
 
     def drive_to_closest_color_byz(self, bgr_feature, confusing_set, duration=30):
         this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
