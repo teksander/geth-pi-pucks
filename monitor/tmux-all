@@ -49,6 +49,13 @@ elif [[ $# -eq 1 ]]; then
 		tmux rename-session GETH
 		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth" Enter
 
+	elif [[ $1 == "python" ]]; then 
+		tmux_ALL
+		# Rename to PYTHON and setup the console
+		tmux kill-session -t PYTHON >/dev/null 2>&1
+		tmux rename-session PYTHON
+		tmux send-keys -t PYTHON "cd $MAIN_DIR_ROBOTS/robots/controllers" Enter "python3 -i console.py" Enter
+
 	elif [[ $1 == "main" ]]; then 
 		tmux_ALL
 		# Rename to MAINLOOP and setup mainloop
@@ -56,17 +63,12 @@ elif [[ $# -eq 1 ]]; then
 		tmux rename-session MAINLOOP
 		tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py"
 
-	else 
-		tmux_ALL
-		# Rename to GETH and setup Geth
-		tmux kill-session -t GETH >/dev/null 2>&1
-		tmux rename-session GETH
-		tmux send-keys -t GETH "cd $MAIN_DIR_ROBOTS" Enter "./setup-geth"
+	elif [[ $1 == "start" || $1 == "-s" ]]; then  
+
+		./tmux-all geth
 		
 		tmux_ALL
-
 		BYZ_COUNT=0
-
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
 		tmux rename-session MAINLOOP
@@ -82,5 +84,17 @@ elif [[ $# -eq 1 ]]; then
 		done
     tmux set-option -w -t MAINLOOP synchronize-panes on
 
+   elif [[ $1 == "sync-on" ]]; then  
+		echo "Synchronize-panes turned on"
+		tmux set-option synchronize-panes on
+
+	 elif [[ $1 == "sync-off" ]]; then  
+		echo "Synchronize-panes turned off"
+		tmux set-option synchronize-panes off
+		    
+
+  else
+		tmux_ALL
+		tmux send-keys "cd $MAIN_DIR_ROBOTS" Enter
 	fi
 fi

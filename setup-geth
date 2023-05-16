@@ -46,7 +46,7 @@ geth --datadir "$MAIN_DIR_ROBOTS/$BLOCKCHAIN_FOLDER" \
 --networkid 1515 \
 --allow-insecure-unlock \
 --lightkdf \
---verbosity 4 \
+--verbosity 1 \
 --vmdebug \
 --nodiscover \
 --miner.gasprice "0x1" \

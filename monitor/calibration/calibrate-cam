@@ -14,12 +14,24 @@ tmux send-keys -t CALIBRATE "cd $MAIN_DIR_ROBOTS/robots/calibration" Enter "pyth
 
 read -p "Press Enter when robots finish collecting data"
 
-
+CAL_FILE="cam.csv"
+> $CAL_FILE
 for ID in $(cat "$IDS_FILE"); do
-	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_test_capture.jpg $MAIN_DIR/monitor/calibration &
-	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_one_time_test.jpg $MAIN_DIR/monitor/calibration &
-	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_raw_reading_test.jpg $MAIN_DIR/monitor/calibration &
-	scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/calibration/${ID}_raw_reading_test_of.jpg $MAIN_DIR/monitor/calibration
+	ssh "${PREFIX}${ID}" "cat $MAIN_DIR_ROBOTS/robots/calibration/$ID.csv" >> $CAL_FILE 
 done
+
+sort -t  $'\t' -k 1 -o $CAL_FILE $CAL_FILE
+cat $CAL_FILE
+
+wait
+
+CAL_FILE="cam_hsv.csv"
+> $CAL_FILE
+for ID in $(cat "$IDS_FILE"); do
+	ssh "${PREFIX}${ID}" "cat $MAIN_DIR_ROBOTS/robots/calibration/${ID}_hsv.csv" >> $CAL_FILE 
+done
+
+sort -t  $'\t' -k 1 -o $CAL_FILE $CAL_FILE
+cat $CAL_FILE
 
 wait

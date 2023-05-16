@@ -1,48 +1,63 @@
 #!/bin/bash  
-# Short script to extract log files from all robots listed
+# Short script to extract log files from each robot
+# robots/logs folder to /results/data/experiment/config/rep
+
+# Arguments: (string) experiment/config
 
 source ../globalconfig
 
-if [ "$#" -eq 1 ]; then
-	if [ -d "$MAIN_DIR/results/data/$1" ]; then
-	# Take action if $DIR exists. #
-	echo "Rewrite folder $MAIN_DIR/results/data/$1? [Y/N]"
-	read CONF
-	if [ $CONF = "Y" -o $CONF = "y" ]; then
-		rm -rfv $MAIN_DIR/results/data/$1
-	else
-		exit 1
-	fi
+EXP=$1
+CFG=$2
 
-	fi
-	
-	mkdir -p $MAIN_DIR/results/data/$1
+LOGSFOLDER="$MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/logs"
+DATAFOLDER="$MAIN_DIR/results/data/$EXP/$CFG"
+PLOTFOLDER="$MAIN_DIR/results/plots/$EXP/$CFG"
 
-	# for ID in $(cat "$IDS_FILE"); do
-	# 	IP="${PREFIX}${ID}"
-	# 	ssh "$IP" "tar -czvf ${MAIN_DIR_ROBOTS}/$ID-geth.tar.gz -C ${MAIN_DIR_ROBOTS}/geth ." &
-	# done
-	wait
-	for ID in $(cat "$IDS_FILE"); do
-		scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/robots/logs $MAIN_DIR/results/data/$1/$ID
-		# scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/$ID-geth.tar.gz $MAIN_DIR/results/data/$1/$ID/
-		# scp -rf pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/$ID-geth.tar.gz $MAIN_DIR/results/data/$1/$ID
+# Create the experiment directory
+mkdir -p $DATAFOLDER $PLOTFOLDER
 
-	done
-else
-	echo "Input record foldername"
-fi
+# Find the latest repetition in that folder
+LAST=$(ls -d  ${DATAFOLDER}/*/ | tail -1 |xargs basename)
+REP=$(printf "%03d" $((10#$LAST+1)))
 
+mkdir -p $DATAFOLDER/$REP
 
+# # Collect experiment configuration into /logs/
+# python3 << END
+# import sys, os
 
+# sys.path += [os.environ['EXPERIMENTFOLDER']+'/controllers', \
+#              os.environ['EXPERIMENTFOLDER']+'/loop_functions', \
+#              os.environ['EXPERIMENTFOLDER']]
 
+# import loop_params as lp
+# import control_params as cp
 
-# backup
-# if [ "$#" -eq 1 ]; then
-# 	rm -rfv $MAIN_DIR/results/data/$1 && mkdir -p $MAIN_DIR/results/data/$1
-# 	for ID in $(cat "$IDS_FILE"); do
-# 		scp -r pi@172.27.1.$ID:$MAIN_DIR_ROBOTS/control/robots/logs $MAIN_DIR/results/data/$1/$ID
-# 	done
-# else
-# 	echo "Input record foldername"
-# fi
+# # Collect the loop parameters
+# dict_list = [(param, value) for param, value in lp.params.items() if isinstance(value, dict)]
+
+# # Collect the control parameters
+# dict_list.extend([('control', cp.params)])
+
+# # Collect the experiment configuration
+# f = open('experimentconfig.sh', 'r')
+# experimentconfig = f.read()
+# experimentparams = {param:value for param,value in os.environ.items() if param in experimentconfig}
+# dict_list.extend([('experiment',experimentparams)])
+
+# savefile = open(os.environ['EXPERIMENTFOLDER'] + '/logs/config.py', 'w+')
+# for name, param_dict in dict_list:
+#   savefile.write('%s = %s \n' % (name, repr(param_dict)))
+# END
+
+cp ../globalconfig $DATAFOLDER
+# cp $EXPERIMENTFOLDER/loop_functions/loop_params.py $LOGSFOLDER
+# cp $EXPERIMENTFOLDER/controllers/control_params.py $LOGSFOLDER
+
+# Collect geth related logs from docker folder into /logs/
+for ID in $(cat "$IDS_FILE"); do
+  scp -r $ROBOTS_NAME@$SUBNET.$ID:$LOGSFOLDER $DATAFOLDER/$REP/$ID
+done
+
+echo "Stored data to: $DATAFOLDER/$REP"
+

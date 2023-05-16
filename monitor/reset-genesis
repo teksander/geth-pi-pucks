@@ -55,7 +55,7 @@ rm genesis.conf
 ########## Compile and Deploy Smart Contract ############
 echo "Compiling the Smart Contract..."
 
-envsubst < $CONTRACT_TEMPLATE > $CONTRACT_FILE
+envsubst < $CONTRACT_TEMP > $CONTRACT_FILE
 solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
 
 ./scp-all abi
@@ -82,5 +82,5 @@ sed -i "0,/\"0xde0b6b3a7640000\"/s//\"0x2000000000000000000000000000000000000000
 
 ########## Upload Genesis File ############
 echo "Uploading Genesis Block..."
-./scp-all "genesis"
+./scp-all genesis
 wait
