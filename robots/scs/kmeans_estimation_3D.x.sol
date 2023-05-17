@@ -11,7 +11,6 @@ contract ForagingPtManagement{
     uint constant min_balance = ${MINBALANCE}; //Minimum number of balance to confirm a cluster
     int256 constant max_unverified_cluster =  ${MAXUNVCLUSTER};
 
-
     address public minter;
     mapping (address => uint) public balances;
 
@@ -65,6 +64,10 @@ contract ForagingPtManagement{
         require(msg.value == amount);
         uint256 curtime = block.timestamp;
 
+        //local variables for pointlist search
+        uint c = 0;
+        uint curLength = 0;
+
 
         int256[space_size] memory position_avg;
         //average of all supportive votes
@@ -114,10 +117,20 @@ contract ForagingPtManagement{
             }
             // Update the membership to the nearest cluster of point[k]
             if (info.foundCluster ==1 && info.minClusterIdx != uint(pointList[k].cluster)){
+                for (uint j=0; j<space_size; j++){
+                    clusterList[uint(pointList[k].cluster)].position[j] = ((int256(clusterList[uint(pointList[k].cluster)].position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit)
+                                     - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit-pointList[k].credit);
+                }
                 clusterList[uint(pointList[k].cluster)].num_rep-=1;
                 clusterList[uint(pointList[k].cluster)].total_credit-=pointList[k].credit;
+
                 if (pointList[k].category==1){
+                    for (uint j=0; j<space_size; j++){
+                        clusterList[uint(pointList[k].cluster)].sup_position[j] = ((int256(clusterList[uint(pointList[k].cluster)].sup_position[j])*int256(clusterList[uint(pointList[k].cluster)].total_credit_food)
+                                         - int256(pointList[k].position[j])*int256(pointList[k].credit)))/int256(clusterList[uint(pointList[k].cluster)].total_credit_food-pointList[k].credit);
+                    }
                     clusterList[uint(pointList[k].cluster)].total_credit_food-=pointList[k].credit;
+
                 }
                 clusterList[info.minClusterIdx].num_rep+=1;
                 clusterList[info.minClusterIdx].total_credit+=pointList[k].credit;
@@ -127,6 +140,9 @@ contract ForagingPtManagement{
                     clusterList[info.minClusterIdx].sup_position = info.positiono;
                 }
                 pointList[k].cluster = int256(info.minClusterIdx);
+                if (clusterList[uint(pointList[k].cluster)].num_rep == 0){
+                        clusterList[uint(pointList[k].cluster)].verified=5; //cluster abandon due to all points have been reassigned to other clusters
+                    }
                 }
             }
         }
@@ -224,9 +240,18 @@ contract ForagingPtManagement{
                     for (uint l=k+1; l<pointList.length; l++){
                         if (pointList[k].cluster == int256(info.minClusterIdx) && pointList[l].cluster == int256(info.minClusterIdx) && pointList[k].sender == pointList[l].sender){
                             payable(pointList[l].sender).transfer(pointList[l].credit);
+                            //update cluster average
+                            for (uint j=0; j<space_size; j++){
+                                    clusterList[info.minClusterIdx].position[j] = ((int256(clusterList[info.minClusterIdx].position[j])*int256(clusterList[info.minClusterIdx].total_credit)
+                                    - int256(pointList[l].position[j])*int256(pointList[l].credit)))/int256(clusterList[info.minClusterIdx].total_credit-pointList[l].credit);
+                            }
                             clusterList[info.minClusterIdx].num_rep-=1;
                             clusterList[info.minClusterIdx].total_credit-=pointList[l].credit;
                             if (pointList[l].category==1){
+                                for (uint j=0; j<space_size; j++){
+                                    clusterList[info.minClusterIdx].sup_position[j] = ((int256(clusterList[info.minClusterIdx].sup_position[j])*int256(clusterList[info.minClusterIdx].total_credit_food)
+                                    - int256(pointList[l].position[j])*int256(pointList[l].credit)))/int256(clusterList[info.minClusterIdx].total_credit_food-pointList[l].credit);
+                                }
                                 clusterList[info.minClusterIdx].total_credit_food-=pointList[l].credit;
                             }
                             pointList[l].cluster=-1;
@@ -246,8 +271,8 @@ contract ForagingPtManagement{
             }
         }
         //remove all points with cluster = -1
-        uint c = 0;
-        uint curLength = pointList.length;
+        c = 0;
+        curLength = pointList.length;
         while(c<curLength){
             if (pointList[c].cluster==-1){
                 pointList[c] = pointList[pointList.length-1];
@@ -287,8 +312,8 @@ contract ForagingPtManagement{
                         payable(pointList[j].sender).transfer(bonus_credit+pointList[j].credit);
                      }
                 }
-                uint c = 0;
-                uint curLength = pointList.length;
+                c = 0;
+                curLength = pointList.length;
                 while(c<curLength){
                     if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
                         pointList[c] = pointList[pointList.length-1];
@@ -325,8 +350,8 @@ contract ForagingPtManagement{
                      }
                 }
                 //remove points
-                uint c = 0;
-                uint curLength = pointList.length;
+                c = 0;
+                curLength = pointList.length;
                 while(c<curLength){
                     if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
                         pointList[c] = pointList[pointList.length-1];
@@ -353,8 +378,8 @@ contract ForagingPtManagement{
                  }
                 }
                 //remove points
-                uint c = 0;
-                uint curLength = pointList.length;
+                c = 0;
+                curLength = pointList.length;
                     while(c<curLength){
                         if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
                             pointList[c] = pointList[pointList.length-1];
@@ -395,27 +420,27 @@ contract ForagingPtManagement{
 
     function getClusters() public view returns(Cluster[] memory) { return clusterList; }
     function getClusterKeys() public pure returns (string[12] memory){
-        return ["position", 
-            "life", 
-            "verified", 
-            "num_rep", 
-            "total_credit", 
-            "total_credit_food", 
-            "realType", 
-            "init_reporter", 
-            "intention", 
-            "sup_position", 
+        return ["position",
+            "life",
+            "verified",
+            "num_rep",
+            "total_credit",
+            "total_credit_food",
+            "realType",
+            "init_reporter",
+            "intention",
+            "sup_position",
             "total_credit_outlier",
             "outlier_senders"];
         }
 
     function getPoints() public view returns(Point[] memory) { return pointList; }
     function getPointKeys() public pure returns (string[6] memory){
-        return ["position", 
-            "credit", 
-            "category", 
-            "cluster", 
-            "sender", 
+        return ["position",
+            "credit",
+            "category",
+            "cluster",
+            "sender",
             "realType"];
         }
 
@@ -428,7 +453,7 @@ contract ForagingPtManagement{
     function getPointListInfo() public view returns(Point[]  memory){
         return pointList;
     }
-    
+
 
     //------ pure functions (math) ------
 
