@@ -51,7 +51,12 @@ contract ForagingPtManagement{
         uint minClusterStatus;
     }
 
-
+    int[3] report_statistics; //0:number of recorded reports, 1: number of reports rejected due to duplicated verification, 2: reports rejected due to maximum number of clusters reached
+    constructor() {
+        report_statistics[0] = 0;
+        report_statistics[1] = 0;
+        report_statistics[2] = 0;
+    }
 
     int[space_size] position_zeros;
     Point[] pointList;
@@ -161,6 +166,7 @@ contract ForagingPtManagement{
         if (category==1 && clusterList.length == 0){
             clusterList.push(Cluster(position, curtime+max_life, 0, 1, amount, amount, realType, msg.sender, intention, position, 0, new address[](0)));
             pointList.push(Point(position, amount, category, 0, msg.sender, realType));
+            report_statistics[0] += 1;
         }
         else{
             // Search for closest unverified cluster
@@ -235,6 +241,7 @@ contract ForagingPtManagement{
 
                 //ADD CORRESPONDING POINT
                 pointList.push(Point(position, amount, category, int256(info.minClusterIdx), msg.sender, realType));
+                report_statistics[0] += 1;
                 //Remove redundant reporters from the pointList
                 for (uint k=0; k<pointList.length-1; k++){
                     for (uint l=k+1; l<pointList.length; l++){
@@ -255,19 +262,23 @@ contract ForagingPtManagement{
                                 clusterList[info.minClusterIdx].total_credit_food-=pointList[l].credit;
                             }
                             pointList[l].cluster=-1;
+                            report_statistics[1] += 1; // report removed due to redundant verification
+                            report_statistics[0] -= 1;
                          }
                     }
                 }
             }
             else if (category==1 && info.foundCluster==0 && unverfied_clusters<max_unverified_cluster){
-                //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster, this is only for experimental purpose
+                //if point reports a food source position and  belongs to nothing>inter cluster threshold, create new cluster
                 clusterList.push(Cluster(position,curtime + max_life, 0, 1, amount, amount, realType, msg.sender, intention,position, 0, new address[](0)));
                 pointList.push(Point(position,amount, category, int256(clusterList.length-1), msg.sender, realType));
+                report_statistics[0] += 1;
 
             }
             else{
                 //Do nothing and transfer back, if anything else
                 payable(msg.sender).transfer(amount);
+                report_statistics[2] += 1; //report removed due to maximum number of unverified cluster reached
             }
         }
         //remove all points with cluster = -1
@@ -407,6 +418,8 @@ contract ForagingPtManagement{
                             }
                             pointList[l] = pointList[pointList.length-1];
                             pointList.pop();
+                            report_statistics[1] += 1; // report removed due to redundant verification
+                            report_statistics[0] -= 1;
                          }
                     }
                 }
@@ -453,8 +466,9 @@ contract ForagingPtManagement{
     function getPointListInfo() public view returns(Point[]  memory){
         return pointList;
     }
-
-
+    function getReportStatistics() public view returns (int[3] memory) {
+        return report_statistics;
+    }
     //------ pure functions (math) ------
 
     function getDistance2D(int256 _x1, int256 _x2, int256 _y1, int256 _y2) private pure returns(int256) {
