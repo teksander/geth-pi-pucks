@@ -16,7 +16,7 @@ echo "3" >> genesis.conf  # Remove existing genesis
 echo "2" >> genesis.conf  # Configure new genesis
 echo "1" >> genesis.conf  # Create new genesis from scratch
 echo "2" >> genesis.conf  # Clique - proof-of-authority
-echo "15" >> genesis.conf # 15 seconds block time
+echo "8" >> genesis.conf # 15 seconds block time
 
 # List of sealers
 for ID in $(cat "$IDS_FILE");
@@ -34,7 +34,7 @@ do
 done
 
 # Pre-fund the contract address
-CONTRACT_ADDRESS=`cat $MAIN_DIR/robots/scs/contractAddress.txt`
+CONTRACT_ADDRESS=`cat $MAIN_DIR/blockchain/scs/contractAddress.txt`
 echo $CONTRACT_ADDRESS >> genesis.conf 
 echo "" >> genesis.conf 
 
@@ -56,15 +56,14 @@ rm genesis.conf
 echo "Compiling the Smart Contract..."
 
 envsubst < $CONTRACT_TEMP > $CONTRACT_FILE
-solc --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/robots/scs/build" "$CONTRACT_FILE"
+find "$MAIN_DIR/blockchain/scs/build" -mindepth 1 -delete
 
-./scp-all abi
+solc --evm-version berlin --overwrite --abi --bin --bin-runtime -o  "$MAIN_DIR/blockchain/scs/build" "$CONTRACT_FILE"
 
-BINDATA=`cat $MAIN_DIR/robots/scs/build/$CONTRACT_NAME.bin-runtime`
+echo "Deploying the Smart Contract @ 0x$CONTRACT_ADDRESS"
 
-echo "Contract address:" `cat $MAIN_DIR/robots/scs/contractAddress.txt ` 
+BINDATA=`cat $MAIN_DIR/blockchain/scs/build/$CONTRACT_NAME.bin-runtime`
 
-echo "Deploying the Smart Contract..."
 sed -i "s|123\": {|123\": {\n\"code\": \"0xBINDATA\",|g" ${GENESIS_FILE}
 sed -i "s|BINDATA|$BINDATA|g" ${GENESIS_FILE}
 
@@ -73,14 +72,13 @@ sed -i "s|0x47b760|0x9000000000|g" ${GENESIS_FILE}
 
 # Change the value of the pre-funded accounts
 sed -i "s|\"0x200000000000000000000000000000000000000000000000000000000000000\"|\"0x1236efcbcbb340000\"|g" ${GENESIS_FILE}
-# 0x1236efcbcbb3400000 = 336 ether
-# 0x1236efcbcbb340000 = 21 ether
-# 0xde0b6b3a7640000 = 1 ether
+# 0x1236efcbcbb3400000 = 336 ether // 0x1236efcbcbb340000 = 21 ether // 0xde0b6b3a7640000 = 1 ether
 
 # Undo for the contract account (first match)
 sed -i "0,/\"0xde0b6b3a7640000\"/s//\"0x200000000000000000000000000000000000000000000000000000000000000\"/" ${GENESIS_FILE}
 
-########## Upload Genesis File ############
-echo "Uploading Genesis Block..."
+########## Upload Genesis File and Contract ABI############
+echo "Uploading Genesis and ABI to the robots..."
 ./scp-all genesis
+./scp-all abi
 wait

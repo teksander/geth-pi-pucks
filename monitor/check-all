@@ -3,13 +3,13 @@
 
 source ../globalconfig
 
-MIN_DEVICES=3
-MIN_BATTERY=80
+MIN_DEVICES=4
+MIN_BATTERY=40
 
 i2c_check() {
 	local ID=$1
 
-	I2CCOUNT=$(ssh "${PREFIX}${ID}" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 ' | wc -l")
+	I2CCOUNT=$(ssh "${PREFIX}${ID}" "sudo i2cdetect -y 4 | grep -E -o ' 1f | 60 | 20 | 6e ' | wc -l")
 	
 	if (($I2CCOUNT < $MIN_DEVICES)); then
 		echo "$SUBNET.$ID I2C failed (${I2CCOUNT} devices)"
@@ -33,10 +33,12 @@ battery_check() {
 
 # Check I2C on each robot
 for ID in $(cat "$IDS_FILE"); do
-	i2c_check "$ID" 
+	i2c_check "$ID" &
 done
+wait
 
 # Check Battery on each robot
 for ID in $(cat "$IDS_FILE"); do
-	battery_check "$ID" 
+	battery_check "$ID" &
 done
+wait

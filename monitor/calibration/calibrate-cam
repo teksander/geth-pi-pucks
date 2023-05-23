@@ -6,7 +6,6 @@
 
 source ../../globalconfig
 
-
 ../tmux-all
 tmux kill-session -t CALIBRATE >/dev/null 2>&1
 tmux rename-session CALIBRATE
@@ -14,24 +13,24 @@ tmux send-keys -t CALIBRATE "cd $MAIN_DIR_ROBOTS/robots/calibration" Enter "pyth
 
 read -p "Press Enter when robots finish collecting data"
 
-CAL_FILE="cam.csv"
-> $CAL_FILE
-for ID in $(cat "$IDS_FILE"); do
-	ssh "${PREFIX}${ID}" "cat $MAIN_DIR_ROBOTS/robots/calibration/$ID.csv" >> $CAL_FILE 
-done
+# CAL_FILE="cam_bgr.csv"
+# > $CAL_FILE
+# for ID in $(cat "$IDS_FILE"); do
+# 	ssh "${PREFIX}${ID}" "cat $MAIN_DIR_ROBOTS/robots/calibration/$ID.csv" >> $CAL_FILE 
+# done
 
-sort -t  $'\t' -k 1 -o $CAL_FILE $CAL_FILE
-cat $CAL_FILE
+# sort -t  $'\t' -k 1 -o $CAL_FILE $CAL_FILE
+# cat $CAL_FILE
 
-wait
+# wait
 
-CAL_FILE="cam_hsv.csv"
-> $CAL_FILE
-for ID in $(cat "$IDS_FILE"); do
-	ssh "${PREFIX}${ID}" "cat $MAIN_DIR_ROBOTS/robots/calibration/${ID}_hsv.csv" >> $CAL_FILE 
-done
+# CAL_FILE="cam_hsv.csv"
+# > $CAL_FILE
+# for ID in $(cat "$IDS_FILE"); do
+# 	ssh "${PREFIX}${ID}" "cat $MAIN_DIR_ROBOTS/robots/calibration/${ID}_hsv.csv" >> $CAL_FILE 
+# done
 
-sort -t  $'\t' -k 1 -o $CAL_FILE $CAL_FILE
-cat $CAL_FILE
+# sort -t  $'\t' -k 1 -o $CAL_FILE $CAL_FILE
+# cat $CAL_FILE
 
-wait
+# wait

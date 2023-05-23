@@ -52,16 +52,16 @@ if [ $1 == "genesis" ]; then
 	done
 fi
 
+if [ $1 == "scbuild" ]; then 
+		scp_ALL blockchain/scs/build blockchain/scs/build
+fi
+
 if [ $1 == "abi" ]; then 
-		scp_ALL robots/scs/build/$CONTRACT_NAME.abi robots/scs/build
+		scp_ALL blockchain/scs/build/$CONTRACT_NAME.abi blockchain/scs/build/$CONTRACT_NAME.abi
 fi
 
 if [ $1 == "contractaddr" ]; then
-	for ID in $(cat "$IDS_FILE"); do
-		IP="${PREFIX}${ID}"
-		scp -r $MAIN_DIR/robots/scs/contractAddress.txt "$IP:$MAIN_DIR_ROBOTS/robots/scs/"  &
-	done
-	wait
+	scp_ALL blockchain/scs/contractAddress.txt blockchain/scs/contractAddress.txt
 fi
 
 if [ $1 == "setup-geth" ]; then 
@@ -89,6 +89,9 @@ if [ $1 == "setup-adhoc" ]; then
 	wait
 fi
 
+if [ $1 == "calibration" ]; then
+ 	scp_ALL robots/calibration/ robots/
+fi
 
 if [ $1 == "calibrate-cam" ]; then
  	scp_ALL robots/calibration/calibrate-cam.py robots/calibration/calibrate-cam.py
@@ -122,6 +125,11 @@ if [ $1 == "arducam" ]; then
 	done
 	wait
 fi
+
+if [ $1 == "blockchain" ]; then
+	scp_ALL blockchain/ ""
+fi
+
 
 if [ $1 == "control" ]; then
 	scp_ALL robots/controllers/ robots/

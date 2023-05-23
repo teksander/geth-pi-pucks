@@ -24,7 +24,7 @@ tmux_ALL() {
 	# Define the terminal geometry (larger if there are many robots)
 	geom="default"
 	if [ $NUM_ROB -gt 8 ]; then
-		geomX=$(( $NUM_ROB*8 ))
+		geomX=$(( $NUM_ROB*15 ))
 		geomY=$(( $NUM_ROB*5 ))
 		geom="${geomX}x${geomY}"
 	fi
@@ -69,18 +69,23 @@ elif [[ $# -eq 1 ]]; then
 		
 		tmux_ALL
 		BYZ_COUNT=0
+		FLT_COUNT=0
+
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
 		tmux rename-session MAINLOOP
 
 		tmux set-option -w -t MAINLOOP synchronize-panes off
 		for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
-		  if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
-       tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py --byz"
-       let BYZ_COUNT++
-       else
-         tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py"
-      fi
+			if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
+				tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py --byz"
+				let BYZ_COUNT++
+			elif [ $FLT_COUNT -lt $NUM_FLT ]; then
+				tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py --faulty"
+				let FLT_COUNT++
+			else
+				tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py"
+			fi
 		done
     tmux set-option -w -t MAINLOOP synchronize-panes on
 
