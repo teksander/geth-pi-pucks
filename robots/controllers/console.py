@@ -5,8 +5,8 @@ import os
 import sys
 import subprocess
 import json
-from aux import TCP_server, Peer, list2dict, print_dict
-import time
+from aux import TCP_server, Peer, colourBGRDistance, list2dict, print_table
+import math, time
 import logging
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
@@ -34,10 +34,10 @@ def init_web3():
 def registerSC(w3):
     sc = None
 
-    abiFile = '../scs/build/ForagingPtManagement.abi'
+    abiFile = '/home/pi/geth-pi-pucks/blockchain/scs/build/ForagingPtManagement.abi'
     abi = json.loads(open(abiFile).read())
 
-    addressFile = '../scs/contractAddress.txt'
+    addressFile = '/home/pi/geth-pi-pucks/blockchain/scs/contractAddress.txt'
     address = '0x'+open(addressFile).read().rstrip()
 
     sc = w3.eth.contract(abi=abi, address=address)
@@ -85,39 +85,6 @@ def getEnodes():
 def getIds():
 		return [readEnode(enode) for enode in getEnodes('geth')]
 
-def rgb_to_ansi(rgb):
-    r, g, b = rgb
-    return f"\033[38;2;{r};{g};{b}m"
-
-def print_table(data, indent = 0, header = True):
-    if not data:
-        return
-
-    # Get the field names from the first dictionary in the list
-    field_names = list(data[0].keys())
-
-    # Calculate the maximum width of each column
-    column_widths = {}
-    for name in field_names:
-        column_widths[name] = max(len(str(row.get(name, ""))) for row in data) + 2
-
-    # Print the table header
-    if header:
-        for name, width in column_widths.items():
-            print(indent*"  " + name + '  ', end="")
-        print()
-
-    # Print the table rows
-    for row in data:
-        ansi_code = rgb_to_ansi(row['position'])
-        print("\n" + indent*"  " + bool(indent)*"*", end="")
-        for name, width in column_widths.items():
-            if isinstance(row.get(name, ""), list) and all(isinstance(item, dict) for item in row.get(name, "")):
-                print_table(row.get(name, ""), indent=1, header=False)
-            else:
-                value = str(row.get(name, ""))
-                print(ansi_code + value.ljust(width) + "\033[0m", end="")
-
 def call_clusters(sc, show = True):
 	clusters = [list2dict(c, sc.functions.getClusterKeys().call()) for c in sc.functions.getClusters().call()]
 	if show:
@@ -139,6 +106,7 @@ def call(sc, show_points = True, raw = False):
 	if not raw:
 
 		for point in points:
+			point['RME'] = round(colourBGRDistance(point['position'], clusters[point['cluster']]['position'])/1e5, 3)
 			point['position'] = [round(i/1e5) for i in point['position']]
 			point['credit'] //= 1e16
 			point['sender'] = point['sender'][0:5]

@@ -222,3 +222,29 @@ def bgr_to_hsv(b, g, r):
     v = cmax
     
     return h, s, v
+
+def colourBGRDistance(p1, p2):
+    space_size = len(p1)
+    divisor = 100000
+    rp1 = [0] * space_size
+    rp2 = [0] * space_size
+
+    for i in range(space_size):
+        rounded = p1[i] // divisor
+
+        if rounded < 0:
+            rounded = 0
+        rp1[i] = rounded
+
+        rounded = p2[i] // divisor
+        if rounded < 0:
+            rounded = 0
+        rp2[i] = rounded
+
+    rMean = (rp1[2] + rp2[2]) // 2
+    r = rp1[2] - rp2[2]
+    g = rp1[1] - rp2[1]
+    b = rp1[0] - rp2[0]
+    distance = ((((512 + rMean) * r * r) >> 8) + 4 * g * g + (((767 - rMean) * b * b) >> 8))
+    distance = math.sqrt(distance) * 100000
+    return distance

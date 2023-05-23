@@ -17,9 +17,9 @@ export GENESIS_NAME="pipucks"
 # [FILES]
 export IDS_FILE="$MAIN_DIR/monitor/pi-pucks.txt"
 export GENESIS_FILE="$MAIN_DIR/$BLOCKCHAIN_FOLDER/genesis/pipucks.json" 
-export CONTRACT_FILE="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/kmeans_estimation_3D.sol"
-export CONTRACT_TEMP="$MAIN_DIR/$EXPERIMENT_FOLDER/scs/kmeans_estimation_3D.x.sol"
-export CONTRACT_ABI="$MAIN_DIR/$EXPERIMENT_FOLDER/controllers/scs/build/$CONTRACT_NAME.abi"
+export CONTRACT_FILE="$MAIN_DIR/$BLOCKCHAIN_FOLDER/scs/kmeans_estimation_3D.sol"
+export CONTRACT_TEMP="$MAIN_DIR/$BLOCKCHAIN_FOLDER/scs/kmeans_estimation_3D.x.sol"
+export CONTRACT_ABI="$MAIN_DIR/$BLOCKCHAIN_FOLDER/scs/build/$CONTRACT_NAME.abi"
 
 # [NETWORKS]
 export SUBNET="172.27.1"
@@ -28,8 +28,9 @@ export MONITOR_ID="100"
 export PREFIX="${ROBOTS_NAME}@${SUBNET}."
 
 # [EXPERIMENT]
-export NUM_ROB=7
-export NUM_BYZ=0
+export NUM_ROB=12
+export NUM_BYZ=2
+export NUM_FLT=0
 
 # [SC]
 export DECIMAL_FACTOR=100000 # 1e5
@@ -39,7 +40,7 @@ export DIMS=3
 export NUMPT=100
 export MAXLIFE=5
 export MINREP=0
-export RADIUS=$(echo 100*$DECIMAL_FACTOR | bc)
+export RADIUS=$(echo 50*$DECIMAL_FACTOR | bc)
 
 export TOTALASSETS=$(echo $NUM_ROB*20000000000000000000 | bc)
-export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER*1/2 | bc)
+export MINBALANCE=$(echo $TOTALASSETS/$MAXUNVCLUSTER*2/3 | bc)

@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 import time
-#from aenum import Enum, auto
+import enum
 
-class Idle():
-    IDLE   = 1
+class Idle(enum.Enum):
+    Start   = 1
     RandomWalk = 6
 
-class Scout():
+class Scout(enum.Enum):
     Query    = 2
     PrepReport = 3
 
-class Verify():
+class Verify(enum.Enum):
     DriveTo = 4
     PrepReport = 5
-
 
 
 class FiniteStateMachine(object):
@@ -32,7 +31,10 @@ class FiniteStateMachine(object):
 
     def getTimers(self):
         return self._accumTime
-
+    
+    def getCurrentTimer(self):
+        return time.time()-self._startTime
+    
     def setState(self, state, message = ""):
 
         self.onTransition(state, message)
@@ -53,8 +55,7 @@ class FiniteStateMachine(object):
 
     def onTransition(self, state, message):
         # Robot actions to perform on every transition
-        pass
-        # if message != None:
-        #     self.robot.log.info("%s -> %s%s", self._currState, state, ' | '+ message)
-        #
+        if message != None:
+            print(f"{self._currState}-> {state} | {message}")
+        
 

@@ -153,7 +153,7 @@ class PID:
 
 
 class ColorWalkEngine(object):
-    def __init__(self, MAX_SPEED):
+    def __init__(self, MAX_SPEED, awb_mode = 'tungsten'):
         """ Constructor
         :type range: int
         :param enode:  (tip: 500)
@@ -161,34 +161,47 @@ class ColorWalkEngine(object):
         self.colors = []
         self.ground_truth_bgr = []  # bgr
         self.ground_truth_hsv = []  # bgr
-        self.cam = UpCamera(cam_int_reg_h, cam_int_reg_offest, cam_rot)
+        self.cam = UpCamera(cam_int_reg_h, cam_int_reg_offest, cam_rot, awb_mode)
         self.rot = Rotation(MAX_SPEED)
         self.rot.start()
-        #self.gs = GroundSensor(gsFreq)
-        #self.gs.start()
         self.april = apriltag.Detector()
         self.max_speed= MAX_SPEED
         self.actual_rw_dir = "s"
         self.last_speed = []
-        if exists('../calibration/' + robotID + '.csv'):
-            with open('../calibration/' + robotID + '.csv', 'r') as color_gt:
+
+        # calibrate the color
+        calibFile = f'../calibration/cam/{awb_mode}/{robotID}_bgr.csv'
+        calibFileTemp = f'../calibration/cam/{awb_mode}/{robotID}_rgb.csv'
+
+        if exists(calibFile):
+            with open(calibFile) as color_gt:
+                for line in color_gt:
+                    elements = line.strip().split(' ')
+                    self.colors.append(elements[0])
+                    self.ground_truth_bgr.append([int(x) for x in elements[1:]])
+        
+        elif exists(calibFileTemp):
+            with open(calibFileTemp) as color_gt:
                 for line in color_gt:
                     elements = line.strip().split(' ')
                     self.colors.append(elements[0])
                     self.ground_truth_bgr.append([int(x) for x in elements[1:]])
         else:
             print("color calibration file not found, use hard coded colors")
-            self.colors = ["red", "blue", "purple"]
-            self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 138]]  # bgr
-        if exists('../calibration/' + robotID + '_hsv.csv'):
-            with open('../calibration/' + robotID + '_hsv.csv', 'r') as color_gt:
+            self.colors = ["red", "blue", "green"]
+            self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 0]] 
+        
+        calibFile = f'../calibration/cam/{awb_mode}/{robotID}_hsv.csv'
+        if exists(calibFile):
+            with open(calibFile) as color_gt:
                 for line in color_gt:
                     elements = line.strip().split(' ')
                     self.ground_truth_hsv.append([int(x) for x in elements[1:]])
         else:
-            print("color calibration fiule not found, use hard coded colors")
-            self.colors = ["red", "blue", "purple"]
-            self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [157, 157, 144]]  # bgr
+            print("color calibration file not found, use hard coded colors")
+            self.colors = ["red", "blue", "green"]
+            self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [80, 157, 157]]
+            
         logger.info('Color walk OK')
 
     def random_walk_engine(self, mylambda= 15, turn = 7):

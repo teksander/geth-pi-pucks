@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import time
-import sys
+import math
 import threading
 import socket
-import subprocess
 import os
 import logging
 
@@ -335,14 +334,15 @@ class PeerBuffer(object):
 class Logger(object):
     """ Logging Class to Record Data to a File
     """
-    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None):
+    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None, extrafields = dict()):
 
         self.file = open(logfile, 'w+', buffering = buffering)
         self.rate = rate
         self.tStamp = 0
         self.tStart = 0
         self.latest = time.time()
-        pHeader = ' '.join([str(x) for x in header])
+        self.extra  = extrafields.values()
+        pHeader = ' '.join([str(x) for x in header]+[str(x) for x in extrafields])
         self.file.write('{} {} {}\n'.format('ID', 'TIME', pHeader))
         
         if ID:
@@ -360,7 +360,7 @@ class Logger(object):
             self.tStamp = time.time()
             try:
                 tString = str(round(self.tStamp-self.tStart, 3))
-                pData = ' '.join([str(x) for x in data])
+                pData = ' '.join([str(x) for x in data]+[str(x) for x in self.extra])
                 self.file.write('{} {} {}\n'.format(self.id, tString, pData))
                 self.latest = self.tStamp
             except:
@@ -387,6 +387,9 @@ def list2dict(values, keys):
 
     return {k: values[i] for i, k in enumerate(keys)}
 
+def rgb_to_ansi(rgb):
+    r, g, b = rgb
+    return f"\033[38;2;{r};{g};{b}m"
 
 def print_color(*variables, color_rgb):
     # Convert variables to strings
@@ -407,6 +410,99 @@ def print_dict(d, indent=0):
             print_dict(value, indent+1)
         else:
             print(str(value))
+
+def print_table(data, indent = 0, header = True):
+    if not data:
+        return
+
+    # Get the field names from the first dictionary in the list
+    field_names = list(data[0].keys())
+
+    # Calculate the maximum width of each column
+    column_widths = {}
+    for name in field_names:
+        column_widths[name] = max(len(str(row.get(name, ""))) for row in data) + 2
+
+    # Print the table header
+    if header:
+        for name, width in column_widths.items():
+            print(indent*"  " + name + '  ', end="")
+        print()
+
+    # Print the table rows
+    for row in data:
+        ansi_code = rgb_to_ansi(row['position'])
+        print("\n" + indent*"  " + bool(indent)*"*", end="")
+        for name, width in column_widths.items():
+            if isinstance(row.get(name, ""), list) and all(isinstance(item, dict) for item in row.get(name, "")):
+                print_table(row.get(name, ""), indent=1, header=False)
+            else:
+                value = str(row.get(name, ""))
+                print(ansi_code + value.ljust(width) + "\033[0m", end="")
+
+def colourBGRDistance(p1, p2):
+    space_size = len(p1)
+    divisor = 100000
+    rp1 = [0] * space_size
+    rp2 = [0] * space_size
+
+    for i in range(space_size):
+        rounded = p1[i] // divisor
+
+        if rounded < 0:
+            rounded = 0
+        rp1[i] = rounded
+
+        rounded = p2[i] // divisor
+        if rounded < 0:
+            rounded = 0
+        rp2[i] = rounded
+
+    rMean = (rp1[2] + rp2[2]) // 2
+    r = rp1[2] - rp2[2]
+    g = rp1[1] - rp2[1]
+    b = rp1[0] - rp2[0]
+    distance = ((((512 + rMean) * r * r) >> 8) + 4 * g * g + (((767 - rMean) * b * b) >> 8))
+    distance = math.sqrt(distance) * 100000
+    return distance
+
+def manhattan_distance(p1, p2):
+    """
+    Compute the Manhattan distance between two points.
+    
+    Arguments:
+    p1, p2 -- Tuples or lists representing the coordinates of the two points.
+    
+    Returns:
+    The Manhattan distance between the two points.
+    """
+    if len(p1) != len(p2):
+        raise ValueError("Both points should have the same number of coordinates.")
+    
+    distance = 0
+    for i in range(len(p1)):
+        distance += abs(p1[i] - p2[i])
+    
+    return distance
+
+def chebyshev_distance(point1, point2):
+    """
+    Compute the Chebyshev distance between two points.
+    
+    Arguments:
+    point1, point2 -- Tuples or lists representing the coordinates of the two points.
+    
+    Returns:
+    The Chebyshev distance between the two points.
+    """
+    if len(point1) != len(point2):
+        raise ValueError("Both points should have the same number of coordinates.")
+    
+    distance = 0
+    for i in range(len(point1)):
+        distance = max(distance, abs(point1[i] - point2[i]))
+    
+    return distance
 
 def readEnode(enode, output = 'id'):
     # Read IP or ID from an enode

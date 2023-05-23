@@ -31,7 +31,7 @@ def calculation(camera):
 class UpCamera(object):
     """ set up an camera object for the R0176 Arducam camera.
     """
-    def __init__(self, interesting_reg_h = 200, interesting_reg_offset = 50, rot = True):
+    def __init__(self, interesting_reg_h = 200, interesting_reg_offset = 50, rot = True, awb_mode = 'tungsten'):
         """ Constructor
         :type freq: str
         :param freq: frequency of measurements in Hz (tip: 20Hz)
@@ -39,7 +39,7 @@ class UpCamera(object):
         self.__stop = 1
         self.id = open("/boot/pi-puck_id", "r").read().strip()
         self.camera = picamera.PiCamera()
-        self.camera.awb_mode = 'tungsten'
+        self.camera.awb_mode = awb_mode
         # set camera resolution to 640x480(Small resolution for faster speeds.)
         self.camera.resolution = (640, 480)
         self.interesting_region_h = interesting_reg_h

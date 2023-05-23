@@ -34,26 +34,24 @@ DEPOSITFACTOR = 3 #portion of assets deposted to support each vote
 
 # /* Global Variables */
 #######################################################################
-global startFlag, isByz
-startFlag = False
-isByz = False
+
+global startFlag, startTime
+startFlag, startTime = False, 0
 
 global gasLimit, gasprice, gas
-gasLimit = 0x9000000
-gasprice = 0x000000 #no gas fee in our configuration
-gas = 0x00000
+gasLimit, gasprice, gas  = 0x9000000, 0x000000, 0x00000
 
-global txList, startTime
-txList = []
+global txList, clocks
+txList, clocks = [], dict()
 
-global color_to_verify, color_to_report, color_idx_to_report
-color_to_verify = [0, 0, 0]
-color_to_report = [0, 0, 0]
+global color_to_verify, color_to_report, color_name_to_report, color_idx_to_report
+color_to_verify = color_to_report = [0, 0, 0]
 color_name_to_report = ''
-color_idx_to_report=0
+color_idx_to_report = 0
 
-global clocks
-clocks = dict()
+global lastblock_global, allpoints_global, allclusters_global	
+lastblock_global = 0	
+allpoints_global, allclusters_global = dict(), dict()
 
 # /* Import Packages */
 #######################################################################
@@ -71,7 +69,7 @@ import threading
 import subprocess
 import random
 import sys
-from console import init_web3, registerSC, call
+from console import init_web3, registerSC
 from erandb import ERANDB
 from groundsensor import GroundSensor
 from colorguidedwalk import ColorWalkEngine
@@ -81,6 +79,10 @@ from aux import *
 
 # Global parameters
 # subprocess.call("source ../../globalconfig")
+
+global isByz, isFaulty
+isByz = True if len(sys.argv)>1 and sys.argv[1] == '--byz' else False
+isFaulty = True if len(sys.argv)>1 and sys.argv[1] == '--faulty' else False
 
 # Calibrated parameters
 #with open('../calibration/gsThreshes.txt') as calibFile:
@@ -114,23 +116,17 @@ logging.getLogger('rgbleds').setLevel(loglevel)
 
 # Experiment data logs (recorded to file)
 
-# header = ['ESTIMATE','W','B','S1','S2','S3']
-# estimatelog = Logger('../logs/estimate.csv', header, 10)
-
 # header = ['#BUFFER', '#GETH','#ALLOWED', 'BUFFERPEERS', 'GETHPEERS','ALLOWED']
 # bufferlog = Logger('../logs/buffer.csv', header, 2)
-
-# header = ['VOTE']
-# votelog = Logger('../logs/vote.csv', header)
 
 header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
 blocklog = Logger('../logs/block.csv', header)
 
-header = ['BLOCK', 'WALLET', 'BALANCE', 'CLUSTERS']
+header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', '#CLUSTERS']
 sclog = Logger('../logs/sc.csv', header)
 
 header = ['B','G','R', 'NAME', 'IDX', 'FOOD', 'SUPPORT','STATE']
-colorlog = Logger('../logs/color.csv', header)
+colorlog = Logger('../logs/color.csv', header, extrafields={'isbyz':isByz, 'isfaulty':isFaulty})
 
 header = ['CHAINDATASIZE', '%CPU']
 extralog = Logger('../logs/extra.csv', header, 5)
@@ -167,13 +163,14 @@ erb = ERANDB(erbDist, erbtFreq)
 
 # /* Init Color-Guided walk, __walking process */
 mainlogger.info('Initialising movement controller...')
-cwe = ColorWalkEngine(rwSpeed)
+awb_mode = 'shade' if isFaulty else 'tungsten'
+cwe = ColorWalkEngine(rwSpeed, awb_mode)
 
 # /* Init LEDs */
 rgb = RGBLEDs()
 
 # /* Init FSM */
-fsm = FiniteStateMachine(start=Idle.IDLE)
+fsm = FiniteStateMachine(start=Idle.Start)
 
 # List of submodules --> iterate .start() to start all
 submodules = [w3.geth.miner, tcp, erb]
@@ -335,57 +332,62 @@ def Main(rate = mainRate):
 	while startFlag:
 		tic.tic()
 
-		if fsm.query(Idle.IDLE):
+		if fsm.query(Idle.Start):
 			fsm.setState(Scout.Query, message="Start exploration")
 
 		elif fsm.query(Scout.Query):
-			# check reported color.
-			verify_unseen = 0
 
-			# query the Smart Contract
-			cluster_list = sc.functions.getClusters().call()
-			points_list = sc.functions.getPoints().call()
+			# check reported color.
+			explore = True
+			rgb.setAll(rgb.off)
+
+			# query the Smart Contract 
+			all_clusters = allclusters_global
+			all_points = allpoints_global
 
 			# check if any cluster avaiting verification on chain
-			if len(cluster_list) > 0 and not voteHash:
+			if len(all_clusters) > 0 and not voteHash:
 				candidate_cluster = []
-				for idx, cluster in enumerate(cluster_list):
+				for idx, cluster in enumerate(all_clusters):
 					verified_by_me = False
-					for point_rec in points_list:
-						if point_rec[4] == me.key and int(point_rec[3]) == idx:
+
+					for point_rec in all_points:
+						if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
 							verified_by_me = True
-						# print("checking keys: ", point_rec[4], me.key)
-					# print(point_rec[3], verified_by_me)
-					if cluster[2] == 0 and not verified_by_me:  # exists cluster needs verification
+
+					if cluster['verified'] == 0 and not verified_by_me:
 						candidate_cluster.append((cluster, idx))
+
 				print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
 
+				# randomly select a cluster to verify
 				if len(candidate_cluster) > 0:
-					# randomly select a cluster to verify
-					# no longer needed to maintain the verified index list, as we used the verified_by_me check above
-					# idx_to_verity = random.randrange(len(candidate_cluster))
 					select_idx = random.randrange(len(candidate_cluster))
 					cluster = candidate_cluster[select_idx][0]
-					cluster_idx_to_verify = candidate_cluster[select_idx][1]+1
-					fsm.setState(Verify.DriveTo, message="Go to unverified cluster")
-					color_to_verify[0] = float(cluster[0][0]) / DECIMAL_FACTOR
-					color_to_verify[1] = float(cluster[0][1]) / DECIMAL_FACTOR
-					color_to_verify[2] = float(cluster[0][2]) / DECIMAL_FACTOR
-					verify_unseen = 1
+					cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
+					color_to_verify = [float(a)/DECIMAL_FACTOR for a in cluster['position']]
+			
+					fsm.setState(Verify.DriveTo, message=f"Verify cluster idx {cluster_idx_to_verify}")
+					explore = False
 
-			if verify_unseen == 0:
+			if explore:
 				print("try to discover color: ")
+
 				found_color_idx, found_color_name, found_color_bgr = cwe.discover_color(10)
 				print("found color: ", found_color_name)
+				rgb.setAll(found_color_name)
+
 				if found_color_bgr != -1:
 					for idx in range(3):
 						color_to_report[idx] =  found_color_bgr[idx]
 					color_name_to_report = found_color_name
 					color_idx_to_report = found_color_idx
+
 					if found_color_idx > -1 and color_name_to_report not in recent_colors:
-						fsm.setState(Scout.PrepReport, message="Prepare proposal")
+						fsm.setState(Scout.PrepReport, message="Found color by exploring")
+
 					elif color_name_to_report in recent_colors:
-						print("found recently seen color, skept")
+						print("found recently seen color, pass")
 						cwe.random_walk_engine(10, 10)
 
 				else:
@@ -394,9 +396,9 @@ def Main(rate = mainRate):
 		elif fsm.query(Scout.PrepReport):
 			
 			if voteHash:
-				print("Drive to the color to be reported: ", [int(a) for a in color_to_report], 'Current vote: ', voteHash.hex()[0:8])
+				print("Drive to report: ", [int(a) for a in color_to_report], 'Current vote: ', voteHash.hex()[0:8])
 			else:
-				print("Drive to the color to be reported: ", [int(a) for a in color_to_report], 'Current vote: ', voteHash)
+				print("Drive to report: ", [int(a) for a in color_to_report], 'Current vote: ', voteHash)
 
 			if not voteHash:
 				arrived,_ ,_ = cwe.drive_to_closest_color(color_to_report, duration=60)  # drive to the color that has been found during scout
@@ -405,7 +407,8 @@ def Main(rate = mainRate):
 				print("EXIT prepare report process, with non-empty voteHash")
 
 			if arrived:
-				vote_support, address_balance = getBalance()
+				vote_support, address_balance = getBalance_global()
+
 				vote_support /= DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag() #id = 0 no tag,
 				#two recently discovered colord are recorded in recent_colors
@@ -431,16 +434,14 @@ def Main(rate = mainRate):
 
 					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
 					print_color("Report vote: ", voteHash.hex()[0:8], 
-								"color: ", list(color_to_report), color_idx_to_report, 
+								"color: ", [int(a) for a in color_to_report], color_name_to_report, 
 								"support: ", vote_support, 
 								"tagid: ", tag_id, 
 								"vote: ", is_useful, 
-								color_rgb=list(color_to_report))
+								color_rgb=[int(a) for a in color_to_report])		
 
-					print('Send report vote and now doing randomwalk')
-					fsm.setState(Idle.RandomWalk, message="Random-walk waiting for vote")
+					fsm.setState(Idle.RandomWalk, message="Wait for vote")
 			else:
-				print("Exit from reporting stage, discover again")
 				fsm.setState(Scout.Query, message="Exit from reporting stage, discover again")
 
 		elif fsm.query(Verify.DriveTo):
@@ -465,7 +466,7 @@ def Main(rate = mainRate):
 				if int(tag_id)==2: # red color apriltag = 2
 					is_useful = True
 
-				vote_support, address_balance = getBalance()
+				vote_support, address_balance = getBalance_global()
 				vote_support /= DEPOSITFACTOR
 				# if vote_support > 0 and found_color_bgr[0]!=-1 and vote_support<address_balance:
 				if found_color_idx == color_idx_to_verify and 0 < vote_support <= address_balance:
@@ -487,34 +488,36 @@ def Main(rate = mainRate):
 					# colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
 					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
 					print_color("Verify vote: ", voteHash.hex()[0:8], 
-		 						"color: ", list(color_to_report), color_idx_to_verify, 
+		 						"color: ", [int(a) for a in color_to_report], found_color_name, 
 								"support: ", vote_support, 
 								"tagid: ", tag_id, 
 								"vote: ", is_useful, 
-								color_rgb=list(color_to_report))
+								color_rgb=[int(a) for a in color_to_report])
 
-			print('Send verify vote and now doing randomwalk')
-			fsm.setState(Idle.RandomWalk, message="Random-walk waiting for vote")
+			fsm.setState(Idle.RandomWalk, message="Wait for vote")
 
 		elif fsm.query(Idle.RandomWalk):
+
 			cwe.random_walk_engine(10, 10)
 
-			if not voteHash:
-				fsm.setState(Scout.Query, message="Resume scout")
+			if not voteHash or fsm.getCurrentTimer()>20:
+				voteHash = None
+				rgb.setAll(rgb.off)
+				fsm.setState(Scout.Query, message=f"rw duration:{fsm.getCurrentTimer():.2f}")
 
 		if voteHash:
 			try:
 				w3.eth.getTransaction(voteHash)
 			except Exception as e:
-				print(f'ERROR Vote disappered. {str(e)}')
+				print(f'ERROR tx: ', voteHash.hex()[0:8], ' disappered ', {str(e)})
 				voteHash = None
 				
 			try:
 				txRecpt = w3.eth.getTransactionReceipt(voteHash)
-				print('SUCCESS Vote included in block!')
+				print('SUCCESS tx: ', voteHash.hex()[0:8],' included in block: ', txRecpt['blockNumber'])
 
 				if txRecpt['status'] == 0:
-					print('ERROR Vote status 0.')
+					print('ERROR  tx: ', voteHash.hex()[0:8],' status is: ', txRecpt['status'])
 
 				voteHash = None
 
@@ -527,6 +530,8 @@ def Main(rate = mainRate):
 
 def Event(rate = eventRate):
 	""" Control routine executed each time new blocks are synchronized """
+	global lastblock_global, allpoints_global, allclusters_global		
+
 	tic = TicToc(rate, 'Event')
 
 	def blockHandle():
@@ -551,13 +556,12 @@ def Event(rate = eventRate):
 
 	def scHandle():
 		""" Execute when new blocks are synchronized """
-		global ubi, payout, newRound, balance
 
 		# Log relevant smart contract details
-		blockNr = w3.eth.blockNumber
-		balance, spendable_balance = getBalance()
-		sources  = sc.functions.getSourceList().call()
-		sclog.log([blockNr, balance, spendable_balance, str(sources).replace(" ", "")])
+		blockNumb = lastblock_global['number']
+		blockHash = lastblock_global['hash'].hex()
+		balance, spendable_balance = getBalance_global()
+		sclog.log([blockNumb, blockHash, balance, spendable_balance, len(allclusters_global)])
 	
 	blockFilter = w3.eth.filter('latest')
 	
@@ -566,6 +570,11 @@ def Event(rate = eventRate):
 		
 		newBlocks = blockFilter.get_new_entries()
 		if newBlocks:
+
+			lastblock_global = w3.eth.getBlock('latest')
+			_, allpoints_global = getPoints()
+			_, allclusters_global = getClusters()
+
 			for blockHex in newBlocks:
 				blockHandle()
 				scHandle()
@@ -694,28 +703,86 @@ def sendVote(color_to_report, is_useful, support, color_idx, cluster_idx):
 		).transact({'from': me.key, 'value':value, 'gas': gasLimit, 'gasPrice': gasprice})
 	
 	txList.append(voteHash)
+
+	rgb.setAll(rgb.white)
+
 	return voteHash
 
 cluster_keys = sc.functions.getClusterKeys().call()
 def getClusters():
-	return [list2dict(c, cluster_keys) for c in sc.functions.getClusters().call()]
+	cluster_list = sc.functions.getClusters().call()
+	cluster_dict = [list2dict(c, cluster_keys) for c in cluster_list]
+	return cluster_list, cluster_dict
 
 point_keys = sc.functions.getPointKeys().call()
 def getPoints():
-	return [list2dict(c, point_keys) for c in sc.functions.getPoints().call()]
+	point_list = sc.functions.getPoints().call()
+	point_dict = [list2dict(c, point_keys) for c in point_list]
+	return point_list, point_dict
 
 def getBalance():
 	#check all my balance, including those frozen in unverified clusters.
 	myUsableBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether")) -1
 	myBalance = myUsableBalance
-	points_list = getPoints()
-	cluster_list = getClusters()
-	for idx, cluster in enumerate(cluster_list):
+	_, allpoints = getPoints()
+	_, allclusters = getClusters()
+	for idx, cluster in enumerate(allclusters):
 		if cluster['verified'] == 0:
-			for point in points_list:
+			for point in allpoints:
 				if point['sender'] == me.key and int(point['cluster']) == idx:
 					myBalance += float(point['credit']) / 1e18
 	return round(myBalance, 2), myUsableBalance
+
+def getBalance_global():
+	#check all my balance, including those frozen in unverified clusters.
+	myUsableBalance = float(w3.fromWei(w3.eth.getBalance(me.key),"ether")) -1
+	myBalance = myUsableBalance
+	for idx, cluster in enumerate(allclusters_global):
+		if cluster['verified'] == 0:
+			for point in allpoints_global:
+				if point['sender'] == me.key and int(point['cluster']) == idx:
+					myBalance += float(point['credit']) / 1e18
+	return round(myBalance, 2), myUsableBalance
+
+def call(show_points = True, raw = False):
+
+	block    = lastblock_global
+	points   = allpoints_global
+	clusters = allclusters_global
+	balance, usable  = getBalance_global()
+	unclustered_points = []
+	
+	if not raw:
+		for point in points:
+			if point['cluster']>=0:
+				p1 = point['position']
+				p2 = clusters[point['cluster']]['position']
+			point['RME'] = round(colourBGRDistance(p1,p2)/1e5, 2)
+			point['MAN'] = round(manhattan_distance(p1,p2)/1e5, 2)
+			point['CHS'] = round(chebyshev_distance(p1,p2)/1e5, 2)
+			point['position'] = [round(i/1e5) for i in point['position']]
+			point['credit'] //= 1e16
+			point['sender'] = point['sender'][0:5]
+
+		for idx, cluster in enumerate(clusters):
+			del cluster['life']
+			cluster['outlier_senders'] = len(cluster['outlier_senders'])
+			cluster['position'] = [round(i/1e5) for i in cluster['position']]
+			cluster['sup_position'] = [round(i/1e5) for i in cluster['sup_position']]
+			cluster['total_credit'] //= 1e16
+			cluster['total_credit_food'] //= 1e16
+			cluster['total_credit_outlier'] //= 1e16
+			cluster['init_reporter'] = cluster['init_reporter'][0:5]
+
+			if show_points:
+				cluster['points'] = [point for point in points if point['cluster']==idx]
+				unclustered_points = [point for point in points if point['cluster']==-1]
+	print_table(clusters)
+	print()
+	print(f"LAST BLOCK: block# (hash) {block['number']} ({block['hash'].hex()[0:8]})")
+	print(f"MY BALANCE: usable (balance) {usable:.2f} ({balance:.2f})")
+	if show_points:
+		print_table(unclustered_points, indent = 2)
 
 def getDiffEnodes(gethEnodes = None):
 	if gethEnodes:
@@ -759,10 +826,14 @@ if len(sys.argv) == 1:
 
 elif len(sys.argv) == 2:
 	if sys.argv[1] == '--byz':
-		isByz = True
 
 		START()
 		mainlogger.info('Robot ID: %s (Byzantine)', me.id)
+
+	elif sys.argv[1] == '--faulty':
+
+		START()
+		mainlogger.info('Robot ID: %s (Faulty)', me.id)
 
 	elif sys.argv[1] == '--nowalk':
 		cwe.rot.setWalk(False)
