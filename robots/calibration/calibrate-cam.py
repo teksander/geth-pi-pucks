@@ -9,7 +9,6 @@ import time
 #from matplotlib import pyplot as plt
 sys.path.append('..')
 sys.path.append('../controllers')
-from rotation import Rotation
 from upcamera import UpCamera
 
 cam_int_reg_h = 200
@@ -19,10 +18,6 @@ cam_sample_lgh = 20
 cam_sample_interval = 20
 max_samples = 1000
 robotID = open("/boot/pi-puck_id", "r").read().strip()
-
-def cross_entropy(dist_x, dist_y):
-    loss = -np.sum(np.array(dist_x)*np.log(dist_y))
-    return loss/float(np.array(dist_y).shape[0])
 
 def ask_yesno(question):
     """
@@ -86,7 +81,6 @@ def set_color_hsv():
     print("color ground truth hsv set to: ", np.mean(readings,axis=0).astype(int))
     return np.mean(readings,axis=0).astype(int)
 
-
 def single_time_test():
     while True:
         print("Present a color")
@@ -96,6 +90,16 @@ def single_time_test():
         print("got reading, bgr: ", ground_truth_bgr, " hsv: ", ground_truth_hsv)
         cv2.imwrite(robotID + '_one_time_test.jpg', cropped_image)
 
+def get_user_awb_mode(camera):
+    while True:
+        awb_mode = input("Which AWB mode to use (default=tungsten)?: ")
+        
+        if awb_mode not in camera.AWB_MODES:
+            print('availiable modes: ', camera.AWB_MODES)
+        else:
+            break
+
+    return awb_mode
 
 if __name__ == "__main__":
     cam = UpCamera(200, 50)
@@ -103,13 +107,16 @@ if __name__ == "__main__":
 
     height1, width1 = image.shape[:2]
 
-
-    colors = ["red", "blue", "green"]
+    colors   = ["red", "blue", "green"]
+    awb_mode = ""
     ground_truth_bgr = [[0,0,255], [255,0,0],[0,255,0]] #bgr
     ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0]] #hsv
-
+    
+     # perform the calibration by looping each color
     if ask_yesno("calibrate color ground truth?"):
-        for idx, name in enumerate(colors):
+       awb_mode = get_user_awb_mode(cam.camera)
+       cam.awb_mode = awb_mode
+       for idx, name in enumerate(colors):
             print("Present " + name +" color")
             input("Press Enter to continue...")
             ground_truth_bgr[idx], cropped_image = set_color()
@@ -118,17 +125,21 @@ if __name__ == "__main__":
             cropped_image = cv2.resize(cropped_image, (w2, height1))
             image = cv2.hconcat([image, cropped_image])
 
-    cv2.imwrite(robotID+'_test_capture.jpg', image)
-    #write color ground truth result
-    color_gt = open(robotID+'.csv','w+')
-    color_hsv_gt = open(robotID+'_hsv.csv','w+')
+    # store the calibration results and a test image capture
+    os.makedirs(f"cam/{awb_mode}/")
+
+    cv2.imwrite(f"cam/{awb_mode}/{robotID}_test.jpg", image)
+
+    color_bgr_gt = open(f"cam/{awb_mode}/{robotID}_bgr.csv",'w+')
+    color_hsv_gt = open(f"cam/{awb_mode}/{robotID}_hsv.csv",'w+')
 
     for idx, name in enumerate(colors):
-        color_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
+        color_bgr_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
         color_hsv_gt.write(name + ' ' + ' '.join([str(x) for x in ground_truth_hsv[idx]]) + '\n')
-    color_gt.close()
+
+    color_bgr_gt.close()
     color_hsv_gt.close()
-    #single_time_test()
+
 
 
 
