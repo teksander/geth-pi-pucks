@@ -207,6 +207,12 @@ class Rotation(object):
         self.duration=duration
         if self.__walk == False:
             self.__walk = True
+    def setPattern_duration(self, pattern, duration):
+        if self.duration <= 0:
+            self.__pattern=pattern
+            self.duration=duration
+            if self.__walk == False:
+                self.__walk = True
     def setDrivingSpeed(self, left, right):
         self.left = left
         self.right = right
@@ -236,9 +242,9 @@ if __name__ == "__main__":
     rot.start()
     input("any key to straight")
     rot.setPattern("s",100)
-    input("any key to turn")
+    input("any key to turn cw")
     rot.setPattern("cw", 100)
-    input("any key to stop")
+    input("any key to turn ccw")
     rot.setPattern("ccw", 100)
     input("any key to stop")
     rot.setWalk(False)

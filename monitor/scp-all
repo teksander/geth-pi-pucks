@@ -52,6 +52,10 @@ if [ $1 == "genesis" ]; then
 	done
 fi
 
+if [ $1 == "custom" ]; then 
+		scp_ALL psutil-5.9.5.tar.gz " "
+fi
+
 if [ $1 == "scbuild" ]; then 
 		scp_ALL blockchain/scs/build blockchain/scs/build
 fi

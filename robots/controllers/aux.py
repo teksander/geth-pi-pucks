@@ -5,6 +5,8 @@ import threading
 import socket
 import os
 import logging
+import json
+import subprocess
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
@@ -515,10 +517,26 @@ def readEnode(enode, output = 'id'):
 
 def getCPUPercent():
     try:
-        cpu = str(round(float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline()),2))
+        cpu_usage = str(round(float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline()),2))
     except:
-        cpu = 0
-    return cpu
+        cpu_usage = 0
+    return cpu_usage
+
+def get_process_stats(process_name):
+    pgrep_command = subprocess.Popen(['pgrep', '-f', process_name], stdout=subprocess.PIPE)
+    pid_list, _ = pgrep_command.communicate()
+    pids = pid_list.decode().split()
+
+    if pids:
+        pid = pids[0]
+        ps_command = subprocess.Popen(['ps', '-p', pid, '-o', '%cpu,%mem'], stdout=subprocess.PIPE)
+        output, _ = ps_command.communicate()
+        process_stats = output.decode().split('\n')[1].split()
+        cpu_percent = float(process_stats[0])
+        mem_percent = float(process_stats[1])
+        return cpu_percent, mem_percent
+    else:
+        return None
     
 def getFolderSize(folder):
     # Return the size of a folder
@@ -531,3 +549,23 @@ def getFolderSize(folder):
             total_size += getFolderSize(itempath)
     return total_size
 
+def mapping_id_keys(directory_path, limit=None):
+    id_to_key = {}
+    key_to_id = {}
+    count = 0
+
+    for i in range(limit):
+        folder_name = str(i)
+        file_path = os.path.join(directory_path, folder_name, folder_name)
+
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+                key = "0x"+data["address"]
+                id_to_key[folder_name] = key
+                key_to_id[key] = folder_name
+                count += 1
+                if count == limit:
+                    break
+
+    return id_to_key, key_to_id

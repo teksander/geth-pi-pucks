@@ -66,11 +66,8 @@ class RGBLEDs(object):
 		
 		self.setLED(self.all, 3*[self.off])
 
-	def _from_string(self, string):
-		if string == 'red': return self.red
-		if string == 'green': return self.green
-		if string == 'blue': return self.blue
-		if string == 'white': return self.white	
+	def _from_string(self, color_string):
+		return getattr(self, color_string, None)		
 			
 	def setAll(self, color):
 

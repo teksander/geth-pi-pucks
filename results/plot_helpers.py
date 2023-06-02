@@ -143,11 +143,13 @@ def get_mainchain_df2(df, leaf):
 
 def get_mainchain_df(df, leaf):
     parentHash = leaf
+    main_list  = [parentHash]
     main_path = []
     
     for (idx, row) in df[::-1].iterrows():
         if row['HASH'] == parentHash:
             main_path.append(idx)
+            main_list.append(row['PHASH'])
             parentHash = row['PHASH']
         
     return df.iloc[main_path]
@@ -247,4 +249,42 @@ def colourBGRDistance(p1, p2):
     b = rp1[0] - rp2[0]
     distance = ((((512 + rMean) * r * r) >> 8) + 4 * g * g + (((767 - rMean) * b * b) >> 8))
     distance = math.sqrt(distance) * 100000
+    return distance
+
+def manhattan_distance(p1, p2):
+    """
+    Compute the Manhattan distance between two points.
+    
+    Arguments:
+    p1, p2 -- Tuples or lists representing the coordinates of the two points.
+    
+    Returns:
+    The Manhattan distance between the two points.
+    """
+    if len(p1) != len(p2):
+        raise ValueError("Both points should have the same number of coordinates.")
+    
+    distance = 0
+    for i in range(len(p1)):
+        distance += abs(p1[i] - p2[i])
+    
+    return distance
+
+def chebyshev_distance(point1, point2):
+    """
+    Compute the Chebyshev distance between two points.
+    
+    Arguments:
+    point1, point2 -- Tuples or lists representing the coordinates of the two points.
+    
+    Returns:
+    The Chebyshev distance between the two points.
+    """
+    if len(point1) != len(point2):
+        raise ValueError("Both points should have the same number of coordinates.")
+    
+    distance = 0
+    for i in range(len(point1)):
+        distance = max(distance, abs(point1[i] - point2[i]))
+    
     return distance

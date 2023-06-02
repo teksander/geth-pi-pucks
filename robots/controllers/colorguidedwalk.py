@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import random, math
 import time
-import smbus
-import threading
 import cv2
 import numpy as np
 import logging
@@ -11,14 +9,12 @@ from upcamera import UpCamera
 from rotation import Rotation
 from groundsensor import GroundSensor
 from PID import PID
-
-
 import sys
-sys.path.append('/home/pi/geth-pi-pucks/robots/arducam/apriltag/python')
-import apriltag
+sys.path.append('../')
+import arducam.apriltag.python.apriltag as apriltag
 
-logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
-logger = logging.getLogger(__name__)
+logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
+logger = logging.getLogger('cwe')
 
 robotID = open("/boot/pi-puck_id", "r").read().strip()
 cam_int_reg_h = 200
@@ -246,7 +242,6 @@ class ColorWalkEngine(object):
             return np.mean(measure_list,axis=0)
         else:
             return [-1,-1,-1]
-   
 
     def check_apriltag(self):
         image = self.cam.get_reading_raw()
@@ -260,7 +255,7 @@ class ColorWalkEngine(object):
                 this_h = max(abs(this_tag.corners[0][1]- this_tag.corners[1][1]), abs(this_tag.corners[2][1]- this_tag.corners[3][1]))
                 if this_h>maximum_h:
                     maximum_h = this_h
-                    this_id = this_tag.tag_id
+                    this_id = int(this_tag.tag_id)
         return this_id, maximum_h
 
     def check_all_color(self, max_area = 5000):
@@ -299,6 +294,7 @@ class ColorWalkEngine(object):
                 return False
         else:
             return True
+        
     def check_rgb_color(self, bgr_feature):
         # check specific bgr array
         this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
@@ -313,7 +309,19 @@ class ColorWalkEngine(object):
     def drive_to_rgb(self, bgr_feature, duration=30):
         this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
         return self.drive_to_hsv(this_color_hsv, duration)
-
+    
+    def get_closest_color(self, bgr_feature):
+        this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+        closest_color = self.colors[0]
+        closest_color_idx = 0
+        closest_color_dist = hue_distance(self.ground_truth_hsv[0][0], this_color_hsv[0])
+        for idx, this_color in enumerate(self.colors):
+            if hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])<closest_color_dist:
+                closest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])
+                closest_color =  this_color
+                closest_color_idx = idx
+        return closest_color, closest_color_idx
+    
     def drive_to_closest_color(self, bgr_feature, duration=30):
         this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
         closest_color = self.colors[0]
@@ -327,21 +335,9 @@ class ColorWalkEngine(object):
         isArrived = self.drive_to_color(closest_color, duration)
         return isArrived , closest_color, closest_color_idx
 
-    def drive_to_closest_color_byz(self, bgr_feature, confusing_set, duration=30):
-        this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
-        closest_color = self.colors[0]
-        colsest_color_dist = hue_distance(self.ground_truth_hsv[0][0], this_color_hsv[0])
-        for idx, this_color in enumerate(self.colors):
-            if hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0]) < colsest_color_dist:
-                colsest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])
-                closest_color = this_color
-        if closest_color in confusing_set:
-            target_color = random.choice(confusing_set)
-        return self.drive_to_color(target_color, duration)
-
     def drive_to_color(self, color_name, duration=30):
         if color_name not in self.colors:
-            print("unknown color")
+            logger.debug("Unknown color")
             return False
         else:
             logger.debug("Driving to color: " + color_name)
@@ -357,16 +353,16 @@ class ColorWalkEngine(object):
         pid_controller = PID(0.01, 0.01, 0.5)
         self.actual_rw_dir = "s"
 
-        #check if the robot is in white free zone
+        # check if the robot is in free zone
         while in_free_zone < 3 and time.time() - startTime < duration:
 
-            logger.debug("Driving to color: " + "in free zone")
+            
             _, tag_height = self.check_apriltag()
-            if tag_height > 0:
-                # print(np.mean(newValues), newValues)
-                if tag_height < 100:  # see white board ground
-                    in_free_zone += 1
+            logger.debug(f"In free zone #{in_free_zone} (tag height={tag_height}")
 
+            if tag_height > 0:
+                if tag_height < 100:
+                    in_free_zone += 1
                 else:
                     in_free_zone = 0
                     self.random_walk_engine(10, 7)
@@ -376,7 +372,6 @@ class ColorWalkEngine(object):
 
         lose_track_count = 0
         while arrived_count < 2 and time.time() - startTime < duration:
-            #newValues = self.gs.getAvg()
             _, tag_height = self.check_apriltag()
             if tag_height>0:
                 #print(tag_height)
@@ -398,6 +393,7 @@ class ColorWalkEngine(object):
             else:
                 detect_color = False
             self.last_speed = [0,0]
+
             if detect_color:
                 lose_track_count=0
                 self.rot.setDrivingMode("speed")
@@ -410,7 +406,7 @@ class ColorWalkEngine(object):
                 left_speed = base_speed - speed_adjustment
                 right_speed = base_speed + speed_adjustment
                 self.last_speed = [left_speed, right_speed]
-                # print("error: ", error, "set speeds: ", left_speed, right_speed)
+                logger.debug(f"speeds: {left_speed},{right_speed} | error: {error}")
                 self.rot.setDrivingSpeed(left_speed,right_speed)
             elif arrived_count == 0 and lose_track_count<5:
                 lose_track_count+=1
@@ -419,19 +415,7 @@ class ColorWalkEngine(object):
                 self.rot.setDrivingMode("pattern")
                 pid_controller = PID(0.01, 0.01, 0.5) #reset controller
                 self.random_walk_engine()
-                #     self.rot.setPattern("s", 5)
-                # elif dir_ang <= -1 and self.rot.isWalking() == False:
-                #     # object not found, random walk
-                #     walk_dir = random.choice(["s", "cw", "ccw"])
-                #     self.rot.setPattern(walk_dir, 3)
-                # elif dir_ang > 0:
-                #     #print("cur angle: ", dir_ang)
-                #     walk_time = np.ceil(1 + int(dir_ang))
-                #     self.rot.setPattern("cw", walk_time)
-                # elif dir_ang < 0:
-                #     #print("cur angle: ", dir_ang)
-                #     walk_time = np.ceil(1 - int(abs(dir_ang)))
-                #     self.rot.setPattern("ccw", walk_time)
+
         self.rot.setDrivingMode("pattern")
 
         self.rot.setWalk(False)
