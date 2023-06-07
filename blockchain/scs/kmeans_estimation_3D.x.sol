@@ -51,11 +51,12 @@ contract ForagingPtManagement{
         uint minClusterStatus;
     }
 
-    int[3] report_statistics; //0:number of recorded reports, 1: number of reports rejected due to duplicated verification, 2: reports rejected due to maximum number of clusters reached
+    int[3] report_statistics; //0:number of recorded reports, 1: number of reports rejected due to duplicated verification, 2: reports rejected due to maximum number of clusters reached, 3:verification outlier count
     constructor() {
         report_statistics[0] = 0;
         report_statistics[1] = 0;
         report_statistics[2] = 0;
+        report_statistics[3] = 0;
     }
 
     int[space_size] position_zeros;
@@ -205,8 +206,8 @@ contract ForagingPtManagement{
                 }
             }
 
-            //check if the report is close enough to the cluster center that the robot intends to verify:
-            if(intention>0 && info.foundCluster==1 && info.minClusterIdx==intention-1 &&clusterList[intention-1].verified==0){
+            //if the report is not close enough to the cluster center that the robot intends to verify:
+            if(intention>0 && info.foundCluster==1 && info.minClusterIdx!=intention-1 &&clusterList[intention-1].verified==0){
                 bool senderExists = false;
                 for (uint j = 0; j < clusterList[intention-1].outlier_senders.length; j++) {
                     if (clusterList[intention-1].outlier_senders[j] == msg.sender) {
@@ -374,7 +375,7 @@ contract ForagingPtManagement{
                     }
                 }
             }
-            else if (clusterList[i].verified==0 && clusterList[i].total_credit_outlier>=min_balance){
+            else if (clusterList[i].verified==0 && clusterList[i].total_credit_outlier>(1-min_balance)){
                 for (uint j=0; j<clusterList[i].outlier_senders.length; j++){
                     bonus_credit = clusterList[i].total_credit/clusterList[i].outlier_senders.length;
                     payable(clusterList[i].outlier_senders[j]).transfer(bonus_credit);
@@ -384,23 +385,23 @@ contract ForagingPtManagement{
             //remove points that correspond to redundant or rejected clusters
             if (clusterList[i].verified==3 || clusterList[i].verified==4){
                 for (uint j=0; j<pointList.length; j++){
-                if (pointList[j].cluster == int256(i)){
-                    payable(pointList[j].sender).transfer(pointList[j].credit);
-                 }
+                    if (pointList[j].cluster == int256(i) || clusterList[i].verified==3){ //only return deposits for clusters that have been rejected due to maximum number of cluster reached
+                        payable(pointList[j].sender).transfer(pointList[j].credit);
+                     }
                 }
                 //remove points
                 c = 0;
                 curLength = pointList.length;
-                    while(c<curLength){
-                        if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
-                            pointList[c] = pointList[pointList.length-1];
-                            pointList.pop();
-                            curLength = pointList.length;
-                        }
-                        else{
-                            c+=1;
-                        }
+                while(c<curLength){
+                    if (pointList[c].cluster == int256(i) || pointList[c].cluster==-1){
+                        pointList[c] = pointList[pointList.length-1];
+                        pointList.pop();
+                        curLength = pointList.length;
                     }
+                    else{
+                        c+=1;
+                    }
+                }
             }
         }
 
