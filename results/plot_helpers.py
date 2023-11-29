@@ -194,6 +194,17 @@ def LinearRegression(group, x, y):
     group['LREG'] = model(group[x], *coefs)
     return group
 
+import colorsys
+def bgr_to_hsv_csys(bgr):
+    h,s,v = colorsys.rgb_to_hsv(*bgr[::-1])
+    return (h*180, s*255, v)
+
+import cv2
+import numpy as np
+def bgr_to_hsv_cv2(bgr):
+    h,s,v = cv2.cvtColor(np.array(bgr, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+    return h,s,v
+
 ######## Random stuff
 def bgr_to_hsv(b, g, r):
     r_norm = r / 255.0
@@ -224,7 +235,7 @@ def bgr_to_hsv(b, g, r):
     v = cmax
     
     return h, s, v
-
+import math
 def colourBGRDistance(p1, p2):
     space_size = len(p1)
     divisor = 100000

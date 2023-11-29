@@ -41,10 +41,15 @@ gasLimit, gasprice, gas  = 0x9000000, 0x000000, 0x00000
 global txList, clocks
 txList, clocks = [], dict()
 
-global color_to_verify, color_to_report, color_name_to_report, color_idx_to_report
-color_to_verify = color_to_report = [0, 0, 0]
+global color_to_report, color_to_verify, color_name_to_report, color_name_to_verify
+global color_idx_to_report, cluster_idx_to_verify, recent_colors
+color_to_verify = [0, 0, 0]
+color_to_report = [0, 0, 0]
+color_name_to_verify = ''
 color_name_to_report = ''
-color_idx_to_report = 0
+color_idx_to_report   = 0
+cluster_idx_to_verify = 0
+recent_colors=[]
 
 global voteHash, balance_global, lastblock_global, allpoints_global, allclusters_global
 voteHash = None
@@ -68,6 +73,7 @@ import threading
 import subprocess
 import random
 import sys
+import copy
 from console import init_web3, registerSC
 from erandb import ERANDB
 from groundsensor import GroundSensor
@@ -83,9 +89,12 @@ from aux import *
 DECIMAL_FACTOR =  1e5
 DEPOSITFACTOR = 3
 
-global isByz, isFaulty
+global isByz, isFau, isCol, behaviour
 isByz = True if len(sys.argv)>1 and sys.argv[1] == '--byz' else False
-isFaulty = True if len(sys.argv)>1 and sys.argv[1] == '--faulty' else False
+isFau = True if len(sys.argv)>1 and sys.argv[1] == '--fau' else False
+isCol = True if len(sys.argv)>1 and sys.argv[1] == '--col' else False
+
+behaviour = 'malicious' if isByz else 'faulty' if isFau else 'colluding' if isCol else 'honest'
 
 # Calibrated parameters
 #with open('../calibration/gsThreshes.txt') as calibFile:
@@ -112,7 +121,7 @@ logging.getLogger('erandb').setLevel(10)
 logging.getLogger('randomwalk').setLevel(loglevel)
 logging.getLogger('aux').setLevel(loglevel)
 logging.getLogger('rgbleds').setLevel(loglevel)
-logging.getLogger('cwe').setLevel(50)
+logging.getLogger('cwe').setLevel(10 if isFau else 50)
 
 # /* Initialize Logging Files */
 #######################################################################
@@ -125,11 +134,11 @@ logging.getLogger('cwe').setLevel(50)
 header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
 blocklog = Logger('../logs/block.csv', header)
 
-header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'PENDING', '#CLUSTERS']
-sclog = Logger('../logs/sc.csv', header, extrafields={'isbyz':isByz, 'isfaulty':isFaulty})
+header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'PENDING', '#CLUSTERS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
+sclog = Logger('../logs/sc.csv', header, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
 
 header = ['B','G','R', 'NAME', 'IDX', 'FOOD', 'SUPPORT','STATE']
-colorlog = Logger('../logs/color.csv', header, extrafields={'isbyz':isByz, 'isfaulty':isFaulty})
+colorlog = Logger('../logs/color.csv', header, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
 
 header = ['MEM', '%CPU', '%RAM']
 extralog = Logger('../logs/extra.csv', header, 10)
@@ -165,9 +174,8 @@ mainlogger.info('Initialising RandB board...')
 erb = ERANDB(erbDist, erbtFreq)
 
 # /* Init Color-Guided walk, __walking process */
-mainlogger.info('Initialising movement controller...')
-awb_mode = 'shade' if isFaulty else 'tungsten'
-cwe = ColorWalkEngine(rwSpeed, awb_mode)
+mainlogger.info('Initialising color tracking controller...')
+cwe = ColorWalkEngine(rwSpeed, [1,1,0.75] if isFau else [1,1,1])
 
 # /* Init LEDs */
 rgb = RGBLEDs()
@@ -178,16 +186,8 @@ fsm = FiniteStateMachine(start=Idle.Start)
 # List of submodules --> iterate .start() to start all
 submodules = [w3.geth.miner, tcp, erb]
 
-global verified_colors, verified_idx, recent_colors
 color_names = cwe.get_color_list()
 print("Calibrated colors:", color_names)
-verified_colors=[0 for x in range(len(color_names))]
-verified_idx=[]
-recent_colors=[]
-
-global cluster_idx_to_verify
-cluster_idx_to_verify=0
-
 
 # /* Define Main-modules */
 #######################################################################
@@ -348,40 +348,51 @@ def Main(rate = mainRate):
 		elif fsm.query(Scout.Query):
 
 			# check reported color.
+			# rgb.setAll(rgb.off)
 			explore = True
 			verify  = True
-			rgb.setAll(rgb.off)
-
+			
 			# query the Smart Contract 
-			all_clusters = allclusters_global
-			all_points = allpoints_global
+			all_clusters = copy.copy(allclusters_global)
+			all_points   = copy.copy(allpoints_global)
 			vote_support, current_balance = getBalance_global()
 
-			# this is for a test: idle and wait if no assets
-			vote_support /= DEPOSITFACTOR
-			if vote_support >= current_balance and current_balance!=0:
-				rgb.setAll('white')
-				verify  = False
-				explore = False
-				time.sleep(1)
+			# # this is for a test: idle and wait if no assets
+			# vote_support /= DEPOSITFACTOR
+			# if vote_support >= current_balance and current_balance!=0:
+			# 	rgb.setAll('white')
+			# 	verify  = False
+			# 	explore = False
+			# 	time.sleep(1)
 
 			# check if any cluster avaiting verification on chain
 			if verify and len(all_clusters) > 0:
-				candidate_cluster = []
+				candidate_cluster  = []
+				unverified_clusters = 0
 				for idx, cluster in enumerate(all_clusters):
+					
 					verified_by_me = False
-
 					for point_rec in all_points:
 						if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
 							verified_by_me = True
 
-					if cluster['verified'] == 0 and not verified_by_me and any([int(a) for a in cluster['position']]):
-						candidate_cluster.append((cluster, idx))
+					if cluster['verified'] == 0:
+						unverified_clusters += 1
 
-				print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
+						if not verified_by_me and any([int(a) for a in cluster['position']]):
+							candidate_cluster.append((cluster, idx))
 
+				# # this is for a test: idle and wait if no clusters to verify
+				if unverified_clusters == DEPOSITFACTOR and len(candidate_cluster) == 0:
+					print("no candidates to verify and max cluster count reached")
+					rgb.setAll('white')
+					verify  = False
+					explore = False
+					time.sleep(1)
+					
 				# randomly select a cluster to verify
-				if len(candidate_cluster) > 0:
+				if verify and len(candidate_cluster) > 0:
+					print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
 					select_idx = random.randrange(len(candidate_cluster))
 					cluster = candidate_cluster[select_idx][0]
 					cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
@@ -397,7 +408,7 @@ def Main(rate = mainRate):
 
 				if found_color_bgr != -1:
 					print(f"Found color: {found_color_name} {[int(a) for a in found_color_bgr]}")
-					rgb.setAll(found_color_name)
+					# rgb.setAll(found_color_name)
 					for idx in range(3):
 						color_to_report[idx] = found_color_bgr[idx]
 					color_name_to_report = found_color_name
@@ -416,7 +427,7 @@ def Main(rate = mainRate):
 		elif fsm.query(Scout.PrepReport):
 			
 			print(f"Drive to report: {color_name_to_report}, {[int(a) for a in color_to_report]}") 
-			rgb.setAll(color_name_to_report)
+			# rgb.setAll(color_name_to_report)
 			
 			arrived, _ , _ = cwe.drive_to_closest_color(color_to_report, duration=100) 
 
@@ -440,11 +451,12 @@ def Main(rate = mainRate):
 					else:
 						print("color repeat sampling failed, report one time measure")
 
-					is_useful=False
-					if int(tag_id)==2: # red color apriltag = 2
-						is_useful = True
+					
+					is_useful = int(tag_id) == 2
 					if isByz:
-						is_useful = not is_useful 
+						is_useful = not is_useful
+					if isCol:
+						is_useful = color_name_to_report == 'blue' 
 
 					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
@@ -462,14 +474,15 @@ def Main(rate = mainRate):
 
 		elif fsm.query(Verify.DriveTo):
 
-			# Temporary check due to bug:
+			# Temporary check due to bug where robot goes to verify [0,0,0]:
 			if not any([int(a) for a in color_to_verify]):
 				print('GOING TO VERIFY ORIGIN!! Bug not fixed')
+				color_to_verify = [int(a * 100000) for a in color_to_verify]
 				print(color_to_verify)
 
 			color_name_to_verify, _ = cwe.get_closest_color(color_to_verify)
 			print(f"Drive to verify: {color_name_to_verify}, {[int(a) for a in color_to_verify]}") 
-			rgb.setAll(color_name_to_verify)
+			# rgb.setAll(color_name_to_verify)
 
 			# Try to find and drive to the closest color according to the agent's understanding for 100 sec
 			arrived, color_name_to_verify, color_idx_to_verify = cwe.drive_to_closest_color(color_to_verify, duration=100)
@@ -508,15 +521,11 @@ def Main(rate = mainRate):
 
 				if ok_to_vote:
 					
-					if tag_id==2: 
-						is_useful = True
-					elif tag_id==1:
-						is_useful=False
-					else:
-						print('Unrecognized tag ID!')
-
+					is_useful = int(tag_id) == 2
 					if isByz:
-						is_useful = not is_useful 
+						is_useful = not is_useful
+					if isCol:
+						is_useful = color_name_to_report == 'blue' 
 
 					print(f"found color {found_color_name}, start repeat sampling...")
 					repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
@@ -534,7 +543,7 @@ def Main(rate = mainRate):
 					# colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
 					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
 					print_color("Verify vote: ", voteHash.hex()[0:8], 
-		 						"color: ", [int(a) for a in color_to_report], found_color_name, 
+								"color: ", [int(a) for a in color_to_report], found_color_name, 
 								"support: ", vote_support, 
 								"tagid: ", tag_id, 
 								"vote: ", is_useful, 
@@ -547,7 +556,7 @@ def Main(rate = mainRate):
 
 			cwe.random_walk_engine(10, 10)
 
-			if not voteHash or fsm.getCurrentTimer()>20:
+			if not voteHash or fsm.getCurrentTimer()>40:
 				voteHash = None
 				cwe.set_leds(0b00000000)
 				fsm.setState(Scout.Query, message=f"rw duration:{fsm.getCurrentTimer():.2f}")
@@ -589,7 +598,21 @@ def Event(rate = eventRate):
 		blockNumb = lastblock_global['number']
 		blockHash = lastblock_global['hash'].hex()
 		balance, spendable_balance = getBalance_global()
-		sclog.log([blockNumb, blockHash, balance, spendable_balance, balance_pending, len(allclusters_global)])
+		rep_stats  = sc.functions.getReportStatistics().call()
+		n_clusters = len(allclusters_global)
+		n_accepted = len([c for c in allclusters_global if c['verified']==1])
+		n_rejected = len([c for c in allclusters_global if c['verified']==2])
+		n_pending  = len([c for c in allclusters_global if c['verified']==0])
+		sclog.log([blockNumb, 
+			 blockHash,
+			   balance, 
+			   spendable_balance, 
+			   balance_pending, 
+			   n_clusters, 
+			   n_accepted, 
+			   n_rejected, 
+			   n_pending, 
+			   *rep_stats])
 
 	blockFilter = w3.eth.filter('latest')
 	
@@ -600,7 +623,7 @@ def Event(rate = eventRate):
 
 		if newBlocks:
 
-			balance_global = float(w3.fromWei(w3.eth.getBalance(me.key),"ether"))-1
+			balance_global = float(w3.fromWei(w3.eth.getBalance(me.key),"ether"))
 			lastblock_global = w3.eth.getBlock('latest')
 			_, allpoints_global = getPoints()
 			_, allclusters_global = getClusters()
@@ -634,10 +657,11 @@ def Event(rate = eventRate):
 
 				except Exception as e:
 					pass
+					# print(f'ERROR tx: ', voteHash.hex()[0:8], ' no receipt ', {str(e)})
 
 		# Low frequency logging of chaindata size and cpu usage
 		if extralog.query():
-			mem = getFolderSize('/home/pi/geth-pi-pucks/blockchain/geth')
+			mem = get_folder_size('/home/pi/geth-pi-pucks/blockchain/geth')
 			cpu, ram = get_process_stats('geth ')
 			extralog.log([mem, cpu, ram])
 
@@ -700,20 +724,17 @@ def STOP(modules = submodules, logs = logmodules):
 		except:
 			mainlogger.warning('Error Closing Logfile')
 
-	if isByz:
-		mainlogger.info('This Robot was BYZANTINE')
+	header = cluster_keys
+	clusterlog = Logger('../logs/cluster.csv', header)
 
-
-	clusterlog = Logger('../logs/cluster.csv', cluster_keys)
 	clusterlog.start()
-
 	for cluster in sc.functions.getClusters().call():
 		cluster = [str(i).replace(', ', ',') for i in cluster]
 		clusterlog.log(cluster)
 	clusterlog.close()
 
 	header = ['HASH','MINED?', 'STATUS', 'BLOCK', 'NONCE', 'VALUE', ]
-	txlog = Logger('../logs/tx.csv', header)
+	txlog = Logger('../logs/tx.csv', header, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
 
 	txlog.start()
 	for txHash in txList:
@@ -787,16 +808,36 @@ def getBalance():
 					myBalance += float(point['credit']) / 1e18
 	return round(myBalance, 2), myUsableBalance
 
+# def getBalance_global():
+# 	#check all my balance, including those frozen in unverified clusters.
+# 	chain_balance = balance_global
+# 	full_balance = chain_balance
+# 	for idx, cluster in enumerate(allclusters_global):
+# 		if cluster['verified'] == 0:
+# 			for point in allpoints_global:
+# 				if point['sender'] == me.key and int(point['cluster']) == idx:
+# 					full_balance += float(point['credit']) / 1e18
+# 	return round(full_balance, 2), chain_balance
+
 def getBalance_global():
 	#check all my balance, including those frozen in unverified clusters.
-	myUsableBalance = balance_global
-	myBalance = myUsableBalance
-	for idx, cluster in enumerate(allclusters_global):
-		if cluster['verified'] == 0:
-			for point in allpoints_global:
-				if point['sender'] == me.key and int(point['cluster']) == idx:
-					myBalance += float(point['credit']) / 1e18
-	return round(myBalance, 2), myUsableBalance
+	chain_balance  = balance_global
+	full_balance   = chain_balance
+
+	cluster_buffer = [0] * len(allclusters_global)
+	for point in allpoints_global:
+		i = int(point['cluster'])
+
+		try:
+			allclusters_global[i]['verified'] == 0
+		except:
+			print(f'index error {i}')
+
+		if point['sender'] == me.key and allclusters_global[i]['verified'] == 0:
+			if cluster_buffer[i] == 0:
+				full_balance += float(point['credit']) / 1e18
+				cluster_buffer[i] = 1
+	return round(full_balance, 2), chain_balance
 
 _, key_to_id = mapping_id_keys("../../blockchain/keystores/", limit=200)
 def call(show_points = True, raw = False):
@@ -887,7 +928,7 @@ elif len(sys.argv) == 2:
 		START()
 		mainlogger.info('Robot ID: %s (Byzantine)', me.id)
 
-	elif sys.argv[1] == '--faulty':
+	elif sys.argv[1] == '--fau':
 
 		START()
 		mainlogger.info('Robot ID: %s (Faulty)', me.id)

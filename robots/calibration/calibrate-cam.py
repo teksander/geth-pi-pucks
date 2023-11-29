@@ -58,12 +58,12 @@ def get_hsv_center(image, length=30):
     hist_img= image_hsv[:, idx - int(length / 2):idx + int(length / 2)].mean(axis=0).mean(axis=0).astype(int)
     return hist_img
 
-def set_color():
+def set_color(repetitions):
     image = cam.get_reading()
     image_r = cam.get_reading_raw()
-    cv2.imwrite(robotID + '_raw_reading_test.jpg', image_r)
+    # cv2.imwrite(robotID + '_raw_reading_test.jpg', image_r)
     readings = []
-    for idx in range(10):
+    for idx in range(repetitions):
         image = cam.get_reading()
         mean_rgb, _ = get_rgb_center(image, 60)
         readings.append(mean_rgb)
@@ -72,10 +72,10 @@ def set_color():
     _, cropped_image = get_rgb_center(image, 60)
     return np.mean(readings, axis=0).astype(int), cropped_image
 
-def set_color_hsv():
+def set_color_hsv(repetitions):
     cam.get_reading()
     readings = []
-    for idx in range(10):
+    for idx in range(repetitions):
         image = cam.get_reading()
         readings.append(get_hsv_center(image,60))
     print("color ground truth hsv set to: ", np.mean(readings,axis=0).astype(int))
@@ -90,55 +90,60 @@ def single_time_test():
         print("got reading, bgr: ", ground_truth_bgr, " hsv: ", ground_truth_hsv)
         cv2.imwrite(robotID + '_one_time_test.jpg', cropped_image)
 
-def get_user_awb_mode(camera):
+def get_user_awb_mode(availiable_modes):
+
     while True:
-        awb_mode = input("Which AWB mode to use (default=tungsten)?: ")
+        awb_mode = input("Which AWB mode to use?: ")
         
-        if awb_mode not in camera.AWB_MODES:
-            print('availiable modes: ', camera.AWB_MODES)
+        if awb_mode not in availiable_modes:
+            print('availiable modes: ', availiable_modes)
         else:
             break
 
     return awb_mode
 
-if __name__ == "__main__":
-    cam = UpCamera(200, 50)
-    image = cam.get_reading_raw()
-
-    height1, width1 = image.shape[:2]
-
-    colors   = ["red", "blue", "green"]
-    awb_mode = ""
-    ground_truth_bgr = [[0,0,255], [255,0,0],[0,255,0]] #bgr
-    ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0]] #hsv
+def main():
     
      # perform the calibration by looping each color
-    if ask_yesno("calibrate color ground truth?"):
-       awb_mode = get_user_awb_mode(cam.camera)
-       cam.awb_mode = awb_mode
-       for idx, name in enumerate(colors):
-            print("Present " + name +" color")
-            input("Press Enter to continue...")
-            ground_truth_bgr[idx], cropped_image = set_color()
-            ground_truth_hsv[idx] = set_color_hsv()
-            h2, w2 = cropped_image.shape[:2]
-            cropped_image = cv2.resize(cropped_image, (w2, height1))
-            image = cv2.hconcat([image, cropped_image])
+    awb_mode = get_user_awb_mode(cam.camera.AWB_MODES)
+    cam.camera.awb_mode = awb_mode
 
-    # store the calibration results and a test image capture
-    os.makedirs(f"cam/{awb_mode}/")
-
-    cv2.imwrite(f"cam/{awb_mode}/{robotID}_test.jpg", image)
-
-    color_bgr_gt = open(f"cam/{awb_mode}/{robotID}_bgr.csv",'w+')
-    color_hsv_gt = open(f"cam/{awb_mode}/{robotID}_hsv.csv",'w+')
+    image = cam.get_reading_raw()
+    height1, width1 = image.shape[:2]
 
     for idx, name in enumerate(colors):
-        color_bgr_gt.write(name+' '+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
-        color_hsv_gt.write(name + ' ' + ' '.join([str(x) for x in ground_truth_hsv[idx]]) + '\n')
+        print("Present " + name +" color")
+        input("Press Enter to continue...")
+        ground_truth_bgr[idx], cropped_image = set_color(10)
+        ground_truth_hsv[idx] = set_color_hsv(10)
+        h2, w2 = cropped_image.shape[:2]
+        cropped_image = cv2.resize(cropped_image, (w2, height1))
+        image = cv2.hconcat([image, cropped_image])
 
-    color_bgr_gt.close()
-    color_hsv_gt.close()
+    # store the calibration results and a test image capture
+    if ask_yesno("save values?"):
+        cv2.imwrite(f"cam/{robotID}_{awb_mode}.jpg", image)
+        color_bgr_gt = open(f"cam/{robotID}_bgr.csv",'a+')
+        color_hsv_gt = open(f"cam/{robotID}_hsv.csv",'a+')
+
+        for idx, name in enumerate(colors):
+            color_bgr_gt.write(f"{robotID} {awb_mode} {name} "+' '.join([str(x) for x in ground_truth_bgr[idx]])+'\n')
+            color_hsv_gt.write(f"{robotID} {awb_mode} {name} "+' '.join([str(x) for x in ground_truth_hsv[idx]])+'\n')
+
+        color_bgr_gt.close()
+        color_hsv_gt.close()
+
+if __name__ == "__main__":
+    cam = UpCamera(200, 50)
+    # image = cam.get_reading_raw()
+    
+    colors   = ["red", "green", "blue"]
+    ground_truth_bgr = [[0,0,255], [255,0,0],[0,255,0]] #bgr
+    ground_truth_hsv = [[0,0,0], [0,0,0], [0,0,0]] #hsv
+   
+    while ask_yesno("calibrate color?"):
+        main()
+
 
 
 

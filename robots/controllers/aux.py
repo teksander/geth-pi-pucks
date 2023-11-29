@@ -336,7 +336,7 @@ class PeerBuffer(object):
 class Logger(object):
     """ Logging Class to Record Data to a File
     """
-    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None, extrafields = dict()):
+    def __init__(self, logfile, header, rate = 0, buffering = 1, ID = None, extrafields = {}):
 
         self.file = open(logfile, 'w+', buffering = buffering)
         self.rate = rate
@@ -536,9 +536,9 @@ def get_process_stats(process_name):
         mem_percent = float(process_stats[1])
         return cpu_percent, mem_percent
     else:
-        return None
+        return None, None
     
-def getFolderSize(folder):
+def get_folder_size(folder):
     # Return the size of a folder
     total_size = os.path.getsize(folder)
     for item in os.listdir(folder):
@@ -546,7 +546,7 @@ def getFolderSize(folder):
         if os.path.isfile(itempath):
             total_size += os.path.getsize(itempath)
         elif os.path.isdir(itempath):
-            total_size += getFolderSize(itempath)
+            total_size += get_folder_size(itempath)
     return total_size
 
 def mapping_id_keys(directory_path, limit=None):
@@ -569,3 +569,47 @@ def mapping_id_keys(directory_path, limit=None):
                     break
 
     return id_to_key, key_to_id
+
+import random
+def simulate_camera_defect(color, defect_type=None, intensity=0.2):
+    """
+    Simulates camera defects by adding biased noise to an RGB color.
+
+    Args:
+        color (list): The original RGB color as a list [R, G, B].
+        defect_type (str): The type of camera defect. Options: 'red_blindness', 'green_blindness', 'blue_blindness', 'shade_effect'.
+        intensity (float): The intensity of the defect, ranging from 0 to 1. Higher values result in more severe defects.
+
+    Returns:
+        list: The modified RGB color with added camera defect.
+    """
+    r, g, b = color
+
+    if defect_type in ['red_blindness', 'green_blindness', 'blue_blindness']:
+        if defect_type == 'red_blindness':
+            r = r * (1 - intensity) + random.uniform(0, intensity * r)
+        elif defect_type == 'green_blindness':
+            g = g * (1 - intensity) + random.uniform(0, intensity * g)
+        elif defect_type == 'blue_blindness':
+            b = b * (1 - intensity) + random.uniform(0, intensity * b)
+
+    if defect_type == 'shade_effect':
+        r = r * (1 - intensity) + random.uniform(0, intensity * 255)
+        g = g * (1 - intensity) + random.uniform(0, intensity * 255)
+        b = b * (1 - intensity) + random.uniform(0, intensity * 255)
+
+    return [int(r), int(g), int(b)]
+
+import cv2
+import numpy as np
+def bgr_to_hsv(bgr_color):
+    """
+    Converts a BGR color to HSV color space using OpenCV.
+
+    Args:
+        bgr_color (list): The BGR color as a list [B, G, R].
+
+    Returns:
+        list: The corresponding HSV color as a list [H, S, V].
+    """
+    return cv2.cvtColor(np.array(bgr_color, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]

@@ -54,11 +54,13 @@ class RGBLEDs(object):
 		self.led2 = 0x01
 		self.led3 = 0x02
 		self.all = [0x00,0x01,0x02]
+		
 		self.red = 0x01
 		self.green = 0x02
 		self.blue = 0x04
 		self.off = 0x00
 		self.white = 0x07
+
 		self.frozen = False
 
 		# /* Init FT903 I2C Interface */
@@ -83,7 +85,6 @@ class RGBLEDs(object):
 		if not self.frozen:
 			for i in range(len(LED)):
 				write_byte_data(LED[i], RGB[i])
-
 
 	def flashRed(self, delay=1):
 		if not self.frozen:

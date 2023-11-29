@@ -113,11 +113,11 @@ if [ $1 == "sshkeys" ]; then
 	wait
 fi
 
-if [ $1 == "calib" ]; then 
+if [ $1 == "calibration-data" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
-		scp -r "$IP:$MAIN_DIR_ROBOTS/robots/calibration/cam/" $MAIN_DIR/robots/calibration/cam/
-#		rsync -avz "$IP:$MAIN_DIR_ROBOTS/robots/calibration/gs/" $MAIN_DIR/robots/calibration/gs/
+		scp "$IP:$MAIN_DIR_ROBOTS/robots/calibration/cam/${ID}_bgr.csv" $MAIN_DIR/robots/calibration/cam/
+		scp "$IP:$MAIN_DIR_ROBOTS/robots/calibration/cam/${ID}_hsv.csv" $MAIN_DIR/robots/calibration/cam/
 	done
 	wait
 fi
@@ -141,6 +141,14 @@ fi
 
 if [ $1 == "mainloop" ]; then
 	scp_ALL robots/controllers/mainloop.py robots/controllers/mainloop.py
+fi
+
+if [ $1 == "rotation" ]; then
+	scp_ALL robots/controllers/rotation.py robots/controllers/rotation.py
+fi
+
+if [ $1 == "colordatacollection" ]; then
+	scp_ALL robots/controllers/colordatacollection.py robots/controllers/colordatacollection.py
 fi
 
 if [ $1 == "colorguidedwalk" ]; then

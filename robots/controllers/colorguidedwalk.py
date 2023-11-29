@@ -5,14 +5,14 @@ import cv2
 import numpy as np
 import logging
 from os.path import exists
+import sys
+sys.path.append('../')
+import arducam.apriltag.python.apriltag as apriltag
 from upcamera import UpCamera
 from rotation import Rotation
 from groundsensor import GroundSensor
 from PID import PID
-import sys
-sys.path.append('../')
-import arducam.apriltag.python.apriltag as apriltag
-
+from rgbleds import RGBLEDs
 logging.basicConfig(format='[%(levelname)s %(name)s] %(message)s')
 logger = logging.getLogger('cwe')
 
@@ -23,9 +23,8 @@ cam_rot = True
 cam_sample_lgh = 50
 cam_sample_interval = 40
 color_ce_threshold = 0.15  # cross entropy threshold, if a color is present
-color_hsv_threshold = np.array([12, 70, 100])  # threshold for each dimension of the HSV
-gsFreq = 20
-
+# color_hsv_threshold = np.array([12, 70, 100])  # threshold for each dimension of the HSV
+color_hsv_threshold = np.array([25, 90, 120])
 
 def get_rgb_feature(image, length=20, interval=20):
     image_sz = image.shape
@@ -71,6 +70,8 @@ def cross_entropy(dist_x, dist_y):
 
 
 def hue_distance(h0, h1):
+    h0 = int(h0)
+    h1 = int(h1)
     return min(abs(h1 - h0), 180 - abs(h1 - h0)) / 90.0
 
 
@@ -149,57 +150,55 @@ class PID:
 
 
 class ColorWalkEngine(object):
-    def __init__(self, MAX_SPEED, awb_mode = 'tungsten'):
+
+    def __init__(self, MAX_SPEED, bias_bgr = [1,1,1]):
         """ Constructor
-        :type range: int
-        :param enode:  (tip: 500)
         """
-        self.colors = []
+        # Color inits
+        self.colors = ['red', 'green', 'blue']
         self.ground_truth_bgr = []  # bgr
         self.ground_truth_hsv = []  # bgr
-        self.cam = UpCamera(cam_int_reg_h, cam_int_reg_offest, cam_rot, awb_mode)
-        self.rot = Rotation(MAX_SPEED)
-        self.rot.start()
-        self.april = apriltag.Detector()
+        self.calibrated_bgr = {}
+        self.calibrated_hsv = {}
+        
+        # Navigation inits
         self.max_speed= MAX_SPEED
         self.actual_rw_dir = "s"
         self.last_speed = []
 
-        # calibrate the color
-        calibFile = f'../calibration/cam/{awb_mode}/{robotID}_bgr.csv'
-        calibFileTemp = f'../calibration/cam/{awb_mode}/{robotID}_rgb.csv'
+        # Submodules
+        self.cam = UpCamera(cam_int_reg_h, cam_int_reg_offest, cam_rot, 'tungsten', bias_bgr)
+        self.april = apriltag.Detector()
+        self.rot = Rotation(MAX_SPEED)
+        self.rot.start()
+        self.rgb = RGBLEDs()
+
+        calibFile = f'../calibration/cam/{robotID}_bgr.csv'
 
         if exists(calibFile):
-            with open(calibFile) as color_gt:
-                for line in color_gt:
-                    elements = line.strip().split(' ')
-                    self.colors.append(elements[0])
-                    self.ground_truth_bgr.append([int(x) for x in elements[1:]])
-        
-        elif exists(calibFileTemp):
-            with open(calibFileTemp) as color_gt:
-                for line in color_gt:
-                    elements = line.strip().split(' ')
-                    self.colors.append(elements[0])
-                    self.ground_truth_bgr.append([int(x) for x in elements[1:]])
+            openFile = list(open(calibFile))
+            for color in self.colors:
+                for line in reversed(openFile):
+                    _, awb_mode, color_name, b, g, r  = line.strip().split(' ')
+                    if awb_mode == 'tungsten' and color_name == color:
+                        color_bgr = [bias_bgr[0]*int(b), bias_bgr[1]*int(g), bias_bgr[2]*int(r)]
+                        color_hsv = cv2.cvtColor(np.array(color_bgr, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+                        self.calibrated_bgr[color_name] = color_bgr
+                        self.calibrated_hsv[color_name] = color_hsv
+                        self.ground_truth_bgr.append(color_bgr)
+                        self.ground_truth_hsv.append(color_hsv)
+                        break
+
         else:
             print("color calibration file not found, use hard coded colors")
             self.colors = ["red", "blue", "green"]
             self.ground_truth_bgr = [[0, 0, 255], [255, 0, 0], [226, 43, 0]] 
-        
-        calibFile = f'../calibration/cam/{awb_mode}/{robotID}_hsv.csv'
-        if exists(calibFile):
-            with open(calibFile) as color_gt:
-                for line in color_gt:
-                    elements = line.strip().split(' ')
-                    self.ground_truth_hsv.append([int(x) for x in elements[1:]])
-        else:
-            print("color calibration file not found, use hard coded colors")
-            self.colors = ["red", "blue", "green"]
             self.ground_truth_hsv = [[175, 255, 240], [100, 255, 172], [80, 157, 157]]
-            
-        logger.info('Color walk OK')
 
+        print(f"My bias: {bias_bgr} // ")
+        print(f"My colors: {self.ground_truth_bgr}")
+        logger.info('Color walk OK')
+        
     def random_walk_engine(self, mylambda= 15, turn = 7):
         self.rot.setDrivingMode("pattern")
         if self.rot.duration <= 0:
@@ -226,37 +225,6 @@ class ColorWalkEngine(object):
 
         self.rot.setWalk(False)
         return -1, -1, -1
-
-    def repeat_sampling(self, color_name, repeat_times = 5):
-        measure_list = []
-        for idx in range(repeat_times):
-            found_color_idx, found_color_name, found_color_rgb, found_color_center = self.check_all_color()
-            if color_name == found_color_name:
-                measure_list.append(found_color_rgb)
-            if (480 // 2 - found_color_center)>0: #if target on your right
-                walk_dir = ["cw", "ccw"][idx % 2]
-            else:
-                walk_dir = ["ccw", "cw"][idx % 2]
-            self.rot.setPattern(walk_dir, 1)
-        if measure_list:
-            return np.mean(measure_list,axis=0)
-        else:
-            return [-1,-1,-1]
-
-    def check_apriltag(self):
-        image = self.cam.get_reading_raw()
-        image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        result = self.april.detect(image_grey)
-        maximum_h = 0
-        this_id = 0
-
-        if result:
-            for this_tag in result:
-                this_h = max(abs(this_tag.corners[0][1]- this_tag.corners[1][1]), abs(this_tag.corners[2][1]- this_tag.corners[3][1]))
-                if this_h>maximum_h:
-                    maximum_h = this_h
-                    this_id = int(this_tag.tag_id)
-        return this_id, maximum_h
 
     def check_all_color(self, max_area = 5000):
         # for all hard coded colors
@@ -294,57 +262,76 @@ class ColorWalkEngine(object):
                 return False
         else:
             return True
-        
-    def check_rgb_color(self, bgr_feature):
-        # check specific bgr array
-        this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
-        image = self.cam.get_reading()
-        image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        cnt, cen = get_contours(image_hsv, this_color_hsv, color_hsv_threshold)
-        if cen != -1:
-            return 1
-        else:
-            return 0
 
-    def drive_to_rgb(self, bgr_feature, duration=30):
-        this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
-        return self.drive_to_hsv(this_color_hsv, duration)
-    
+    def repeat_sampling(self, color_name, repeat_times = 5):
+        measure_list = []
+        for idx in range(repeat_times):
+            found_color_idx, found_color_name, found_color_rgb, found_color_center = self.check_all_color()
+            if color_name == found_color_name:
+                measure_list.append(found_color_rgb)
+            if (480 // 2 - found_color_center)>0: #if target on your right
+                walk_dir = ["cw", "ccw"][idx % 2]
+            else:
+                walk_dir = ["ccw", "cw"][idx % 2]
+            self.rot.setPattern(walk_dir, 1)
+        if measure_list:
+            return np.mean(measure_list,axis=0)
+        else:
+            return [-1,-1,-1]
+
+    def check_apriltag(self):
+        image_grey = cv2.cvtColor(self.cam.get_reading_raw(), cv2.COLOR_BGR2GRAY)
+        readings = self.april.detect(image_grey)
+
+        max_ht  = 0
+        tag_id = 0
+        if readings:
+            for tag in readings:
+                height = max(abs(tag.corners[0][1]- tag.corners[1][1]), 
+                             abs(tag.corners[2][1]- tag.corners[3][1]))
+                if height > max_ht:
+                    max_ht = height
+                    tag_id = int(tag.tag_id)
+        return tag_id, max_ht
+            
     def get_closest_color(self, bgr_feature):
-        this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
-        closest_color = self.colors[0]
-        closest_color_idx = 0
-        closest_color_dist = hue_distance(self.ground_truth_hsv[0][0], this_color_hsv[0])
-        for idx, this_color in enumerate(self.colors):
-            if hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])<closest_color_dist:
-                closest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])
-                closest_color =  this_color
-                closest_color_idx = idx
-        return closest_color, closest_color_idx
+        hsv_feature = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+        
+        closest_color_dist = hue_distance(self.ground_truth_hsv[0][0], hsv_feature[0])
+        closest_color_name = self.colors[0]
+        closest_color_idx  = 0
+        for idx, name in enumerate(self.colors):
+            if hue_distance(self.ground_truth_hsv[idx][0], hsv_feature[0]) < closest_color_dist:
+                closest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], hsv_feature[0])
+                closest_color_name = name
+                closest_color_idx  = idx
+        return closest_color_name, closest_color_idx
     
     def drive_to_closest_color(self, bgr_feature, duration=30):
-        this_color_hsv = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
-        closest_color = self.colors[0]
+        hsv_feature = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+        closest_color_name = self.colors[0]
         closest_color_idx = 0
-        closest_color_dist = hue_distance(self.ground_truth_hsv[0][0], this_color_hsv[0])
-        for idx, this_color in enumerate(self.colors):
-            if hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])<closest_color_dist:
-                closest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], this_color_hsv[0])
-                closest_color =  this_color
-                closest_color_idx = idx
-        isArrived = self.drive_to_color(closest_color, duration)
-        return isArrived , closest_color, closest_color_idx
+        closest_color_dist = hue_distance(self.ground_truth_hsv[0][0], hsv_feature[0])
+        for idx, name in enumerate(self.colors):
+            if hue_distance(self.ground_truth_hsv[idx][0], hsv_feature[0]) < closest_color_dist:
+                closest_color_dist = hue_distance(self.ground_truth_hsv[idx][0], hsv_feature[0])
+                closest_color_name = name
+                closest_color_idx  = idx
+        isArrived = self.drive_to_color(closest_color_name, duration)
+        return isArrived, closest_color_name, closest_color_idx
 
     def drive_to_color(self, color_name, duration=30):
         if color_name not in self.colors:
             logger.debug("Unknown color")
             return False
         else:
-            logger.debug("Driving to color: " + color_name)
-            hsv = np.array(self.ground_truth_hsv[self.colors.index(color_name)])
-            return self.drive_to_hsv(hsv, duration)
+            logger.debug(f"Driving to color: {color_name}")
+            logger.debug(f"Driving to BGR: {self.ground_truth_bgr[self.colors.index(color_name)]}")
+            logger.debug(f"Driving to HSV: {self.ground_truth_hsv[self.colors.index(color_name)]}")
+            hsv_feature = np.array(self.ground_truth_hsv[self.colors.index(color_name)])
+            return self.drive_to_hsv(hsv_feature, duration, color_name = color_name)
 
-    def drive_to_hsv(self, target_hsv, duration=30):
+    def drive_to_hsv(self, target_hsv, duration=30, color_name = 'off'):
         self.rot.setWalk(False)
         arrived_count = 0
         detect_color = False
@@ -356,7 +343,6 @@ class ColorWalkEngine(object):
         # check if the robot is in free zone
         while in_free_zone < 3 and time.time() - startTime < duration:
 
-            
             _, tag_height = self.check_apriltag()
             logger.debug(f"In free zone #{in_free_zone} (tag height={tag_height}")
 
@@ -395,6 +381,7 @@ class ColorWalkEngine(object):
             self.last_speed = [0,0]
 
             if detect_color:
+                self.rgb.setAll(color_name)
                 lose_track_count=0
                 self.rot.setDrivingMode("speed")
                 error = 480 // 2 - cen
@@ -406,12 +393,17 @@ class ColorWalkEngine(object):
                 left_speed = base_speed - speed_adjustment
                 right_speed = base_speed + speed_adjustment
                 self.last_speed = [left_speed, right_speed]
-                logger.debug(f"speeds: {left_speed},{right_speed} | error: {error}")
+                logger.debug(f"speeds: {left_speed},{right_speed} | error: {error} ")
                 self.rot.setDrivingSpeed(left_speed,right_speed)
             elif arrived_count == 0 and lose_track_count<5:
+                if lose_track_count % 2 == 0:
+                    self.rgb.setAll('off')
+                else:
+                    self.rgb.setAll(color_name)
                 lose_track_count+=1
                 self.rot.setDrivingSpeed(self.last_speed[1], self.last_speed[0]) #reverse last PID action, try to recover the color
             elif arrived_count == 0 and lose_track_count>=5:
+                self.rgb.setAll('off')
                 self.rot.setDrivingMode("pattern")
                 pid_controller = PID(0.01, 0.01, 0.5) #reset controller
                 self.random_walk_engine()
@@ -423,6 +415,10 @@ class ColorWalkEngine(object):
             return True
         else:
             return False
+
+    def drive_to_rgb(self, bgr_feature, duration=30):
+        hsv_feature = cv2.cvtColor(np.array(bgr_feature, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+        return self.drive_to_hsv(hsv_feature, duration)
 
     def get_color_list(self):
         return self.colors
@@ -440,7 +436,7 @@ if __name__ == "__main__":
 
     cwe = ColorWalkEngine(500)
     
-    cwe.check_all_color()
+    # cwe.check_all_color()
 
 
     # print(cwe.discover_color(60)[1])

@@ -16,7 +16,7 @@ echo "3" >> genesis.conf  # Remove existing genesis
 echo "2" >> genesis.conf  # Configure new genesis
 echo "1" >> genesis.conf  # Create new genesis from scratch
 echo "2" >> genesis.conf  # Clique - proof-of-authority
-echo "8" >> genesis.conf # 15 seconds block time
+echo "10" >> genesis.conf # 10 seconds block time
 
 # List of sealers
 for ID in $(cat "$IDS_FILE");

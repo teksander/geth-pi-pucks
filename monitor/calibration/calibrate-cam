@@ -4,9 +4,9 @@
 # - The Pi-puck IDs are listed in pi-pucks.txt
 # - The robots are randomely placed in an arena with binary floor data
 
-source ../../globalconfig
+source ../globalconfig
 
-../tmux-all
+./tmux-all
 tmux kill-session -t CALIBRATE >/dev/null 2>&1
 tmux rename-session CALIBRATE
 tmux send-keys -t CALIBRATE "cd $MAIN_DIR_ROBOTS/robots/calibration" Enter "python3 -i calibrate-cam.py"

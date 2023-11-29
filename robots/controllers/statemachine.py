@@ -14,10 +14,14 @@ class Verify(enum.Enum):
     DriveTo = 4
     PrepReport = 5
 
+class StateVariables(object):
+    pass
 
 class FiniteStateMachine(object):
 
     def __init__(self, start = None):
+        self.vars = StateVariables()
+
         self._prevState = start
         self._currState = start
         self._accumTime = dict()
@@ -28,6 +32,10 @@ class FiniteStateMachine(object):
 
     def getState(self, ):
         return self._currState
+    
+    def initVar(self, var, value):
+        if not hasattr(self.vars, var):
+            setattr(self.vars, var, value)
 
     def getTimers(self):
         return self._accumTime

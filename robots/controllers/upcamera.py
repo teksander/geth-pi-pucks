@@ -3,7 +3,7 @@ import picamera, cv2
 from picamera.array import PiRGBArray
 import os
 import logging
-
+import numpy as np
 
 logging.basicConfig(format='[%(levelname)s %(name)s %(relativeCreated)d] %(message)s')
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def calculation(camera):
 class UpCamera(object):
     """ set up an camera object for the R0176 Arducam camera.
     """
-    def __init__(self, interesting_reg_h = 200, interesting_reg_offset = 50, rot = True, awb_mode = 'tungsten'):
+    def __init__(self, interesting_reg_h = 200, interesting_reg_offset = 50, rot = True, awb_mode = 'tungsten', bgr_bias = [1,1,1]):
         """ Constructor
         :type freq: str
         :param freq: frequency of measurements in Hz (tip: 20Hz)
@@ -39,54 +39,26 @@ class UpCamera(object):
         self.__stop = 1
         self.id = open("/boot/pi-puck_id", "r").read().strip()
         self.camera = picamera.PiCamera()
-        self.camera.awb_mode = awb_mode
-        # set camera resolution to 640x480(Small resolution for faster speeds.)
-        self.camera.resolution = (640, 480)
+
+        self.camera.awb_mode      = awb_mode
+        self.camera.resolution    = (640, 480)
         self.interesting_region_h = interesting_reg_h
         self.interesting_region_o = interesting_reg_offset
-        self.rotate = rot
-        #find best focal distance
-        #self.focal_calibration()
+        self.bgr_bias             = bgr_bias
+        self.rotate               = rot
+
         logger.info('Up-Camera OK')
 
+    def apply_bias(self, img_bgr):
 
-    def focal_calibration(self):
+        b, g, r = cv2.split(img_bgr)
 
-        print("Start focusing")
-        max_index = 10
-        max_value = 0.0
-        last_value = 0.0
-        dec_count = 0
-        focal_distance = 10
-        while True:
-            # Adjust focus
-            focusing(focal_distance)
-            # Take image and calculate image clarity
-            val = calculation(self.camera)
-            # Find the maximum image clarity
-            if val > max_value:
-                max_index = focal_distance
-                max_value = val
+        b_t = (b * self.bgr_bias[0]).astype(np.uint8) 
+        g_t = (g * self.bgr_bias[1]).astype(np.uint8) 
+        r_t = (r * self.bgr_bias[2]).astype(np.uint8) 
 
-            # If the image clarity starts to decrease
-            if val < last_value:
-                dec_count += 1
-            else:
-                dec_count = 0
-            # Image clarity is reduced by six consecutive frames
-            if dec_count > 6:
-                break
-            last_value = val
-
-            # Increase the focal distance
-            focal_distance += 10
-            if focal_distance > 1000:
-                break
-
-        # Adjust focus to the best
-        focusing(max_index)
-        print("Set focal distance to: ", max_index)
-
+        return b_t, g_t, r_t
+    
     def get_reading(self):
         rawCapture = PiRGBArray(self.camera)
         self.camera.capture(rawCapture, format="bgr", use_video_port=False)
@@ -96,6 +68,9 @@ class UpCamera(object):
         # Rotate image
         if self.rotate:
             image = cv2.rotate(image, cv2.ROTATE_180)
+
+        # Apply bias to the image
+        image = cv2.merge(self.apply_bias(image))
 
         # Crop image according to user-defined region
         centre = image.shape
@@ -148,5 +123,5 @@ class UpCamera(object):
 
 if __name__ == "__main__":
     cam = UpCamera(200, 50)
-    cam.get_image_raw()
-    cam.stop()
+    # cam.get_image_raw()
+    # cam.stop()

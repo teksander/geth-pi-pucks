@@ -69,7 +69,8 @@ elif [[ $# -eq 1 ]]; then
 		
 		tmux_ALL
 		BYZ_COUNT=0
-		FLT_COUNT=0
+		FAU_COUNT=0
+		COL_COUNT=0
 
 		# Rename to MAINLOOP and setup mainloop
 		tmux kill-session -t MAINLOOP >/dev/null 2>&1
@@ -79,10 +80,16 @@ elif [[ $# -eq 1 ]]; then
 		for PANE in $(shuf -i 0-$(($NUM_ROB-1))); do
 			if [ $BYZ_COUNT -lt $NUM_BYZ ]; then
 				tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py --byz"
+				tmux select-pane -t MAINLOOP:0.$PANE -P 'bg=#5c1111'
 				let BYZ_COUNT++
-			elif [ $FLT_COUNT -lt $NUM_FLT ]; then
-				tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py --faulty"
-				let FLT_COUNT++
+			elif [ $FAU_COUNT -lt $NUM_FAU ]; then
+				tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py --fau"
+				tmux select-pane -t MAINLOOP:0.$PANE -P 'bg=#575c11'
+				let FAU_COUNT++
+			elif [ $COL_COUNT -lt $NUM_COL ]; then
+				tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py --col"
+				tmux select-pane -t MAINLOOP:0.$PANE -P 'bg=#8B0000'
+				let COL_COUNT++
 			else
 				tmux send-keys -t MAINLOOP:0.$PANE "cd $MAIN_DIR_ROBOTS/$EXPERIMENT_FOLDER/controllers" Enter "python3 -i mainloop.py"
 			fi

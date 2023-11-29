@@ -84,6 +84,8 @@ class Rotation(object):
         # Obstacle Avoidance parameters
         weights_left = [-8, -8, -3, 0, 0, 3, 8, 8]
         weights_right = [-1 * x for x in weights_left]
+        self.ignore_duration = 5
+        self.ignore_start    = time.time()
 
         # Turn IR sensors on
         self.__write_data(IR_CONTROL, 1)
@@ -118,21 +120,45 @@ class Rotation(object):
                 this_right = self.right
 
             # Obstacle avoidance
-
             self.ir = [0] * 8
             for i in range(8):
                 self.ir[i] = self.__read_data(IR0_REFLECTED + i)
-                #print("ir reading: ", self.ir[i])
                 if not self.ir[i] or self.ir[i] > 50000:
                     self.ir[i] = 0
 
             # Find Wheel Speed for Obstacle Avoidance
+            # avoid = False
+            # if self.mode == "speed":
+            #     if time.time() - self.ignore_start > self.ignore_duration/2:
+            #         this_left  = -100
+            #         this_right = -100
+            #     else:
+            #         this_left  = 0
+            #         this_right = 0
 
+            #     if time.time() - self.ignore_start > self.ignore_duration:
+            #         self.ignore_start = time.time()
+            #         avoid = True
+
+            # if avoid:
+            avoid = False
+            avoid_front = False
             for i, reading in enumerate(self.ir):
-
                 if (reading > self.irDist):
                     this_left  = self.MAX_SPEED / 2 + weights_left[i] * reading
                     this_right = self.MAX_SPEED / 2 + weights_right[i] * reading
+                    avoid = True
+                    if i in [0,7]:
+                        avoid_front = True
+
+            if avoid_front and self.mode == "speed":
+                if time.time() - self.ignore_start < self.ignore_duration/3:
+                    this_left = this_right = -100
+                elif time.time() - self.ignore_start < self.ignore_duration:
+                    this_left = this_right = 0
+            else:
+                self.ignore_start = time.time()
+                            
 
             # Saturate Speeds greater than MAX_SPEED
             if this_left > self.MAX_SPEED:
