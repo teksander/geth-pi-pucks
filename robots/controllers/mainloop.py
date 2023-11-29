@@ -134,7 +134,7 @@ logging.getLogger('cwe').setLevel(10 if isFau else 50)
 header = ['TELAPSED','TIMESTAMP','BLOCK', 'HASH', 'PHASH', 'DIFF', 'TDIFF', 'SIZE','TXS', 'UNC', 'PENDING', 'QUEUED']
 blocklog = Logger('../logs/block.csv', header)
 
-header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'PENDING', '#CLUSTERS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
+header = ['BLOCK','HASH', 'BALANCE', 'SPENDABLE', 'SCBAL', 'PENDING', '#CLUSTERS', '#ACCEPT', '#REJECT', '#PENDING', 'RS1', 'RS2', 'RS3', 'RS4']
 sclog = Logger('../logs/sc.csv', header, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
 
 header = ['B','G','R', 'NAME', 'IDX', 'FOOD', 'SUPPORT','STATE']
@@ -603,15 +603,18 @@ def Event(rate = eventRate):
 		n_accepted = len([c for c in allclusters_global if c['verified']==1])
 		n_rejected = len([c for c in allclusters_global if c['verified']==2])
 		n_pending  = len([c for c in allclusters_global if c['verified']==0])
+		scbalance  = sc.functions.balances(w3.eth.coinbase).call()
+
 		sclog.log([blockNumb, 
 			 blockHash,
 			   balance, 
 			   spendable_balance, 
+			   float(scbalance/1e18),
 			   balance_pending, 
 			   n_clusters, 
 			   n_accepted, 
 			   n_rejected, 
-			   n_pending, 
+			   n_pending, 	   
 			   *rep_stats])
 
 	blockFilter = w3.eth.filter('latest')
