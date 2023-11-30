@@ -562,13 +562,17 @@ def Main(rate = mainRate):
 				fsm.setState(Scout.Query, message=f"rw duration:{fsm.getCurrentTimer():.2f}")
 
 		elif fsm.query(Idle.ToOtherColor):
+
 			if fsm.getPreviousState() == Scout.PrepReport:
 				exclude_color = color_name_to_report
 			else:
 				exclude_color = color_name_to_verify
+
+
 			navigation_targets = [this_color for this_color in cwe.colors if this_color != exclude_color]
 			navigation_target = random.choice(navigation_targets)
-			cwe.drive_to_color(navigation_target, duration=20) #drive to a color different from the latest report
+			print("Drive out of the report color, towards: ", navigation_target)
+			cwe.drive_to_color(navigation_target, duration=30) #drive to a color different from the latest report
 			if not voteHash or fsm.getCurrentTimer()>40:
 				voteHash = None
 				cwe.set_leds(0b00000000)

@@ -1,12 +1,20 @@
 #!/bin/bash
 
 # [PATHS]
-export BASE_FOLDER="geth-pi-pucks"
+if [ $USER == "eksander" ]; then
+  export BASE_FOLDER="geth-pi-pucks"
+  export MONITOR_NAME="eksander"
+elif [ $USER == "ubuntu" ]; then
+  export BASE_FOLDER="blockchain_robots/geth-pi-pucks"
+  export MONITOR_NAME="ubuntu"
+fi
+
+
 export EXPERIMENT_FOLDER="robots"
 export BLOCKCHAIN_FOLDER="blockchain"
 
 export ROBOTS_NAME="pi"
-export MONITOR_NAME="eksander"
+
 
 export MAIN_DIR="/home/$USER/$BASE_FOLDER"
 export MAIN_DIR_ROBOTS="/home/$ROBOTS_NAME/geth-pi-pucks"
