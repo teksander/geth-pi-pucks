@@ -189,7 +189,7 @@ submodules = [w3.geth.miner, tcp, erb]
 color_names = cwe.get_color_list()
 print("Calibrated colors:", color_names)
 
-balance_global = float(w3.fromWei(w3.eth.getBalance(me.key), "ether"))
+# balance_global = float(w3.fromWei(w3.eth.getBalance(me.key), "ether"))
 # /* Define Main-modules */
 #######################################################################
 
@@ -462,7 +462,7 @@ def Main(rate = mainRate):
 					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
 					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
-					print_color("Report vote: ", voteHash.hex()[0:8], 
+					print_color("Report vote: ", voteHash[0:8],
 								"color: ", [int(a) for a in color_to_report], color_name_to_report, 
 								"support: ", vote_support, 
 								"tagid: ", tag_id, 
@@ -543,7 +543,7 @@ def Main(rate = mainRate):
 
 					# colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
 					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
-					print_color("Verify vote: ", voteHash.hex()[0:8], 
+					print_color("Verify vote: ", voteHash[0:8],
 								"color: ", [int(a) for a in color_to_report], found_color_name, 
 								"support: ", vote_support, 
 								"tagid: ", tag_id, 
@@ -669,14 +669,14 @@ def Event(rate = eventRate):
 				try:
 					w3.eth.getTransaction(voteHash)
 				except Exception as e:
-					print(f'ERROR tx: ', voteHash.hex()[0:8], ' disappered ', {str(e)})
+					print(f'ERROR tx: ', voteHash[0:8], ' disappered ', {str(e)})
 					voteHash = None
 					cwe.set_leds(0b00000000)
 				try:
 					txRecpt = w3.eth.getTransactionReceipt(voteHash)
-					print('SUCCESS tx: ', voteHash.hex()[0:8],' included in block: ', txRecpt['blockNumber'])
+					print('SUCCESS tx: ', voteHash[0:8],' included in block: ', txRecpt['blockNumber'])
 					if txRecpt['status'] == 0:
-						print('ERROR  tx: ', voteHash.hex()[0:8],' status is: ', txRecpt['status'])
+						print('ERROR  tx: ', voteHash[0:8],' status is: ', txRecpt['status'])
 
 					voteHash = None
 					cwe.set_leds(0b00000000)
