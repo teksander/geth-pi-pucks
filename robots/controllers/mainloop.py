@@ -189,6 +189,7 @@ submodules = [w3.geth.miner, tcp, erb]
 color_names = cwe.get_color_list()
 print("Calibrated colors:", color_names)
 
+balance_global = float(w3.fromWei(w3.eth.getBalance(me.key), "ether"))
 # /* Define Main-modules */
 #######################################################################
 
@@ -436,7 +437,7 @@ def Main(rate = mainRate):
 				vote_support /= DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag()
 
-				
+				print("find tag id: ", tag_id, vote_support, address_balance)
 				if tag_id != 0 and vote_support < address_balance:
 
 					# two recently discovered colord are recorded in recent_colors
@@ -468,7 +469,7 @@ def Main(rate = mainRate):
 								"vote: ", is_useful, 
 								color_rgb=[int(a) for a in color_to_report])		
 
-					fsm.setState(Idle.ToOtherColor, message="Wait for vote")
+					fsm.setState(Idle.RandomWalk, message="Wait for vote")
 			else:
 				fsm.setState(Scout.Query, message="Did not arrive")
 
@@ -549,12 +550,15 @@ def Main(rate = mainRate):
 								"vote: ", is_useful, 
 								color_rgb=[int(a) for a in color_to_report])
 
-					fsm.setState(Idle.ToOtherColor, message="Wait for vote")
+					fsm.setState(Idle.RandomWalk, message="Wait for vote")
 
 
 		elif fsm.query(Idle.RandomWalk):
-
-			cwe.random_walk_engine(10, 10)
+			if fsm.getCurrentTimer() <=2:
+				cwe.rot.setDrivingMode("pattern")
+				cwe.rot.setPattern("cw", (random.uniform(0, 1) * 3)+4)
+			else:
+				cwe.random_walk_engine(15, 3)
 
 			if not voteHash or fsm.getCurrentTimer()>40:
 				voteHash = None
@@ -572,7 +576,9 @@ def Main(rate = mainRate):
 			navigation_targets = [this_color for this_color in cwe.colors if this_color != exclude_color]
 			navigation_target = random.choice(navigation_targets)
 			print("Drive out of the report color, towards: ", navigation_target)
-			cwe.drive_to_color(navigation_target, duration=30) #drive to a color different from the latest report
+			arrived = cwe.drive_to_color(navigation_target, duration=30, arrival_threshold=40, turn_lambda=1, turn_time=15) #drive to a color different from the latest report
+			if arrived:
+				cwe.random_walk_engine(10,10)
 			if not voteHash or fsm.getCurrentTimer()>40:
 				voteHash = None
 				cwe.set_leds(0b00000000)

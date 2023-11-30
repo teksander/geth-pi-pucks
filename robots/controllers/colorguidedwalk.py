@@ -320,7 +320,7 @@ class ColorWalkEngine(object):
         isArrived = self.drive_to_color(closest_color_name, duration)
         return isArrived, closest_color_name, closest_color_idx
 
-    def drive_to_color(self, color_name, duration=30):
+    def drive_to_color(self, color_name, duration=30, arrival_threshold=100, turn_lambda=10, turn_time=7):
         if color_name not in self.colors:
             logger.debug("Unknown color")
             return False
@@ -329,9 +329,9 @@ class ColorWalkEngine(object):
             logger.debug(f"Driving to BGR: {self.ground_truth_bgr[self.colors.index(color_name)]}")
             logger.debug(f"Driving to HSV: {self.ground_truth_hsv[self.colors.index(color_name)]}")
             hsv_feature = np.array(self.ground_truth_hsv[self.colors.index(color_name)])
-            return self.drive_to_hsv(hsv_feature, duration, color_name = color_name)
+            return self.drive_to_hsv(hsv_feature, duration, color_name = color_name, arrival_threshold=arrival_threshold, turn_lambda=turn_lambda, turn_time=turn_time)
 
-    def drive_to_hsv(self, target_hsv, duration=30, color_name = 'off'):
+    def drive_to_hsv(self, target_hsv, duration=30, color_name = 'off', arrival_threshold=100, turn_lambda = 10, turn_time=7):
         self.rot.setWalk(False)
         arrived_count = 0
         detect_color = False
@@ -351,17 +351,18 @@ class ColorWalkEngine(object):
                     in_free_zone += 1
                 else:
                     in_free_zone = 0
-                    self.random_walk_engine(10, 7)
+                    self.random_walk_engine(turn_lambda, turn_time)
             else:
-                self.random_walk_engine(10, 7)
+                self.random_walk_engine(turn_lambda, turn_time)
                 in_free_zone += 1
 
         lose_track_count = 0
         while arrived_count < 2 and time.time() - startTime < duration:
             _, tag_height = self.check_apriltag()
+            #print("see tag, detect color: ",tag_height, detect_color)
             if tag_height>0:
                 #print(tag_height)
-                if tag_height >= 100 and detect_color:  # see color and white board at once
+                if tag_height >= arrival_threshold and detect_color:  # see color and white board at once
                     self.rot.setDrivingMode("pattern")
                     self.rot.setWalk(False)
                     arrived_count += 1
@@ -406,7 +407,7 @@ class ColorWalkEngine(object):
                 self.rgb.setAll('off')
                 self.rot.setDrivingMode("pattern")
                 pid_controller = PID(0.01, 0.01, 0.5) #reset controller
-                self.random_walk_engine()
+                self.random_walk_engine(turn_lambda, turn_time)
 
         self.rot.setDrivingMode("pattern")
 
