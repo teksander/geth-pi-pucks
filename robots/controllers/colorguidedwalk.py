@@ -172,6 +172,7 @@ class ColorWalkEngine(object):
         self.rot = Rotation(MAX_SPEED)
         self.rot.start()
         self.rgb = RGBLEDs()
+        self.duration = 0
 
         calibFile = f'../calibration/cam/{robotID}_bgr.csv'
 
@@ -212,10 +213,11 @@ class ColorWalkEngine(object):
             self.rot.setPattern(self.actual_rw_dir, time_to_walk)
 
     def discover_color(self, duration=10):
+        self.duration=duration
         startTime = time.time()
         #self.random_walk_engine() #walk a bit first
         self.actual_rw_dir = "s"
-        while time.time() - startTime < duration:
+        while time.time() - startTime < self.duration:
             if self.rot.duration <= 0:
                 color_idx, color_name, color_rgb,_ = self.check_all_color()
                 if color_idx != -1 and self.check_free_zone():
@@ -341,7 +343,8 @@ class ColorWalkEngine(object):
         self.actual_rw_dir = "s"
 
         # check if the robot is in free zone
-        while in_free_zone < 3 and time.time() - startTime < duration:
+        self.duration=duration
+        while in_free_zone < 3 and time.time() - startTime < self.duration:
 
             _, tag_height = self.check_apriltag()
             logger.debug(f"In free zone #{in_free_zone} (tag height={tag_height}")
@@ -357,7 +360,7 @@ class ColorWalkEngine(object):
                 in_free_zone += 1
 
         lose_track_count = 0
-        while arrived_count < 2 and time.time() - startTime < duration:
+        while arrived_count < 2 and time.time() - startTime < self.duration:
             _, tag_height = self.check_apriltag()
             #print("see tag, detect color: ",tag_height, detect_color)
             if tag_height>0:

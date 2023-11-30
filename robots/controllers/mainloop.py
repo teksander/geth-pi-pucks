@@ -462,9 +462,9 @@ def Main(rate = mainRate):
 					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
 					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
-					print_color("Report vote: ", voteHash[0:8],
+					print_color("Report vote: ", voteHash.hex()[0:8],
 								"color: ", [int(a) for a in color_to_report], color_name_to_report, 
-								"support: ", vote_support, 
+								"support: ", vote_support,
 								"tagid: ", tag_id, 
 								"vote: ", is_useful, 
 								color_rgb=[int(a) for a in color_to_report])		
@@ -543,7 +543,7 @@ def Main(rate = mainRate):
 
 					# colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
 					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
-					print_color("Verify vote: ", voteHash[0:8],
+					print_color("Verify vote: ", voteHash.hex()[0:8],
 								"color: ", [int(a) for a in color_to_report], found_color_name, 
 								"support: ", vote_support, 
 								"tagid: ", tag_id, 
@@ -560,7 +560,7 @@ def Main(rate = mainRate):
 			else:
 				cwe.random_walk_engine(15, 3)
 
-			if not voteHash or fsm.getCurrentTimer()>40:
+			if not voteHash or fsm.getCurrentTimer()>40 or not startFlag:
 				voteHash = None
 				cwe.set_leds(0b00000000)
 				fsm.setState(Scout.Query, message=f"rw duration:{fsm.getCurrentTimer():.2f}")
@@ -669,14 +669,14 @@ def Event(rate = eventRate):
 				try:
 					w3.eth.getTransaction(voteHash)
 				except Exception as e:
-					print(f'ERROR tx: ', voteHash[0:8], ' disappered ', {str(e)})
+					print(f'ERROR tx: ', voteHash.hex()[0:8], ' disappered ', {str(e)})
 					voteHash = None
 					cwe.set_leds(0b00000000)
 				try:
 					txRecpt = w3.eth.getTransactionReceipt(voteHash)
-					print('SUCCESS tx: ', voteHash[0:8],' included in block: ', txRecpt['blockNumber'])
+					print('SUCCESS tx: ', voteHash.hex()[0:8],' included in block: ', txRecpt['blockNumber'])
 					if txRecpt['status'] == 0:
-						print('ERROR  tx: ', voteHash[0:8],' status is: ', txRecpt['status'])
+						print('ERROR  tx: ', voteHash.hex()[0:8],' status is: ', txRecpt['status'])
 
 					voteHash = None
 					cwe.set_leds(0b00000000)
@@ -731,7 +731,7 @@ def START(modules = submodules + mainmodules, logs = logmodules):
 
 def STOP(modules = submodules, logs = logmodules):
 	global startFlag
-
+	cwe.duration=0
 	mainlogger.info('--/-- Stopping Main-modules --/--')
 	startFlag = False
 	for module in mainmodules:

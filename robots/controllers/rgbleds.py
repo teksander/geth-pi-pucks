@@ -77,8 +77,8 @@ class RGBLEDs(object):
 			color = self._from_string(color)
 
 		if not self.frozen:
-			# write_byte_data(self.led1, color)
-			write_byte_data(self.led2, color)
+			write_byte_data(self.led1, color)
+			# write_byte_data(self.led2, color)
 			# write_byte_data(self.led3, color)
 
 	def setLED(self, LED, RGB):
