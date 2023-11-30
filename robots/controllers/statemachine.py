@@ -5,6 +5,7 @@ import enum
 class Idle(enum.Enum):
     Start   = 1
     RandomWalk = 6
+    ToOtherColor = 7
 
 class Scout(enum.Enum):
     Query    = 2

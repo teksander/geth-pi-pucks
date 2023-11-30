@@ -335,7 +335,7 @@ def Buffer(rate = bufferRate):
 
 def Main(rate = mainRate):
 	""" Main control routine """
-	global fsm, voteHash, color_to_verify, color_to_report, color_name_to_report, recent_colors, cluster_idx_to_verify, color_idx_to_report
+	global fsm, voteHash, color_to_verify, color_to_report, color_name_to_report, color_name_to_verify, recent_colors, cluster_idx_to_verify, color_idx_to_report
 
 	tic = TicToc(rate, 'Main')
 		 
@@ -468,7 +468,7 @@ def Main(rate = mainRate):
 								"vote: ", is_useful, 
 								color_rgb=[int(a) for a in color_to_report])		
 
-					fsm.setState(Idle.RandomWalk, message="Wait for vote")
+					fsm.setState(Idle.ToOtherColor, message="Wait for vote")
 			else:
 				fsm.setState(Scout.Query, message="Did not arrive")
 
@@ -525,7 +525,7 @@ def Main(rate = mainRate):
 					if isByz:
 						is_useful = not is_useful
 					if isCol:
-						is_useful = color_name_to_report == 'blue' 
+						is_useful = color_name_to_verify == 'blue'
 
 					print(f"found color {found_color_name}, start repeat sampling...")
 					repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
@@ -549,13 +549,26 @@ def Main(rate = mainRate):
 								"vote: ", is_useful, 
 								color_rgb=[int(a) for a in color_to_report])
 
-					fsm.setState(Idle.RandomWalk, message="Wait for vote")
+					fsm.setState(Idle.ToOtherColor, message="Wait for vote")
 
 
 		elif fsm.query(Idle.RandomWalk):
 
 			cwe.random_walk_engine(10, 10)
 
+			if not voteHash or fsm.getCurrentTimer()>40:
+				voteHash = None
+				cwe.set_leds(0b00000000)
+				fsm.setState(Scout.Query, message=f"rw duration:{fsm.getCurrentTimer():.2f}")
+
+		elif fsm.query(Idle.ToOtherColor):
+			if fsm.getPreviousState() == Scout.PrepReport:
+				exclude_color = color_name_to_report
+			else:
+				exclude_color = color_name_to_verify
+			navigation_targets = [this_color for this_color in cwe.colors if this_color != exclude_color]
+			navigation_target = random.choice(navigation_targets)
+			cwe.drive_to_color(navigation_target, duration=20) #drive to a color different from the latest report
 			if not voteHash or fsm.getCurrentTimer()>40:
 				voteHash = None
 				cwe.set_leds(0b00000000)
