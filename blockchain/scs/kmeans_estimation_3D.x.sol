@@ -115,7 +115,7 @@ contract ForagingPtManagement{
                                          + int256(pointList[k].position[j])*int256(amount)))/int256(clusterList[i].total_credit_food+amount);
                         }
                     }
-                    this_distance = colourBGRDistance(position_avg, pointList[k].position);
+                    this_distance = getDistance(position_avg, pointList[k].position);
 
                     if (this_distance<info.minDistance){
                         info.minDistance = this_distance;
@@ -201,7 +201,7 @@ contract ForagingPtManagement{
                                          + int256(position[j])*int256(amount)))/int256(clusterList[i].total_credit_food+amount);
                         }
                     }
-                    this_distance = colourBGRDistance(position_avg, position);
+                    this_distance = getDistance(position_avg, position);
 
                     if (this_distance<=radius && this_distance<info.minDistance){
                         info.minDistance = this_distance;

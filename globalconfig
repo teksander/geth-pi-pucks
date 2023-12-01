@@ -37,7 +37,7 @@ export PREFIX="${ROBOTS_NAME}@${SUBNET}."
 
 # [EXPERIMENT]
 export NUM_ROB=12
-export NUM_BYZ=4
+export NUM_BYZ=0
 export NUM_FAU=0
 export NUM_COL=0
 

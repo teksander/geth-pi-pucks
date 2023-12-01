@@ -855,14 +855,15 @@ def getBalance_global():
 		i = int(point['cluster'])
 
 		try:
-			allclusters_global[i]['verified'] == 0
+			#allclusters_global[i]['verified'] == 0
+			if point['sender'] == me.key and allclusters_global[i]['verified'] == 0:
+				if cluster_buffer[i] == 0:
+					full_balance += float(point['credit']) / 1e18
+					cluster_buffer[i] = 1
 		except:
 			print(f'index error {i}')
 
-		if point['sender'] == me.key and allclusters_global[i]['verified'] == 0:
-			if cluster_buffer[i] == 0:
-				full_balance += float(point['credit']) / 1e18
-				cluster_buffer[i] = 1
+
 	return round(full_balance, 2), chain_balance
 
 _, key_to_id = mapping_id_keys("../../blockchain/keystores/", limit=200)
