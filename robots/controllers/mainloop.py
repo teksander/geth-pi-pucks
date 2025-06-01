@@ -13,7 +13,7 @@ logtofile = False
 # /* Experiment Parameters */
 #######################################################################
 tcpPort = 40421
-erbDist = 50
+erbDist = 0
 erbtFreq = 10
 gsFreq = 20
 rwSpeed = 600
@@ -230,7 +230,7 @@ def Buffer(rate = bufferRate):
 
 		# Perform buffering tasks for each peer currently in buffer
 		for peer in pb.buffer:
-			if peer.isDead:
+			if peer.isDead and len(gethIds)>10:
 				tcp.unallow(peer.id)
 				bufferlogger.debug('Unallowed peer %s @ age %.2f', peer.id, peer.age)
 
@@ -268,15 +268,15 @@ def Buffer(rate = bufferRate):
 						peer.setTimeout(3)
 						bufferlogger.debug('Added peer %s @ age %.2f', peer.id, peer.age)
 
-		# Remove peers which are in geth but not in buffer
-		for peerId in getDiff():
-			try:
-				enode = getEnodeById(peerId, gethEnodes)
-				w3.provider.make_request("admin_removePeer",[enode])
-				tcp.unallow(peerId)
-				bufferlogger.warning('Removed ilegittimate peer: %s',peerId)
-			except:
-				print('Error removing ilegittimate peer')
+		# # Remove peers which are in geth but not in buffer
+		# for peerId in getDiff():
+		# 	try:
+		# 		enode = getEnodeById(peerId, gethEnodes)
+		# 		w3.provider.make_request("admin_removePeer",[enode])
+		# 		tcp.unallow(peerId)
+		# 		bufferlogger.warning('Removed ilegittimate peer: %s',peerId)
+		# 	except:
+		# 		print('Error removing ilegittimate peer')
 
 		# Collect new peer IDs from E-RANDB to the buffer
 		erbIds = set()
@@ -344,16 +344,21 @@ def Main(rate = mainRate):
 		tic.tic()
 
 		if fsm.query(Idle.Start):
+
+			# #---- Physical attack
+			# if isByz and color_name_to_report == 'red':
+			# 	rgb.setAll('blue')
+			# #----
+
 			fsm.setState(Scout.Query, message="Start exploration")
 
 		elif fsm.query(Scout.Query):
-
 			# check reported color.
 			# rgb.setAll(rgb.off)
 			explore = True
 			verify  = True
-			
-			# query the Smart Contract 
+
+			# query the Smart Contract
 			all_clusters = copy.copy(allclusters_global)
 			all_points   = copy.copy(allpoints_global)
 			vote_support, current_balance = getBalance_global()
@@ -367,11 +372,14 @@ def Main(rate = mainRate):
 			# 	time.sleep(1)
 
 			# check if any cluster avaiting verification on chain
+
+			# if not isByz: #Pure Dos
+
 			if verify and len(all_clusters) > 0:
 				candidate_cluster  = []
 				unverified_clusters = 0
 				for idx, cluster in enumerate(all_clusters):
-					
+
 					verified_by_me = False
 					for point_rec in all_points:
 						if point_rec['sender'] == me.key and point_rec['cluster'] == idx:
@@ -383,14 +391,6 @@ def Main(rate = mainRate):
 						if not verified_by_me and any([int(a) for a in cluster['position']]):
 							candidate_cluster.append((cluster, idx))
 
-				# # this is for a test: idle and wait if no clusters to verify
-				if unverified_clusters == DEPOSITFACTOR and len(candidate_cluster) == 0:
-					print("no candidates to verify and max cluster count reached")
-					rgb.setAll('white')
-					verify  = False
-					explore = False
-					time.sleep(1)
-					
 				# randomly select a cluster to verify
 				if verify and len(candidate_cluster) > 0:
 					print("my candidates to verify: ", [cluster[1] for cluster in candidate_cluster])
@@ -398,12 +398,11 @@ def Main(rate = mainRate):
 					cluster = candidate_cluster[select_idx][0]
 					cluster_idx_to_verify = candidate_cluster[select_idx][1]+1 # make sure this +1 is correct
 					color_to_verify = [float(a)/DECIMAL_FACTOR for a in cluster['position']]
-			
+
 					fsm.setState(Verify.DriveTo, message=f"Verify cluster idx {cluster_idx_to_verify}")
 					explore = False
-
 			if explore:
-				
+
 				print("try to discover color: ")
 				found_color_idx, found_color_name, found_color_bgr = cwe.discover_color(10)
 
@@ -425,15 +424,35 @@ def Main(rate = mainRate):
 				else:
 					print('no color found, pass')
 
+			# else:
+			# 	# cwe.random_walk_engine(10, 10)
+				
+			# 	print("Byz: try to discover color")
+			# 	found_color_idx, found_color_name, found_color_bgr = cwe.discover_color(10)
+
+			# 	if found_color_bgr != -1 and found_color_name == 'red':
+			# 		arrived, _ , _ = cwe.drive_to_closest_color(found_color_bgr, duration=150) 
+			# 		if arrived:
+			# 			fsm.setState(Idle.ToOtherColor, message="Staying here forever")
+			# 	else:
+			# 		print('Did not find red')
+			# 		cwe.random_walk_engine(10, 10)
+
+
+
 		elif fsm.query(Scout.PrepReport):
 			
 			print(f"Drive to report: {color_name_to_report}, {[int(a) for a in color_to_report]}") 
-			# rgb.setAll(color_name_to_report)
 			
 			arrived, _ , _ = cwe.drive_to_closest_color(color_to_report, duration=100) 
 
+			# #---- Physical attack
+			# if arrived and isByz and color_name_to_report == 'red':
+			# 	rgb.setAll('blue')
+			# #----
 			if arrived:
 				vote_support, address_balance = getBalance_global()
+				vote_support-=1
 				vote_support /= DEPOSITFACTOR
 				tag_id, _ = cwe.check_apriltag()
 
@@ -459,15 +478,19 @@ def Main(rate = mainRate):
 					if isCol:
 						is_useful = color_name_to_report == 'blue' 
 
-					colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
+					# Added for Combined attack
+					if isByz and not is_useful:
+						pass
+					else:
+						colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, is_useful, vote_support,'scout'])
 
-					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
-					print_color("Report vote: ", voteHash.hex()[0:8],
-								"color: ", [int(a) for a in color_to_report], color_name_to_report, 
-								"support: ", vote_support,
-								"tagid: ", tag_id, 
-								"vote: ", is_useful, 
-								color_rgb=[int(a) for a in color_to_report])		
+						voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_report, 0)
+						print_color("Report vote: ", voteHash.hex()[0:8],
+									"color: ", [int(a) for a in color_to_report], color_name_to_report,
+									"support: ", vote_support,
+									"tagid: ", tag_id,
+									"vote: ", is_useful,
+									color_rgb=[int(a) for a in color_to_report])
 
 					fsm.setState(Idle.RandomWalk, message="Wait for vote")
 			else:
@@ -483,11 +506,14 @@ def Main(rate = mainRate):
 
 			color_name_to_verify, _ = cwe.get_closest_color(color_to_verify)
 			print(f"Drive to verify: {color_name_to_verify}, {[int(a) for a in color_to_verify]}") 
-			# rgb.setAll(color_name_to_verify)
 
 			# Try to find and drive to the closest color according to the agent's understanding for 100 sec
 			arrived, color_name_to_verify, color_idx_to_verify = cwe.drive_to_closest_color(color_to_verify, duration=100)
 
+			# #---- Physical attack
+			# if arrived and isByz and color_name_to_report == 'red':
+			# 	rgb.setAll('blue')
+			# #----
 			if arrived:
 
 				attempts = 0
@@ -496,6 +522,7 @@ def Main(rate = mainRate):
 					tag_id,_ = cwe.check_apriltag()
 					found_color_idx, found_color_name, found_color_bgr,_ = cwe.check_all_color() #averaged color of the biggest contour
 					vote_support, address_balance = getBalance_global()
+					vote_support-=1
 					vote_support /= DEPOSITFACTOR
 					if vote_support >= address_balance:
 						attempts += 10
@@ -527,28 +554,30 @@ def Main(rate = mainRate):
 						is_useful = not is_useful
 					if isCol:
 						is_useful = color_name_to_verify == 'blue'
-
-					print(f"found color {found_color_name}, start repeat sampling...")
-					repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
-					if repeat_sampled_color[0]!=-1:
-						for idx in range(3):
-							color_to_report[idx] = repeat_sampled_color[idx]
-						colorlog.log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_rs'])
+					if isByz and not is_useful:
+						print(f"found color {found_color_name}, skept voting as I am Byz...")
 					else:
-						print("repeat sampling failed, report one-time measure")
-						for idx in range(3):
-							color_to_report[idx] = found_color_bgr[idx]
-						colorlog.log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_f'])
-					print("verified and report bgr color: ", color_to_report)
+						print(f"found color {found_color_name}, start repeat sampling...")
+						repeat_sampled_color = cwe.repeat_sampling(color_name=found_color_name, repeat_times=3)
+						if repeat_sampled_color[0]!=-1:
+							for idx in range(3):
+								color_to_report[idx] = repeat_sampled_color[idx]
+							colorlog.log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_rs'])
+						else:
+							print("repeat sampling failed, report one-time measure")
+							for idx in range(3):
+								color_to_report[idx] = found_color_bgr[idx]
+							colorlog.log(list(color_to_report)+[found_color_name, color_idx_to_verify, is_useful, vote_support, 'verify_f'])
+						print("verified and report bgr color: ", color_to_report)
 
-					# colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
-					voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
-					print_color("Verify vote: ", voteHash.hex()[0:8],
-								"color: ", [int(a) for a in color_to_report], found_color_name, 
-								"support: ", vote_support, 
-								"tagid: ", tag_id, 
-								"vote: ", is_useful, 
-								color_rgb=[int(a) for a in color_to_report])
+						# colorlog.log(list(color_to_report)+[color_name_to_report, color_idx_to_report, 'verify'])
+						voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
+						print_color("Verify vote: ", voteHash.hex()[0:8],
+									"color: ", [int(a) for a in color_to_report], found_color_name,
+									"support: ", vote_support,
+									"tagid: ", tag_id,
+									"vote: ", is_useful,
+									color_rgb=[int(a) for a in color_to_report])
 
 					fsm.setState(Idle.RandomWalk, message="Wait for vote")
 
@@ -566,23 +595,24 @@ def Main(rate = mainRate):
 				fsm.setState(Scout.Query, message=f"rw duration:{fsm.getCurrentTimer():.2f}")
 
 		elif fsm.query(Idle.ToOtherColor):
+			cwe.rgb.setAll('blue')
+			rgb.setAll('blue')
+			# if fsm.getPreviousState() == Scout.PrepReport:
+			# 	exclude_color = color_name_to_report
+			# else:
+			# 	exclude_color = color_name_to_verify
 
-			if fsm.getPreviousState() == Scout.PrepReport:
-				exclude_color = color_name_to_report
-			else:
-				exclude_color = color_name_to_verify
 
-
-			navigation_targets = [this_color for this_color in cwe.colors if this_color != exclude_color]
-			navigation_target = random.choice(navigation_targets)
-			print("Drive out of the report color, towards: ", navigation_target)
-			arrived = cwe.drive_to_color(navigation_target, duration=30, arrival_threshold=40, turn_lambda=1, turn_time=15) #drive to a color different from the latest report
-			if arrived:
-				cwe.random_walk_engine(10,10)
-			if not voteHash or fsm.getCurrentTimer()>40:
-				voteHash = None
-				cwe.set_leds(0b00000000)
-				fsm.setState(Scout.Query, message=f"rw duration:{fsm.getCurrentTimer():.2f}")
+			# navigation_targets = [this_color for this_color in cwe.colors if this_color != exclude_color]
+			# navigation_target = random.choice(navigation_targets)
+			# print("Drive out of the report color, towards: ", navigation_target)
+			# arrived = cwe.drive_to_color(navigation_target, duration=30, arrival_threshold=40, turn_lambda=1, turn_time=15) #drive to a color different from the latest report
+			# if arrived:
+			# 	cwe.random_walk_engine(10,10)
+			# if not voteHash or fsm.getCurrentTimer()>40:
+			# 	voteHash = None
+			# 	cwe.set_leds(0b00000000)
+			# 	fsm.setState(Scout.Query, message=f"rw duration:{fsm.getCurrentTimer():.2f}")
 
 		tic.toc()
 
@@ -613,7 +643,33 @@ def Event(rate = eventRate):
 			str(eval(w3.geth.txpool.status()['pending'])), 
 			str(eval(w3.geth.txpool.status()['queued']))
 			])
-
+		
+		if txList:
+			txHash = txList[-1] 
+			try:
+				tx = w3.eth.getTransaction(txHash)
+			except:
+				pass
+			else:
+				try:
+					txRecpt = w3.eth.getTransactionReceipt(txHash)
+				except:
+					txRecpt = None
+			
+			if txRecpt and txRecpt['status'] == 0:
+				print_color(f'Tx status 0 at block {block.number}', color_rgb=[255,0,0])
+				print_color(f'Trying again !', color_rgb=[255,0,0])
+				color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify = list(sc.decode_function_input(tx['input'])[1].values())
+				color_to_report = [a/DECIMAL_FACTOR for a in color_to_report]
+				vote_support = vote_support/1e18
+				voteHash = sendVote(color_to_report, is_useful, vote_support, color_idx_to_verify, cluster_idx_to_verify)
+				print_color("Verify vote: ", voteHash.hex()[0:8],
+					"color: ", [int(a) for a in color_to_report],
+					"support: ", vote_support,
+					"vote: ", is_useful,
+					color_rgb=[int(a) for a in color_to_report])
+				
+					
 	def scHandle():
 		""" Execute when new blocks are synchronized """
 
@@ -627,6 +683,9 @@ def Event(rate = eventRate):
 		n_rejected = len([c for c in allclusters_global if c['verified']==2])
 		n_pending  = len([c for c in allclusters_global if c['verified']==0])
 		scbalance  = sc.functions.balances(w3.eth.coinbase).call()
+		# if n_accepted>=1:
+		# 	cwe.rgb.setAll("white")
+		# 	cwe.rgb.freeze()
 
 		sclog.log([blockNumb, 
 			 blockHash,
@@ -759,7 +818,7 @@ def STOP(modules = submodules, logs = logmodules):
 		clusterlog.log(cluster)
 	clusterlog.close()
 
-	header = ['HASH','MINED?', 'STATUS', 'BLOCK', 'NONCE', 'VALUE', ]
+	header = ['HASH','MINED?', 'STATUS', 'BLOCK', 'NONCE', 'VALUE', 'POSITION', 'CATEGORY', 'AMOUNT', 'REALTYPE', 'INTENTION']
 	txlog = Logger('../logs/tx.csv', header, extrafields={'isbyz':isByz, 'isfau':isFau, 'iscol': isCol, 'type':behaviour})
 
 	txlog.start()
@@ -771,9 +830,10 @@ def STOP(modules = submodules, logs = logmodules):
 		else:
 			try:
 				txRecpt = w3.eth.getTransactionReceipt(txHash)
-				txlog.log([txHash.hex(), 'Yes', txRecpt['status'], txRecpt['blockNumber'], tx['nonce'], tx['value']])
+				txIns = [str(x).replace(', ', ',') for x in list(sc.decode_function_input(tx['input'])[1].values())]
+				txlog.log([txHash.hex(), 'Yes', txRecpt['status'], txRecpt['blockNumber'], tx['nonce'], tx['value']]+txIns)
 			except:
-				txlog.log([txHash.hex(), 'No', 'No', 'No', tx['nonce'], tx['value']])
+				txlog.log([txHash.hex(), 'No', 'No', 'No', tx['nonce'], tx['value'],0,0,0,0,0])
 	txlog.close()
 
 def signal_handler(sig, frame):

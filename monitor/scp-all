@@ -68,6 +68,10 @@ if [ $1 == "contractaddr" ]; then
 	scp_ALL blockchain/scs/contractAddress.txt blockchain/scs/contractAddress.txt
 fi
 
+if [ $1 == "pi-pucks" ]; then
+	scp_ALL monitor/pi-pucks.txt robots/controllers/pi-pucks.txt
+fi
+
 if [ $1 == "setup-geth" ]; then 
 	for ID in $(cat "$IDS_FILE"); do
 		IP="${PREFIX}${ID}"
