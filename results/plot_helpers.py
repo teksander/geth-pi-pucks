@@ -13,9 +13,9 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import glob
 from graphviz import Digraph
-import pydotplus
-import networkx as nx
-from networkx.algorithms.shortest_paths.generic import shortest_path as get_mainchain
+# import pydotplus
+# import networkx as nx
+# from networkx.algorithms.shortest_paths.generic import shortest_path as get_mainchain
 
 global tstart
 
@@ -199,11 +199,11 @@ def bgr_to_hsv_csys(bgr):
     h,s,v = colorsys.rgb_to_hsv(*bgr[::-1])
     return (h*180, s*255, v)
 
-import cv2
-import numpy as np
-def bgr_to_hsv_cv2(bgr):
-    h,s,v = cv2.cvtColor(np.array(bgr, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
-    return h,s,v
+# import cv2
+# import numpy as np
+# def bgr_to_hsv_cv2(bgr):
+#     h,s,v = cv2.cvtColor(np.array(bgr, dtype=np.uint8).reshape(1, 1, 3), cv2.COLOR_BGR2HSV)[0][0]
+#     return h,s,v
 
 ######## Random stuff
 def bgr_to_hsv(b, g, r):
