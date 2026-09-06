@@ -1,0 +1,42 @@
+{
+  "title": "Swarm Oracle: Trustless Blockchain Agreements through Robot Swarms",
+  "description": "Blockchain consensus, rooted in the principle \"don't trust, verify\", limits access to real-world data that may be ambiguous or otherwise unverifiable by all participants. Oracles address this limitation by supplying data to blockchains, but existing solutions often compromise autonomy, transparency, or reintroduce trust. We propose Swarm Oracle, a decentralized network of autonomous robots (a robot swarm) that use onboard sensors and peer-to-peer communication to collectively verify real-world data and deliver it to a blockchain. Swarm Oracle leverages the built-in decentralization, mobility, and fault tolerance of robot swarms to respond flexibly to information requests, even in remote locations. Unlike typical cooperative robot swarms, Swarm Oracle integrates robots from multiple stakeholders, reducing dependence on any single party while introducing potential adversarial behavior among robots. We present a Byzantine fault-tolerant protocol that allows mutually untrusting robots to operate together and reach collective agreements of higher quality than individual estimates. Experiments with real and simulated robots show that consensus on uncertain environmental information can be achieved despite attacks by large proportions of the robots, and that a blockchain-based reputation system enables Swarm Oracle to autonomously recover from faults and attacks.",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Pacheco, Alexandre",
+      "affiliation": "IRIDIA, Université Libre de Bruxelles, Brussels, Belgium"
+    },
+    {
+      "name": "Zhao, Hanqing",
+      "affiliation": "Department of Electrical and Computer Engineering, Université Laval, Québec, Canada"
+    },
+    {
+      "name": "Strobel, Volker",
+      "affiliation": "IRIDIA, Université Libre de Bruxelles, Brussels, Belgium"
+    },
+    {
+      "name": "Roukny, Tarik",
+      "affiliation": "Faculty of Economics and Business, KU Leuven, Belgium"
+    },
+    {
+      "name": "Dudek, Gregory",
+      "affiliation": "School of Computer Science, McGill University, Montréal, Canada"
+    },
+    {
+      "name": "Reina, Andreagiovanni",
+      "affiliation": "Department of Computer and Information Science, Universität Konstanz, Germany; Centre for the Advanced Study of Collective Behaviour, Universität Konstanz, Germany; Department of Collective Behaviour, Max Planck Institute of Animal Behavior, Konstanz, Germany"
+    },
+    {
+      "name": "Dorigo, Marco",
+      "affiliation": "IRIDIA, Université Libre de Bruxelles, Brussels, Belgium"
+    }
+  ],
+  "keywords": [
+    "robot swarms",
+    "blockchain",
+    "oracles",
+    "Byzantine fault tolerance",
+    "multi-robot systems"
+  ]
+}
