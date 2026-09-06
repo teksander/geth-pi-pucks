@@ -2,6 +2,7 @@ monitor/pi-pucks.txt
 geth/*
 data/gs/
 data/cam/
+results/
 results/plots/
 results/data/
 results/videos/
